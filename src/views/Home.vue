@@ -1,14 +1,14 @@
 <template>
     <div id="page">
-        <Chat></Chat>
+        <TestVideo></TestVideo>
     </div>
 </template>
 
 <script>
-    import Chat from "../components/Chat";
+    import TestVideo from "../components/TestVideo";
     export default {
         components: {
-          Chat,
+            TestVideo,
         },
         name: "Home"
     }
