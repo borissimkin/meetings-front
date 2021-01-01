@@ -3,8 +3,7 @@ import App from './App.vue'
 import VueSocketIOExt from 'vue-socket.io-extended';
 import io from 'socket.io-client';
 
-Vue.config.productionTip = false
-let serverPath = (Vue.config.productionTip) ? 'https://www.api.com' : 'http://127.0.0.1:3000'
+let serverPath = process.env.VUE_APP_SERVER_PATH;
 
 const socket = io(serverPath);
 
