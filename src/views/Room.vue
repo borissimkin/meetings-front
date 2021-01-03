@@ -1,18 +1,18 @@
 <template>
-  <div style="display: flex">
-      <TestVideo></TestVideo>
-      <Chat></Chat>
+  <div >
+    <Videos :room-id="id"></Videos>
+    <Chat></Chat>
   </div>
 </template>
 
 <script>
-import TestVideo from "../components/TestVideo";
 import Chat from "@/components/Chat";
+import Videos from "@/components/Videos";
 export default {
   name: "Room",
   components: {
+    Videos,
     Chat,
-    TestVideo,
   },
   props: {
     id: {

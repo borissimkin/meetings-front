@@ -6,6 +6,13 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
       new Dotenv(),
+      new ContextReplacementPlugin(
+        /\/package-name\//,
+        (data) => {
+          delete data.dependencies[0].critical;
+          return data;
+        },
+      ),
     ]
   }
 };

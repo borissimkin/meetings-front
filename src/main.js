@@ -9,7 +9,6 @@ const socket = io(serverPath);
 
 Vue.use(VueSocketIOExt, socket);
 
-
 new Vue({
   render: h => h(App),
 }).$mount('#app')
