@@ -6,7 +6,7 @@
 import Peer from "peerjs"
 export default {
   name: "Videos",
-  props: ['roomId'],
+  props: ['roomId', 'userId'], //todo: userId to store
   data() {
     return {
       myPeer: new Peer(undefined, {
@@ -35,33 +35,33 @@ export default {
         })
       })
 
-      this.$socket.client.on('userConnected', userId => {
-        console.log({userId, stream})
-        this.connectToNewUser(userId, stream)
+      this.$socket.client.on('callConnected', (peerId, userId) => {
+        this.connectToNewUser(peerId, userId, stream)
       })
 
 
     });
 
-    this.myPeer.on('open', id => {
-      console.log(id);
-      this.$socket.client.emit('join-room', this.roomId, id)
+    this.myPeer.on('open', peerId => {
+      this.$socket.client.emit('call-connect', peerId, this.userId)
     })
 
   },
 
   sockets: {
     userDisconnected(userId) {
+      console.log(`disconnect ${userId}`)
       if (this.peers[userId]) {
         this.peers[userId].close()
       }
     }
+    //todo: call disconnected
 
   },
 
   methods: {
-    connectToNewUser(userId, stream) {
-      const call = this.myPeer.call(userId, stream)
+    connectToNewUser(peerId, userId, stream) {
+      const call = this.myPeer.call(peerId, stream)
       const video = document.createElement('video')
       call.on('stream', userVideoStream => {
         this.addVideoStream(video, userVideoStream)
@@ -69,7 +69,7 @@ export default {
       call.on('close', () => {
         video.remove()
       })
-      this.peers[userId] = call;
+      this.peers[peerId] = call;
     },
 
     addVideoStream(video, stream) {

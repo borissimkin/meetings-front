@@ -52,7 +52,7 @@
                 const mediaStream = event.stream;
                 document.getElementById('remoteVideo').srcObject.srcObject = mediaStream;
                 this.remoteStream = mediaStream;
-                this.trace('Remote peer connection received remote stream.');
+                this.trace('Remote myPeer connection received remote stream.');
             },
 
             // Add behavior for video streams.
@@ -76,9 +76,9 @@
                 }
             },
 
-            //Define RTC peer connection behavior
+            //Define RTC myPeer connection behavior
 
-            //connects with new peer candidate
+            //connects with new myPeer candidate
             handleConnection(event) {
                 const peerConnection = event.target;
                 const iceCandidate = event.candidate;
@@ -138,7 +138,7 @@
                 this.setDescriptionSuccess(peerConnection, 'setRemoteDescription');
             },
 
-            //Logs offer creation and sets peer connection session descriptions.
+            //Logs offer creation and sets myPeer connection session descriptions.
             createdOffer(description) {
                 this.trace(`Offer from localPeerConnection:\n${description.sdp}`);
 
@@ -160,7 +160,7 @@
                     .catch(this.setSessionDescriptionError);
             },
 
-            // Logs answer to offer creation and sets peer connection session descriptions.
+            // Logs answer to offer creation and sets myPeer connection session descriptions.
             createdAnswer(description) {
                 this.trace(`Answer from remotePeerConnection:\n${description.sdp}.`);
 
@@ -203,16 +203,16 @@
 
                 const servers = null;  // Allows for RTC server configuration.
 
-                // Create peer connections and add behavior.
+                // Create myPeer connections and add behavior.
                 this.localPeerConnection = new RTCPeerConnection(servers);
-                this.trace('Created local peer connection object localPeerConnection.');
+                this.trace('Created local myPeer connection object localPeerConnection.');
 
                 this.localPeerConnection.addEventListener('icecandidate', this.handleConnection);
                 this.localPeerConnection.addEventListener(
                     'iceconnectionstatechange', this.handleConnectionChange);
 
                 this.remotePeerConnection = new RTCPeerConnection(servers);
-                this.trace('Created remote peer connection object remotePeerConnection.');
+                this.trace('Created remote myPeer connection object remotePeerConnection.');
 
                 this.remotePeerConnection.addEventListener('icecandidate', this.handleConnection);
                 this.remotePeerConnection.addEventListener(
@@ -229,13 +229,13 @@
 
             },
 
-            // Gets the name of a certain peer connection.
+            // Gets the name of a certain myPeer connection.
             getPeerName(peerConnection) {
                 return (peerConnection === this.localPeerConnection) ?
                     'localPeerConnection' : 'remotePeerConnection';
             },
 
-            //Gets the "other" peer connection.
+            //Gets the "other" myPeer connection.
             getOtherPeer(peerConnection) {
                 return (peerConnection === this.localPeerConnection) ?
                     this.remotePeerConnection : this.localPeerConnection;

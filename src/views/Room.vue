@@ -1,6 +1,6 @@
 <template>
   <div >
-    <Videos :room-id="id"></Videos>
+    <Videos :room-id="id" :user-id="userId"></Videos>
     <Chat></Chat>
   </div>
 </template>
@@ -24,12 +24,13 @@ export default {
   },
   data() {
     return {
+      userId: '' + Math.random(),
       usersInChatRoom: []
     }
   },
 
   mounted() {
-    this.$socket.client.emit('join-room', this.id, Math.random());
+    this.$socket.client.emit('join-room', this.id, this.userId);
   },
 
 }
