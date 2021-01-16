@@ -1,5 +1,6 @@
 <template>
-  <div id="video-grid"></div>
+  <div id="video-grid">
+  </div>
 </template>
 
 <script>
@@ -14,7 +15,7 @@ export default {
         port: 3001,
       }),
       videoGrid: null,
-      peers: {},
+      peers: [],
     }
   },
   mounted() {
@@ -50,12 +51,16 @@ export default {
 
   sockets: {
     userDisconnected(userId) {
-      console.log(`disconnect ${userId}`)
-      if (this.peers[userId]) {
-        this.peers[userId].close()
-      }
+      let indexPeerElement = this.peers.findIndex(x => {
+        return x.userId === userId
+      })
+      console.log(indexPeerElement)
+      const peer = this.peers[indexPeerElement];
+      const video = peer.video;
+      video.remove();
+      peer.call.close();
+      this.peers.splice(indexPeerElement, 1);
     }
-    //todo: call disconnected
 
   },
 
@@ -63,13 +68,22 @@ export default {
     connectToNewUser(peerId, userId, stream) {
       const call = this.myPeer.call(peerId, stream)
       const video = document.createElement('video')
+      video.classList.add('other-video')
       call.on('stream', userVideoStream => {
         this.addVideoStream(video, userVideoStream)
       })
       call.on('close', () => {
+        console.log('remove')
         video.remove()
       })
-      this.peers[peerId] = call;
+      this.peers.push(
+          {
+            userId: userId,
+            peerId: peerId,
+            call: call,
+            video: video
+          }
+      )
     },
 
     addVideoStream(video, stream) {
@@ -85,11 +99,11 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 #video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 100px);
-  grid-auto-rows: 100px;
+  grid-template-columns: repeat(auto-fill, 400px);
+  grid-auto-rows: 400px;
 }
 
 video {
