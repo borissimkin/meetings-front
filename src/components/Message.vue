@@ -1,10 +1,13 @@
 <template>
-  <div class="message message-your">
-    <div class="message-area ">
-      <div class="message-text">
-        {{ text }}
-      </div>
+  <div class="message m-2 p-2">
+    <div class="message-text">
+      {{ text }}
     </div>
+<!--    <div class="message__area ">-->
+<!--      <div class="message-text">-->
+<!--        -->
+<!--      </div>-->
+<!--    </div>-->
     <div class="author">
       <div class="author-text">
         {{ author }}
@@ -21,7 +24,9 @@ export default {
     text: String,
     author: String,
   },
-  methods: {},
+  methods: {
+
+  },
 
 }
 </script>
@@ -29,31 +34,16 @@ export default {
 <style scoped>
 .message {
   background-color: cornflowerblue;
-  text-align: right;
-
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  width: 50%;
-  border-radius: 0.4rem;
-  max-height: 100px;
+  text-align: left;
+  border-radius: 0.1rem;
   bottom: 0;
+  min-width: 250px;
 
 }
 
 .message-text {
+  word-wrap:break-word;
   color: white;
-  padding-right: 1rem;
-  /*text-align:justify*/
-}
-
-.message-stranger {
-
-}
-
-.message-your {
-  margin-left: 1rem;
-
-
 }
 
 .author-text {
