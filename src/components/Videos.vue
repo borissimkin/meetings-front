@@ -5,20 +5,22 @@
 
 <script>
 import Peer from "peerjs"
+import { getPeerConfig } from "@/peerServer";
+import server from "@/server"
+
 export default {
   name: "Videos",
-  props: ['roomId', 'userId'], //todo: userId to store
+  props: ['roomId', 'userId', 'users'], //todo: store implement
   data() {
     return {
-      myPeer: new Peer(undefined, {
-        host: '/',
-        port: 3001,
-      }),
+      myPeer: new Peer(undefined, getPeerConfig()),
       videoGrid: null,
       peers: [],
     }
   },
-  mounted() {
+  async mounted() {
+    this.peers = await this.fetchPeers();
+    console.log(this.peers)
     const myVideo = document.createElement('video')
     this.videoGrid = document.getElementById('video-grid')
     myVideo.muted = true
@@ -27,11 +29,17 @@ export default {
       audio: true
     }).then(stream => {
       this.addVideoStream(myVideo, stream);
-
       this.myPeer.on('call', call => {
         call.answer(stream);
         const video = document.createElement('video')
         call.on('stream', userVideoStream => {
+          const peer = this.getPeerByPeerId(call.peer)
+          if (peer) {
+            peer.video = video;
+            peer.call = call;
+          } else {
+            console.log(`peer not found ${call.peer}`);
+          }
           this.addVideoStream(video, userVideoStream)
         })
       })
@@ -54,7 +62,9 @@ export default {
       let indexPeerElement = this.peers.findIndex(x => {
         return x.userId === userId
       })
-      console.log(indexPeerElement)
+      if (indexPeerElement === -1) {
+        return
+      }
       const peer = this.peers[indexPeerElement];
       const video = peer.video;
       video.remove();
@@ -65,10 +75,21 @@ export default {
   },
 
   methods: {
+    getPeerByPeerId(peerId) {
+      return this.peers.find(peer => peer.peerId === peerId)
+    },
+
+    async fetchPeers() {
+      //todo: конечно же прорефакторить
+      let response = await server.get(`/room/${this.roomId}/peers`)
+      console.log({response})
+      return response.data;
+
+    },
+
     connectToNewUser(peerId, userId, stream) {
       const call = this.myPeer.call(peerId, stream)
       const video = document.createElement('video')
-      video.classList.add('other-video')
       call.on('stream', userVideoStream => {
         this.addVideoStream(video, userVideoStream)
       })

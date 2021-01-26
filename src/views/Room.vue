@@ -1,5 +1,5 @@
 <template>
-  <div >
+  <div style="display: flex; justify-content: space-between">
     <Videos :room-id="id" :user-id="userId"></Videos>
     <Chat></Chat>
   </div>
