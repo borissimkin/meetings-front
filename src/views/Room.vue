@@ -1,7 +1,10 @@
 <template>
-  <div style="display: flex; justify-content: space-between">
-    <Videos :room-id="id" :user-id="userId"></Videos>
-    <Chat></Chat>
+  <div class="room" style="display: flex; justify-content: space-between">
+    <Videos
+      :room-id="id"
+      :user-id="userId"
+    />
+    <Chat class="m-4" />
   </div>
 </template>
 
@@ -37,5 +40,7 @@ export default {
 </script>
 
 <style scoped>
+.room {
 
+}
 </style>

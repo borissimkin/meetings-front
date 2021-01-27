@@ -3,18 +3,12 @@
     <div class="message-text">
       {{ text }}
     </div>
-<!--    <div class="message__area ">-->
-<!--      <div class="message-text">-->
-<!--        -->
-<!--      </div>-->
-<!--    </div>-->
     <div class="author">
       <div class="author-text">
         {{ author }}
       </div>
     </div>
   </div>
-
 </template>
 
 <script>
@@ -33,7 +27,7 @@ export default {
 
 <style scoped>
 .message {
-  background-color: cornflowerblue;
+  background-color: #6078f3;
   text-align: left;
   border-radius: 0.1rem;
   bottom: 0;
@@ -44,11 +38,14 @@ export default {
 .message-text {
   word-wrap:break-word;
   color: white;
+  font-size: .8rem;
 }
 
 .author-text {
   font-size: 0.75rem;
   padding-right: 0.5rem;
+  color: white;
+
 
 }
 

@@ -1,20 +1,40 @@
 <template>
   <div class="chat">
-    <div id="chat-area" class="chat-area">
-      <Message v-for="message of messages" :key="message.id" :author="message.author.name"
-               :text="message.text">
-      </Message>
+    <div
+      id="chat-area"
+      class="chat-area"
+    >
+      <Message
+        v-for="message of messages"
+        :key="message.id"
+        :author="message.author.name"
+        :text="message.text"
+      />
     </div>
-    <div class="d-flex">
-      <b-textarea v-model="inputMessage" placeholder="Написать сообщение..." @keyup.enter="sendMessage">
-      </b-textarea>
-      <button class="send-button" v-on:click="sendMessage">Отправить</button>
+    <div class="enter-message">
+      <b-form-textarea
+        v-model="inputMessage"
+        class="enter-message__area"
+        size="sm"
+        rows="3"
+        no-resize
+        placeholder="Написать сообщение..."
+        @keyup.enter="sendMessage"
+      />
+      <div
+        class="enter-message__button p-4"
+        :class="{'enter-message__button_disabled': isEmptyInputMessage}"
+        @click="sendMessage"
+      >
+        <b-icon-triangle-half
+          rotate="90"
+          scale="2"
+        />
+      </div>
     </div>
   </div>
-
 </template>
 <script>
-/**todo: Нужно как то чтобы элементы добавлялись к низу чата, но вместо аншифт был пуш */
 
 import Message from "./Message";
 
@@ -35,6 +55,12 @@ export default {
     }
   },
 
+  computed: {
+    isEmptyInputMessage() {
+      return !/\S/.test(this.inputMessage)
+    },
+  },
+
   sockets: {
     newMessage(data) {
       this.messages.push({'text': data, 'author': {'name': 'Аноним'}})
@@ -51,8 +77,7 @@ export default {
   },
   methods: {
     sendMessage() {
-      if (!this.inputMessage) {
-        //todo: сделать кнопку не активной
+      if (this.isEmptyInputMessage) {
         return
       }
       this.$socket.client.emit('new-message', this.inputMessage);
@@ -65,7 +90,6 @@ export default {
 
     scrollDown() {
       const chat = document.getElementById('chat-area')
-      console.log(chat)
       chat.scrollTop = chat.scrollHeight;
     }
 
@@ -73,23 +97,53 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+.enter-message {
+  display: flex;
+
+  &__area {
+    background-color: #444444;
+    color: white;
+    outline: none;
+    border:1px solid #656565
+
+  }
+
+  &__area:focus {
+    background-color: #444444;
+    color: white;
+    box-shadow: 0 0 10px #656565;
+    outline: none;
+    border:1px solid #656565
+  }
+
+  &__button {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+
+    &_disabled {
+      cursor: default;
+      opacity: .5;
+    }
+  }
+}
+
 .chat {
-  /*float: right;*/
-  padding-right: 50px;
 }
 
 .chat-area {
   display: flex;
   flex-direction: column;
   position: relative;
-  border: 1px solid black;
+  border-radius: 0.2rem;
   min-width: 300px;
   width: 300px;
   min-height: 800px;
   height: 800px;
   overflow-y: auto;
-  /*overflow-x: hidden;*/
+  background-color: #333333;
+
 }
 
 

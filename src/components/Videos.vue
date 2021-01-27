@@ -1,6 +1,5 @@
 <template>
-  <div id="video-grid">
-  </div>
+  <div id="video-grid" />
 </template>
 
 <script>
