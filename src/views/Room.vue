@@ -1,19 +1,25 @@
 <template>
-  <div class="room" style="display: flex; justify-content: space-between">
-    <Videos
-      :room-id="id"
-      :user-id="userId"
-    />
-    <Chat class="m-4" />
+  <div class="room p-4" style="">
+    <div>
+      <Videos
+          :room-id="id"
+          :user-id="userId"
+      />
+      <SettingsMediaDevices></SettingsMediaDevices>
+    </div>
+    <Chat />
+
   </div>
 </template>
 
 <script>
 import Chat from "@/components/Chat";
 import Videos from "@/components/Videos";
+import SettingsMediaDevices from "@/components/SettingMediaDevices";
 export default {
   name: "Room",
   components: {
+    SettingsMediaDevices,
     Videos,
     Chat,
   },
@@ -41,6 +47,9 @@ export default {
 
 <style scoped>
 .room {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
 
 }
 </style>

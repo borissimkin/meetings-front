@@ -1,5 +1,9 @@
 <template>
   <div id="video-grid" />
+<!--  <div>-->
+<!--    <button @click="testOffMedia">Выключить</button>-->
+<!--    <button @click="testOnMedia">Включить</button>-->
+<!--  </div>-->
 </template>
 
 <script>
@@ -9,48 +13,45 @@ import server from "@/server"
 
 export default {
   name: "Videos",
-  props: ['roomId', 'userId', 'users'], //todo: store implement
+  props: {
+    roomId: {
+      type: Number,
+      required: true,
+    },
+    //todo: в стор
+    userId: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       myPeer: new Peer(undefined, getPeerConfig()),
+      myStream: null,
       videoGrid: null,
       peers: [],
+      maxCountVideos: 6,
     }
   },
   async mounted() {
     this.peers = await this.fetchPeers();
-    console.log(this.peers)
     const myVideo = document.createElement('video')
+    myVideo.classList.add('post-1')
     this.videoGrid = document.getElementById('video-grid')
     myVideo.muted = true
-    navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true
-    }).then(stream => {
-      this.addVideoStream(myVideo, stream);
-      this.myPeer.on('call', call => {
-        call.answer(stream);
-        const video = document.createElement('video')
-        call.on('stream', userVideoStream => {
-          const peer = this.getPeerByPeerId(call.peer)
-          if (peer) {
-            peer.video = video;
-            peer.call = call;
-          } else {
-            console.log(`peer not found ${call.peer}`);
-          }
-          this.addVideoStream(video, userVideoStream)
-        })
+    try {
+      this.myStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
       })
+      this.addVideoStream(myVideo, this.myStream);
 
-      this.$socket.client.on('callConnected', (peerId, userId) => {
-        this.connectToNewUser(peerId, userId, stream)
-      })
-
-
-    });
-
+    } catch (error) {
+      console.log({ error })
+    }
+    console.log('awdawda')
     this.myPeer.on('open', peerId => {
+      console.log(peerId)
       this.$socket.client.emit('call-connect', peerId, this.userId)
     })
 
@@ -74,6 +75,24 @@ export default {
   },
 
   methods: {
+    testOffMedia() {
+      // console.log(this.myStream.getTracks(), this.myStream.getAudioTracks(), this.myStream.getVideoTracks())
+
+      const tracks = this.myStream.getTracks()
+      for (let track of tracks) {
+        track.enabled = false
+      }
+
+      // console.log(tracks)
+    },
+
+    testOnMedia() {
+      const tracks = this.myStream.getTracks()
+      for (let track of tracks) {
+        track.enabled = true
+      }
+    },
+
     getPeerByPeerId(peerId) {
       return this.peers.find(peer => peer.peerId === peerId)
     },
@@ -81,19 +100,17 @@ export default {
     async fetchPeers() {
       //todo: конечно же прорефакторить
       let response = await server.get(`/room/${this.roomId}/peers`)
-      console.log({response})
       return response.data;
-
     },
 
     connectToNewUser(peerId, userId, stream) {
+      console.log('connect new user')
       const call = this.myPeer.call(peerId, stream)
       const video = document.createElement('video')
       call.on('stream', userVideoStream => {
         this.addVideoStream(video, userVideoStream)
       })
       call.on('close', () => {
-        console.log('remove')
         video.remove()
       })
       this.peers.push(
@@ -119,15 +136,41 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 #video-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 400px);
-  grid-auto-rows: 400px;
+  grid-template-areas: "post-1 post-1 post-2"
+                       "post-1 post-1 post-3"
+                       "post-6 post-5 post-4";
+  grid-template-rows: repeat(3, 200px);
+  grid-template-columns: repeat(3, 1fr);
+}
+.post-1 {
+  grid-area: post-1;
 }
 
+.post-2 {
+  grid-area: post-2;
+
+}
+.post-3 {
+  grid-area: post-3;
+}
+
+.post-4 {
+  grid-area: post-4;
+}
+
+.post-5 {
+  grid-area: post-5;
+}
+
+.post-6 {
+  grid-area: post-6;
+}
+
+
 video {
-  width: 100%;
   height: 100%;
   object-fit: cover;
 }

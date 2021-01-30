@@ -139,8 +139,7 @@ export default {
   border-radius: 0.2rem;
   min-width: 300px;
   width: 300px;
-  min-height: 800px;
-  height: 800px;
+  min-height: 500px;
   overflow-y: auto;
   background-color: #333333;
 
