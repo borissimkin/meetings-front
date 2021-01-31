@@ -6,10 +6,7 @@ Vue.use(Vuex);
 
 let store = new Vuex.Store({
   modules: {
-    meeting: {
-      ...meeting,
-      namespaced: true
-    }
+    meeting
   }
 
 });

@@ -1,15 +1,14 @@
 <template>
-  <div id="video-grid" />
-<!--  <div>-->
-<!--    <button @click="testOffMedia">Выключить</button>-->
-<!--    <button @click="testOnMedia">Включить</button>-->
-<!--  </div>-->
+  <div>
+    <div id="video-grid" />
+  </div>
 </template>
 
 <script>
 import Peer from "peerjs"
 import { getPeerConfig } from "@/peerServer";
 import server from "@/server"
+import {mapState} from "vuex"
 
 export default {
   name: "Videos",
@@ -27,33 +26,51 @@ export default {
   data() {
     return {
       myPeer: new Peer(undefined, getPeerConfig()),
-      myStream: null,
       videoGrid: null,
       peers: [],
       maxCountVideos: 6,
     }
   },
+  computed: {
+    ...mapState("meeting", {
+      myStream: state => state.userStream,
+    })
+  },
   async mounted() {
     this.peers = await this.fetchPeers();
+    console.log(this.peers)
     const myVideo = document.createElement('video')
     myVideo.classList.add('post-1')
     this.videoGrid = document.getElementById('video-grid')
     myVideo.muted = true
-    try {
-      this.myStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true
-      })
+    navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: true
+    }).then(stream => {
+      this.$store.dispatch("meeting/setUserStream", stream)
       this.addVideoStream(myVideo, this.myStream);
-
-    } catch (error) {
-      console.log({ error })
-    }
-    console.log('awdawda')
+      this.myPeer.on('call', call => {
+        call.answer(this.myStream);
+        const video = document.createElement('video')
+        call.on('stream', userVideoStream => {
+          const peer = this.getPeerByPeerId(call.peer)
+          if (peer) {
+            peer.video = video;
+            peer.call = call;
+          } else {
+            console.log(`peer not found ${call.peer}`);
+          }
+          this.addVideoStream(video, userVideoStream)
+        })
+      })
+      this.$socket.client.on('callConnected', (peerId, userId) => {
+        this.connectToNewUser(peerId, userId, this.myStream)
+      })
+    });
     this.myPeer.on('open', peerId => {
-      console.log(peerId)
       this.$socket.client.emit('call-connect', peerId, this.userId)
     })
+
 
   },
 
@@ -75,24 +92,6 @@ export default {
   },
 
   methods: {
-    testOffMedia() {
-      // console.log(this.myStream.getTracks(), this.myStream.getAudioTracks(), this.myStream.getVideoTracks())
-
-      const tracks = this.myStream.getTracks()
-      for (let track of tracks) {
-        track.enabled = false
-      }
-
-      // console.log(tracks)
-    },
-
-    testOnMedia() {
-      const tracks = this.myStream.getTracks()
-      for (let track of tracks) {
-        track.enabled = true
-      }
-    },
-
     getPeerByPeerId(peerId) {
       return this.peers.find(peer => peer.peerId === peerId)
     },

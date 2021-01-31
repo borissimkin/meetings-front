@@ -1,14 +1,16 @@
 <template>
-  <div class="room p-4" style="">
+  <div
+    class="room p-4"
+    style=""
+  >
     <div>
       <Videos
-          :room-id="id"
-          :user-id="userId"
+        :room-id="id"
+        :user-id="userId"
       />
-      <SettingsMediaDevices></SettingsMediaDevices>
+      <SettingsMediaDevices />
     </div>
     <Chat />
-
   </div>
 </template>
 

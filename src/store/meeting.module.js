@@ -1,37 +1,54 @@
 import {
-  SET_MY_AUDIO,
-  SET_MY_VIDEO,
+  SET_ENABLED_VIDEO,
+  SET_ENABLED_MICRO,
+  SET_USER_STREAM,
 } from "@/store/mutations.type";
 
 //todo: здесь потом еще будет говорит он или нет
-const state = {
-  myAudio: false,
-  myVideo: false,
-};
-
-const getters = {
-
-};
-
-const actions = {
-  //todo: передавать ли всем остальныи что он выключил?
-
-};
-
-const mutations = {
-  [SET_MY_VIDEO](state, value) {
-    state.myVideo = value;
+const meetings = {
+  namespaced: true,
+  state: {
+    enabledMicro: true,
+    enabledVideo: true,
+    userStream: null
   },
 
-  [SET_MY_AUDIO](state, value) {
-    state.myAudio = value;
+  mutations: {
+    [SET_ENABLED_MICRO](state, value) {
+      state.enabledMicro = value;
+      if (state.userStream) {
+        for (let track of state.userStream.getAudioTracks()) {
+          track.enabled = value
+        }
+      }
+    },
+
+    [SET_ENABLED_VIDEO](state, value) {
+      state.enabledVideo = value;
+      if (state.userStream) {
+        for (let track of state.userStream.getVideoTracks()) {
+          track.enabled = value
+        }
+      }
+
+    },
+
+    [SET_USER_STREAM](state, stream) {
+      state.userStream = stream;
+    }
+
+  },
+  actions: {
+    setUserStream({commit, state}, stream) {
+      commit(SET_USER_STREAM, stream)
+      commit(SET_ENABLED_MICRO, state.enabledMicro)
+      commit(SET_ENABLED_VIDEO, state.enabledVideo)
+    }
+
   },
 
-};
 
-export default {
-  state,
-  getters,
-  actions,
-  mutations
+
 }
+export default meetings
+

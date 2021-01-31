@@ -15,11 +15,16 @@
 export default {
   name: "Message",
   props: {
-    text: String,
-    author: String,
-  },
-  methods: {
-
+    text: {
+      required: true,
+      type: String,
+      default: ''
+    },
+    author: {
+      required: true,
+      type: String,
+      default: ''
+    },
   },
 
 }
