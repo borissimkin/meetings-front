@@ -6,7 +6,7 @@
 
 <script>
 import router from "@/router/router";
-import store from "@/store/store";
+import store from "@/store";
 
 export default {
   router: router,
@@ -26,7 +26,6 @@ export default {
   background-color: #222222;
 
   min-height: 100%;
-  /*margin-top: 60px;*/
 }
 html,
 body {

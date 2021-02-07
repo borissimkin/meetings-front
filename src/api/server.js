@@ -1,5 +1,5 @@
 import axios from "axios";
-import store from "@/store/store";
+import store from "@/store";
 import router from "@/router/router";
 import redirectService from '@/services/redirect.service';
 
@@ -12,7 +12,7 @@ let server = axios.create({
   }
 });
 
-server.interceptors.response.use(responseErrorHandler);
+server.interceptors.response.use(responseSuccessHandler, responseErrorHandler);
 
 async function responseErrorHandler(error) {
   if (Object.prototype.hasOwnProperty.call(error, "response") &&
@@ -31,6 +31,11 @@ async function responseErrorHandler(error) {
   }
   return Promise.reject(error)
 }
+
+function responseSuccessHandler(response) {
+  return response;
+}
+
 
 
 server.interceptors.request.use(config => {

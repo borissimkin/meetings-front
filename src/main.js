@@ -12,6 +12,7 @@ Vue.use(IconsPlugin)
 
 let serverPath = process.env.VUE_APP_SERVER_PATH;
 
+//todo: что то делать с сокетом когда не авторизован
 const socket = io(serverPath);
 
 Vue.use(VueSocketIOExt, socket);

@@ -1,23 +1,17 @@
 import authApi from "../api/auth.api";
 import tokenService from "../services/token.service";
-import { SET_CURRENT_USER, SET_ERROR, SET_LOADING, SET_TOKEN } from "./mutations.type";
+import { SET_CURRENT_USER, SET_TOKEN } from "./mutations.type";
 
 
 const auth = {
   namespaced: true,
 
   state: {
-    loading: false,
-    error: "",
-    token: tokenService || "",
+    token: tokenService.getToken() || "",
     currentUser: null,
   },
 
   mutations: {
-    [SET_LOADING](state, value) {
-      state.loading = value;
-    },
-
     [SET_TOKEN](state, token) {
       state.token = token;
     },
@@ -26,41 +20,20 @@ const auth = {
       state.currentUser = currentUser;
     },
 
-    [SET_ERROR](state, error) {
-      state.error = error;
-    },
-
   },
 
   actions: {
     async signIn({commit}, payload) {
-      commit(SET_LOADING, true);
-      commit(SET_ERROR, '');
       const {password, email} = {...payload};
-      try {
-        const response = await authApi.signIn(email, password);
-        tokenService.setToken(response.data.token);
-      } catch (error) {
-        //todo: проверить ошибку чтобы записать текст
-        console.log({error})
+      const response = await authApi.signIn(email, password);
+      tokenService.setToken(response.data.token);
+      commit(SET_TOKEN, response.data.token);
 
-      } finally {
-        commit(SET_LOADING, false)
-      }
     },
 
-    async signUp({commit}, payload) {
-      commit(SET_LOADING, true);
-      commit(SET_ERROR, '');
-      try {
-        await authApi.signUp(payload)
-      } catch (error) {
-        //todo: проверить ошибку чтобы записать текст
-        console.log({error})
-        commit(SET_ERROR, error)
-      } finally {
-        commit(SET_LOADING, false);
-      }
+    async signUp(payload) {
+      await authApi.signUp(payload)
+
     },
 
     logout({commit}) {

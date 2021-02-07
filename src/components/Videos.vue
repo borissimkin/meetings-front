@@ -7,7 +7,7 @@
 <script>
 import Peer from "peerjs"
 import { getPeerConfig } from "@/peerServer";
-import server from "@/server"
+import meetingApi from "@/api/meeting.api";
 import {mapState} from "vuex"
 
 export default {
@@ -98,12 +98,12 @@ export default {
 
     async fetchPeers() {
       //todo: конечно же прорефакторить
-      let response = await server.get(`/room/${this.roomId}/peers`)
+      let response = meetingApi.getPeers(this.roomId);
       return response.data;
     },
 
     connectToNewUser(peerId, userId, stream) {
-      console.log('connect new user')
+      console.log('connect new uer')
       const call = this.myPeer.call(peerId, stream)
       const video = document.createElement('video')
       call.on('stream', userVideoStream => {
