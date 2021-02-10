@@ -37,7 +37,7 @@ export default {
     })
   },
   async mounted() {
-    this.peers = await this.fetchPeers();
+    await this.fetchPeers();
     console.log(this.peers)
     const myVideo = document.createElement('video')
     myVideo.classList.add('post-1')
@@ -74,6 +74,10 @@ export default {
 
   },
 
+  beforeDestroy() {
+    this.myPeer.destroy()
+  },
+
   sockets: {
     userDisconnected(userId) {
       let indexPeerElement = this.peers.findIndex(x => {
@@ -98,8 +102,8 @@ export default {
 
     async fetchPeers() {
       //todo: конечно же прорефакторить
-      let response = meetingApi.getPeers(this.roomId);
-      return response.data;
+      let response = await meetingApi.getPeers(this.roomId);
+      this.peers = response.data;
     },
 
     connectToNewUser(peerId, userId, stream) {

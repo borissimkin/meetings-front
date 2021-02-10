@@ -85,7 +85,12 @@ export default {
         await this.$router.push(redirectService.getRedirectPath() || '/');
         redirectService.removeRedirectPath();
       } catch (error) {
-        this.errorAuthorization = error.response.data;
+        if (!error.response) {
+          return
+        }
+        if (error.response.status === 403) {
+          this.errorAuthorization = "Неверный email или пароль"
+        }
       } finally {
         this.loading = false;
       }

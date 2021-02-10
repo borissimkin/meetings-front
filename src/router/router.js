@@ -20,13 +20,16 @@ let router = new Router({
       name: "home",
       component: Home,
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
       }
     },
     {
       path: "/room/:id",
       name: "room",
       component: Room,
+      meta: {
+        requiresAuth: true,
+      },
       props: true,
       async beforeEnter(to, from, next) {
         //todo: проверить
