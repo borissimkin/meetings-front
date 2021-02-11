@@ -6,7 +6,7 @@
 
 <script>
 import Peer from "peerjs"
-import { getPeerConfig } from "@/peerServer";
+import { getPeerConfig } from "@/peer.server";
 import meetingApi from "@/api/meeting.api";
 import {mapState} from "vuex"
 

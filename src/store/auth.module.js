@@ -23,6 +23,7 @@ const auth = {
   },
 
   actions: {
+
     async signIn({commit}, payload) {
       const {password, email} = {...payload};
       const response = await authApi.signIn(email, password);

@@ -1,4 +1,9 @@
 # meetings-front
+.env переменные
+```
+VUE_APP_SERVER_PATH=http://localhost:3000
+VUE_APP_PEER_SERVER_PATH=/
+```
 
 ## Project setup
 ```

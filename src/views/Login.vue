@@ -64,6 +64,8 @@
 
 <script>
 import redirectService from "@/services/redirect.service"
+import store from "@/store";
+import socket from "@/socket";
 export default {
   name: "Login",
   data() {
@@ -83,9 +85,11 @@ export default {
       try {
         await this.$store.dispatch("auth/signIn", this.form);
         await this.$router.push(redirectService.getRedirectPath() || '/');
+        socket.emit('authenticate', { token: store.state.auth.token })
         redirectService.removeRedirectPath();
       } catch (error) {
         if (!error.response) {
+          console.error(error)
           return
         }
         if (error.response.status === 403) {
