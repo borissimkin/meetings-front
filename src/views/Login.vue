@@ -1,64 +1,57 @@
 <template>
   <div id="login">
-    <b-overlay
-      :class="{'login__container_not-auth': errorAuthorization}"
-      :show="loading"
-      class="login__container-wrapper"
-      no-fade
-      opacity="0.4"
-      rounded="sm"
-      spinner-variant="primary"
-    >
-      <div class="login__container login__container-wrapper">
-        <div class="login__container-header">
-          Авторизация
-        </div>
-        <div class="login__container-main">
-          <b-form
-            @submit.prevent="signIn"
-          >
-            <b-form-group>
-              <b-form-input
-                v-model="form.email"
-                type="email"
-                placeholder="Введите email"
-                required
-              />
-            </b-form-group>
-            <b-form-group>
-              <b-form-input
-                v-model="form.password"
-                type="password"
-                placeholder="Введите пароль"
-                required
-              />
-            </b-form-group>
-            <template v-if="errorAuthorization">
-              <div class="error-text pb-2">
-                {{ errorAuthorization }}
-              </div>
-            </template>
-            <div
-              class="login__container-main-footer"
-            >
+    <div class="login__container">
+      <div class="login__container-header">
+        Авторизация
+      </div>
+      <v-divider />
+      <div class="login__container-main">
+        <v-form
+          @submit.prevent="signIn"
+        >
+          <v-text-field
+            v-model="form.email"
+            placeholder="Email"
+            type="email"
+            required
+          />
+          <v-text-field
+            v-model="form.password"
+            type="password"
+            placeholder="Пароль"
+            required
+          />
+          <template v-if="errorAuthorization">
+            <div class="error-text pb-2">
+              {{ errorAuthorization }}
+            </div>
+          </template>
+          <v-row>
+            <v-col>
               <router-link
                 class="pt-2"
                 to="/register"
               >
                 Зарегистрироваться
               </router-link>
-              <b-button
+            </v-col>
+            <v-col>
+              <v-btn
                 type="submit"
-                variant="primary"
-                class="login__container-main-footer-button"
               >
                 Войти
-              </b-button>
-            </div>
-          </b-form>
-        </div>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
       </div>
-    </b-overlay>
+    </div>
+    <v-overlay :value="loading">
+      <v-progress-circular
+        indeterminate
+        size="64"
+      />
+    </v-overlay>
   </div>
 </template>
 
@@ -137,9 +130,7 @@ export default {
     font-weight: 500;
     padding: 1rem;
     text-align: left;
-    font-family: 'Roboto', sans-serif;
     color: #2e2f4e;
-    border-bottom: 2px #eeeeee solid;
   }
 
   &-main {
@@ -151,21 +142,6 @@ export default {
       justify-content: space-between;
     }
 
-  }
-
-  &-telegram {
-    padding: 1rem 1.5rem .5rem 1.5rem;
-
-    &-widget {
-      text-align: right;
-    }
-
-    &_error-auth {
-      color: red;
-      background: #f1f1f1;
-      border-radius: 6px;
-      margin-top: 1rem;
-    }
   }
 
   &_not-auth {

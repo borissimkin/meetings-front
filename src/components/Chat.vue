@@ -12,24 +12,25 @@
       />
     </div>
     <div class="enter-message">
-      <b-form-textarea
+      <v-textarea
         v-model="inputMessage"
-        class="enter-message__area"
-        size="sm"
-        rows="3"
+        solo
+        label="Написать сообщение..."
         no-resize
-        placeholder="Написать сообщение..."
+        rows="4"
+        row-height="20"
         @keyup.enter="sendMessage"
       />
       <div
-        class="enter-message__button p-4"
+        class="enter-message__button"
         :class="{'enter-message__button_disabled': isEmptyInputMessage}"
         @click="sendMessage"
       >
-        <b-icon-triangle-half
-          rotate="90"
-          scale="2"
-        />
+        <div @click="sendMessage">
+          <v-icon x-large>
+            mdi-send
+          </v-icon>
+        </div>
       </div>
     </div>
   </div>
@@ -101,22 +102,6 @@ export default {
 .enter-message {
   display: flex;
 
-  &__area {
-    background-color: #444444;
-    color: white;
-    outline: none;
-    border:1px solid #656565
-
-  }
-
-  &__area:focus {
-    background-color: #444444;
-    color: white;
-    box-shadow: 0 0 10px #656565;
-    outline: none;
-    border:1px solid #656565
-  }
-
   &__button {
     display: flex;
     align-items: center;
@@ -139,10 +124,15 @@ export default {
   border-radius: 0.2rem;
   min-width: 300px;
   width: 300px;
-  min-height: 500px;
+  min-height: 700px;
+  max-height: 700px;
   overflow-y: auto;
   background-color: #333333;
 
+}
+
+.enter-message__button {
+  display: flex;
 }
 
 

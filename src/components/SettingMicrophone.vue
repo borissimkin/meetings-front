@@ -1,13 +1,20 @@
 <template>
-  <div
-    class="microphone"
-    @click="toggleMicrophone"
-  >
+  <div>
     <template v-if="enabledMicro">
-      <b-icon-mic />
+      <v-icon
+        x-large
+        @click="toggleMicrophone"
+      >
+        mdi-microphone
+      </v-icon>
     </template>
     <template v-else>
-      <b-icon-mic-mute />
+      <v-icon
+        x-large
+        @click="toggleMicrophone"
+      >
+        mdi-microphone-off
+      </v-icon>
     </template>
   </div>
 </template>

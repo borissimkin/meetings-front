@@ -1,10 +1,20 @@
 <template>
-  <div @click="toggleVideo">
+  <div>
     <template v-if="enabledVideo">
-      <b-icon-camera-video />
+      <v-icon
+        x-large
+        @click="toggleVideo"
+      >
+        mdi-video
+      </v-icon>
     </template>
     <template v-else>
-      <b-icon-camera-video-off />
+      <v-icon
+        x-large
+        @click="toggleVideo"
+      >
+        mdi-video-off
+      </v-icon>
     </template>
   </div>
 </template>

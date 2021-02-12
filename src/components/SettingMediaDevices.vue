@@ -1,14 +1,11 @@
 <template>
   <div>
-    <b-button-toolbar
-      :justify="true"
+    <div
       class="toolbar"
     >
-      <b-button-group>
-        <SettingMicrophone class="toolbar__button" />
-        <SettingVideo class="toolbar__button" />
-      </b-button-group>
-    </b-button-toolbar>
+      <SettingMicrophone class="toolbar__button" />
+      <SettingVideo class="toolbar__button" />
+    </div>
   </div>
 </template>
 
@@ -23,7 +20,7 @@ export default {
 
 <style scoped lang="scss">
 .toolbar {
-  background-color: #656565;
+  display: flex;
 
   &__button {
 
@@ -32,14 +29,8 @@ export default {
     }
     color: #ffffff;
     padding: .8rem;
-    font-size: 1.5rem;
 
     border: 1px solid #929292;
-
-    &:hover {
-      cursor: pointer;
-      color: #AFAFAF
-    };
   }
 }
 
