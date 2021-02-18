@@ -8,6 +8,7 @@ import NotFound from "@/views/NotFound";
 import roomApi from "../api/room.api";
 import store from "@/store";
 import redirectService from "@/services/redirect.service"
+import RegistrationForm from "@/views/RegistrationForm";
 
 
 Vue.use(Router);
@@ -32,7 +33,6 @@ let router = new Router({
       },
       props: true,
       async beforeEnter(to, from, next) {
-        //todo: проверить
         const response = await roomApi.isRoomExist(to.params.id);
         if (!response.data.exists) {
           next("404")
@@ -52,6 +52,11 @@ let router = new Router({
         }
         next()
       }
+    },
+    {
+      path: "/registration",
+      name: "registration",
+      component: RegistrationForm, //todo: может надо было делать все в одной??
     },
     {
       path: '*',

@@ -30,7 +30,7 @@
             <v-col>
               <router-link
                 class="pt-2"
-                to="/register"
+                to="/registration"
               >
                 Зарегистрироваться
               </router-link>
@@ -102,7 +102,6 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  margin-top: 20px;
 }
 
 .error-text {
@@ -114,6 +113,7 @@ export default {
   box-shadow: 0 1px 4px 0 #b7b7b7;
   border-radius: 6px;
   padding: .5rem;
+  min-width: 315px;
 
   &-wrapper {
     width: 300px;
