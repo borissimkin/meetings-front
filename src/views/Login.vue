@@ -1,6 +1,6 @@
 <template>
   <div id="login">
-    <div class="login__container">
+    <div class="login__container" :class="{'login__container_not-auth': errorAuthorization}">
       <div class="login__container-header">
         Авторизация
       </div>
@@ -57,7 +57,6 @@
 
 <script>
 import redirectService from "@/services/redirect.service"
-import store from "@/store";
 import socket from "@/socket";
 export default {
   name: "Login",
@@ -78,7 +77,7 @@ export default {
       try {
         await this.$store.dispatch("auth/signIn", this.form);
         await this.$router.push(redirectService.getRedirectPath() || '/');
-        socket.emit('authenticate', { token: store.state.auth.token })
+        socket.emit('authenticate', { token: this.$store.state.auth.token })
         redirectService.removeRedirectPath();
       } catch (error) {
         if (!error.response) {

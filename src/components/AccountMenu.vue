@@ -1,13 +1,13 @@
 <template>
   <v-menu
-      :nudge-width="200"
-      offset-x
+    :nudge-width="200"
+    offset-x
   >
     <template v-slot:activator="{ on, attrs }">
       <v-icon
-          dark
-          v-bind="attrs"
-          v-on="on"
+        dark
+        v-bind="attrs"
+        v-on="on"
       >
         mdi-account
       </v-icon>
@@ -16,10 +16,10 @@
       <v-list>
         <v-list-item>
           <v-list-item-content>
-            <v-list-item-title>Симкин Борис(заглушка)</v-list-item-title>
+            <v-list-item-title>{{fullName}}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-divider></v-divider>
+        <v-divider />
         <v-list-item to="login">
           Выйти
         </v-list-item>
@@ -29,9 +29,21 @@
 </template>
 
 <script>
-//todo: текущее имя
+import {getFullName} from "@/helpers/username.process";
+import {mapState} from "vuex"
+
 export default {
-name: "AccountMenu"
+  name: "AccountMenu",
+
+  computed: {
+    ...mapState("auth", {
+      currentUser: state => state.currentUser,
+    }),
+
+    fullName() {
+      return getFullName(this.currentUser.firstName, this.currentUser.lastName)
+    }
+  }
 }
 </script>
 

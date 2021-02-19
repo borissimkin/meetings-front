@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-card>
-      <Header></Header>
+      <TheHeader />
     </v-card>
     <v-main>
       <router-view />
@@ -13,12 +13,12 @@
 
 import router from "@/router/router";
 import store from "@/store";
-import Header from "@/components/Header";
+import TheHeader from "@/components/TheHeader";
 
 export default {
-  components: {Header},
+  name: 'App',
+  components: {TheHeader},
   router: router,
   store: store,
-  name: 'App',
 };
 </script>

@@ -56,7 +56,7 @@ let router = new Router({
     {
       path: "/registration",
       name: "registration",
-      component: RegistrationForm, //todo: может надо было делать все в одной??
+      component: RegistrationForm,
     },
     {
       path: '*',
@@ -68,6 +68,9 @@ let router = new Router({
 
 
 router.beforeEach((to, from, next) => {
+  if (to.name !== '/login') {
+    store.dispatch("auth/fetchCurrentUser").then(next)
+  }
   if (to.name !== '/login' && to.matched.some(record => record.meta.requiresAuth) && !store.getters["auth/isLoggedIn"]) {
     redirectService.setRedirectPath(to.path);
     next({path: "/login", replace: false});
