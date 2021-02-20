@@ -41,7 +41,7 @@ export default {
   },
 
   mounted() {
-    this.$socket.client.emit('join-room', this.id, this.userId);
+    this.$socket.client.emit('join-room', this.id);
   },
 
 }

@@ -12,28 +12,17 @@
         :date="message.message.date"
       />
     </div>
-    <div class="enter-message">
-      <v-textarea
+    <v-textarea
         v-model="inputMessage"
-        solo
-        label="Написать сообщение..."
+        append-icon="mdi-send"
+        filled
         no-resize
-        rows="4"
+        label="Сообщение"
+        rows="3"
         row-height="20"
+        @click:append="sendMessage"
         @keyup.enter="sendMessage"
-      />
-      <div
-        class="enter-message__button"
-        :class="{'enter-message__button_disabled': isEmptyInputMessage}"
-        @click="sendMessage"
-      >
-        <div @click="sendMessage">
-          <v-icon x-large>
-            mdi-send
-          </v-icon>
-        </div>
-      </div>
-    </div>
+    ></v-textarea>
   </div>
 </template>
 <script>
@@ -98,14 +87,12 @@ export default {
 
     },
 
-    userConnected(userId) {
-      console.log(userId);
-      // this.messages.push({'text': 'Присоединился', author: {'name': userId}})
+    userConnected(user) {
+      console.log(user);
     },
 
-    userDisconnected(userId) {
-      console.log(userId);
-      // this.messages.push({'text': 'Отсоединился', author: {'name': userId}})
+    userDisconnected(user) {
+      console.log(user);
     }
 
   },
@@ -162,7 +149,8 @@ export default {
   max-height: 700px;
   overflow-y: auto;
   background-color: #EEEEEE;
-  box-shadow: 0 5px 10px #BDBDBD;
+  border-bottom: 1px solid #BDBDBD;
+  //box-shadow: 0 5px 10px #BDBDBD;
 
 }
 
