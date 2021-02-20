@@ -5,3 +5,4 @@ export const SET_TOKEN = "setToken";
 export const SET_CURRENT_USER = "setCurrentUser";
 export const SET_LOADING = "setLoading";
 export const SET_ERROR = "setError";
+export const STOP_USER_STREAM = "stopUserStream"

@@ -2,6 +2,7 @@ import {
   SET_ENABLED_VIDEO,
   SET_ENABLED_MICRO,
   SET_USER_STREAM,
+  STOP_USER_STREAM,
 } from "@/store/mutations.type";
 
 //todo: здесь потом еще будет говорит он или нет
@@ -35,7 +36,16 @@ const meetings = {
 
     [SET_USER_STREAM](state, stream) {
       state.userStream = stream;
-    }
+    },
+
+    [STOP_USER_STREAM](state) {
+      state.userStream.getTracks().forEach(function(track) {
+        if (track.readyState === 'live') {
+          track.stop();
+        }
+      });
+
+    },
 
   },
   actions: {

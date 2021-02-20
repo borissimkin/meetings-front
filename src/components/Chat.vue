@@ -119,21 +119,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.enter-message {
-  display: flex;
-
-  &__button {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-
-    &_disabled {
-      cursor: default;
-      opacity: .5;
-    }
-  }
-}
-
 .chat {
 
 }
@@ -150,13 +135,6 @@ export default {
   overflow-y: auto;
   background-color: #EEEEEE;
   border-bottom: 1px solid #BDBDBD;
-  //box-shadow: 0 5px 10px #BDBDBD;
-
 }
-
-.enter-message__button {
-  display: flex;
-}
-
 
 </style>

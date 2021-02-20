@@ -20,7 +20,7 @@
           </v-list-item-content>
         </v-list-item>
         <v-divider />
-        <v-list-item to="login">
+        <v-list-item to="/login">
           Выйти
         </v-list-item>
       </v-list>

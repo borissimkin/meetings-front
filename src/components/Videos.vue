@@ -9,17 +9,13 @@ import Peer from "peerjs"
 import { getPeerConfig } from "@/peer.server";
 import meetingApi from "@/api/meeting.api";
 import {mapState} from "vuex"
+import {STOP_USER_STREAM} from "@/store/mutations.type";
 
 export default {
   name: "Videos",
   props: {
     roomId: {
-      type: Number,
-      required: true,
-    },
-    //todo: в стор
-    userId: {
-      type: Number,
+      type: String,
       required: true,
     },
   },
@@ -64,11 +60,12 @@ export default {
         })
       })
       this.$socket.client.on('callConnected', (peerId, userId) => {
+        console.log({peerId, userId})
         this.connectToNewUser(peerId, userId, this.myStream)
       })
     });
     this.myPeer.on('open', peerId => {
-      this.$socket.client.emit('call-connect', peerId, this.userId)
+      this.$socket.client.emit('call-connect', peerId)
     })
 
 
@@ -76,12 +73,13 @@ export default {
 
   beforeDestroy() {
     this.myPeer.destroy()
+    this.$store.commit(`meeting/${STOP_USER_STREAM}`)
   },
 
   sockets: {
-    userDisconnected(userId) {
+    userDisconnected(user) {
       let indexPeerElement = this.peers.findIndex(x => {
-        return x.userId === userId
+        return x.userId === user.id
       })
       if (indexPeerElement === -1) {
         return

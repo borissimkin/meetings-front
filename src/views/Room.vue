@@ -6,7 +6,6 @@
     <div>
       <Videos
         :room-id="id"
-        :user-id="userId"
       />
       <SettingsMediaDevices />
     </div>
@@ -35,7 +34,6 @@ export default {
   },
   data() {
     return {
-      userId: '' + Math.random(),
       usersInChatRoom: []
     }
   },
