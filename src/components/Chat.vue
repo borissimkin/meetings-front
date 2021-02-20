@@ -7,8 +7,9 @@
       <Message
         v-for="message of messages"
         :key="message.id"
-        :author="message.author.name"
-        :text="message.text"
+        :user="message.user"
+        :text="message.message.text"
+        :date="message.message.date"
       />
     </div>
     <div class="enter-message">
@@ -38,9 +39,30 @@
 <script>
 
 import Message from "./Message";
-
+import {mapState} from "vuex"
 
 export default {
+  /** todo: может передавать только id?
+   * send message {
+   *   message: {
+   *     text
+   *   }
+   * }
+   *
+   * receive message {
+   *   user {
+   *     id,
+   *     firstName,
+   *     lastName,
+   *   },
+   *   message {
+   *     id
+   *     text,
+   *     date
+   *   }
+   *
+   * }**/
+
   name: "Chat",
   components: {
     Message,
@@ -57,6 +79,10 @@ export default {
   },
 
   computed: {
+    ...mapState("auth", {
+      currentUser: state => state.currentUser,
+    }),
+
     isEmptyInputMessage() {
       return !/\S/.test(this.inputMessage)
     },
@@ -64,15 +90,22 @@ export default {
 
   sockets: {
     newMessage(data) {
-      this.messages.push({'text': data, 'author': {'name': 'Аноним'}})
+      console.log({data})
+      this.messages.push(data);
+      this.$nextTick(() => {
+        this.scrollDown()
+      })
+
     },
 
     userConnected(userId) {
-      this.messages.push({'text': 'Присоединился', author: {'name': userId}})
+      console.log(userId);
+      // this.messages.push({'text': 'Присоединился', author: {'name': userId}})
     },
 
     userDisconnected(userId) {
-      this.messages.push({'text': 'Отсоединился', author: {'name': userId}})
+      console.log(userId);
+      // this.messages.push({'text': 'Отсоединился', author: {'name': userId}})
     }
 
   },
@@ -81,12 +114,12 @@ export default {
       if (this.isEmptyInputMessage) {
         return
       }
-      this.$socket.client.emit('new-message', this.inputMessage);
-      this.messages.push({text: this.inputMessage, author: {name: 'Я'}})
+      this.$socket.client.emit('new-message', {
+        message: {
+          text: this.inputMessage
+        }
+      });
       this.inputMessage = "";
-      this.$nextTick(() => {
-        this.scrollDown()
-      })
     },
 
     scrollDown() {
@@ -115,6 +148,7 @@ export default {
 }
 
 .chat {
+
 }
 
 .chat-area {
@@ -127,7 +161,8 @@ export default {
   min-height: 700px;
   max-height: 700px;
   overflow-y: auto;
-  background-color: #333333;
+  background-color: #EEEEEE;
+  box-shadow: 0 5px 10px #BDBDBD;
 
 }
 

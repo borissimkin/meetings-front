@@ -1,6 +1,9 @@
 <template>
   <div id="login">
-    <div class="login__container" :class="{'login__container_not-auth': errorRegistration}">
+    <div
+      class="login__container"
+      :class="{'login__container_not-auth': errorRegistration}"
+    >
       <div class="login__container-header">
         Регистрация
       </div>

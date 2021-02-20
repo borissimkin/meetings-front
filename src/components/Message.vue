@@ -1,17 +1,23 @@
 <template>
-  <div class="message m-2 p-2">
+  <div class="message ma-2 pa-2">
+    <div class="message__header">
+      <span class="message-author">
+        {{ name }}
+      </span>
+      <span class="message-created">
+        {{ processedDate }}
+      </span>
+    </div>
     <div class="message-text">
       {{ text }}
-    </div>
-    <div class="author">
-      <div class="author-text">
-        {{ author }}
-      </div>
     </div>
   </div>
 </template>
 
 <script>
+import {getFullName} from "@/helpers/username.process";
+import * as dayjs from "dayjs";
+
 export default {
   name: "Message",
   props: {
@@ -20,36 +26,65 @@ export default {
       type: String,
       default: ''
     },
-    author: {
+    user: {
       required: true,
-      type: String,
-      default: ''
+      type: Object,
+      default: ()=>{}
     },
+    date: {
+      required: true,
+      type: String || Date,
+      default: new Date()
+    }
   },
+  computed: {
+    name() {
+      return getFullName(this.user.firstName, this.user.lastName)
+    },
+
+    processedDate() {
+      return dayjs(new Date(this.date)).format("HH:mm")
+    }
+
+  }
 
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .message {
-  background-color: #6078f3;
   text-align: left;
   border-radius: 0.1rem;
   bottom: 0;
   min-width: 250px;
+  background-color: white;
 
-}
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
 
-.message-text {
-  word-wrap:break-word;
-  color: white;
-  font-size: .8rem;
+  &-text {
+    word-wrap:break-word;
+    font-size: .8rem;
+
+  }
+
+  &-author {
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding-right: 0.5rem;
+  }
+
+  &-created {
+    font-size: 0.75rem;
+
+  }
+
 }
 
 .author-text {
-  font-size: 0.75rem;
-  padding-right: 0.5rem;
-  color: white;
+
 
 
 }
