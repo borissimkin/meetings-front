@@ -2,16 +2,12 @@
   <div id="login">
     <div
       class="login__container"
-      :class="{'login__container_not-auth': errorAuthorization}"
+      :class="{ 'login__container_not-auth': errorAuthorization }"
     >
-      <div class="login__container-header">
-        Авторизация
-      </div>
+      <div class="login__container-header">Авторизация</div>
       <v-divider />
       <div class="login__container-main">
-        <v-form
-          @submit.prevent="signIn"
-        >
+        <v-form @submit.prevent="signIn">
           <v-text-field
             v-model="form.email"
             placeholder="Email"
@@ -31,70 +27,60 @@
           </template>
           <v-row>
             <v-col>
-              <router-link
-                class="pt-2"
-                to="/registration"
-              >
+              <router-link class="pt-2" to="/registration">
                 Зарегистрироваться
               </router-link>
             </v-col>
             <v-col>
-              <v-btn
-                type="submit"
-              >
-                Войти
-              </v-btn>
+              <v-btn type="submit"> Войти </v-btn>
             </v-col>
           </v-row>
         </v-form>
       </div>
     </div>
     <v-overlay :value="loading">
-      <v-progress-circular
-        indeterminate
-        size="64"
-      />
+      <v-progress-circular indeterminate size="64" />
     </v-overlay>
   </div>
 </template>
 
 <script>
-import redirectService from "@/services/redirect.service"
-import socket from "@/socket";
+import redirectService from '@/services/redirect.service'
+import socket from '@/socket'
 export default {
-  name: "Login",
+  name: 'Login',
   data() {
     return {
       errorAuthorization: '',
       loading: false,
       form: {
         password: '',
-        email: ''
+        email: '',
       },
     }
   },
   methods: {
     async signIn() {
-      this.errorAuthorization = '';
-      this.loading = true;
+      this.errorAuthorization = ''
+      this.loading = true
       try {
-        await this.$store.dispatch("auth/signIn", this.form);
-        await this.$router.push(redirectService.getRedirectPath() || '/');
+        await this.$store.dispatch('auth/signIn', this.form)
+        await this.$router.push(redirectService.getRedirectPath() || '/')
         socket.emit('authenticate', { token: this.$store.state.auth.token })
-        redirectService.removeRedirectPath();
+        redirectService.removeRedirectPath()
       } catch (error) {
         if (!error.response) {
           console.error(error)
           return
         }
         if (error.response.status === 403) {
-          this.errorAuthorization = "Неверный email или пароль"
+          this.errorAuthorization = 'Неверный email или пароль'
         }
       } finally {
-        this.loading = false;
+        this.loading = false
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -107,14 +93,14 @@ export default {
 }
 
 .error-text {
-  color: #ec0101
+  color: #ec0101;
 }
 
 .login__container {
   background: #fff;
   box-shadow: 0 1px 4px 0 #b7b7b7;
   border-radius: 6px;
-  padding: .5rem;
+  padding: 0.5rem;
   min-width: 315px;
 
   &-wrapper {
@@ -143,7 +129,6 @@ export default {
 
       justify-content: space-between;
     }
-
   }
 
   &_not-auth {
@@ -151,7 +136,4 @@ export default {
     transition: box-shadow 0.5s ease-in-out;
   }
 }
-
-
-
 </style>

@@ -10,15 +10,14 @@
 </template>
 
 <script>
-
-import router from "@/router/router";
-import store from "@/store";
-import TheHeader from "@/components/TheHeader";
+import router from '@/router/router'
+import store from '@/store'
+import TheHeader from '@/components/TheHeader'
 
 export default {
   name: 'App',
-  components: {TheHeader},
+  components: { TheHeader },
   router: router,
   store: store,
-};
+}
 </script>

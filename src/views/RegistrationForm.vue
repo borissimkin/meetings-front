@@ -2,17 +2,12 @@
   <div id="login">
     <div
       class="login__container"
-      :class="{'login__container_not-auth': errorRegistration}"
+      :class="{ 'login__container_not-auth': errorRegistration }"
     >
-      <div class="login__container-header">
-        Регистрация
-      </div>
+      <div class="login__container-header">Регистрация</div>
       <v-divider />
       <div class="login__container-main">
-        <v-form
-          v-model="valid"
-          @submit.prevent="signUp"
-        >
+        <v-form v-model="valid" @submit.prevent="signUp">
           <v-text-field
             v-model="form.firstName"
             :counter="10"
@@ -54,77 +49,61 @@
             </div>
           </template>
           <v-row class="justify-end pt-2">
-            <v-btn
-              :disabled="!valid"
-              type="submit"
-            >
-              Создать
-            </v-btn>
+            <v-btn :disabled="!valid" type="submit"> Создать </v-btn>
           </v-row>
         </v-form>
 
         <v-row>
-          <router-link
-            class="pt-2"
-            to="/login"
-          >
+          <router-link class="pt-2" to="/login">
             Уже есть аккаунт?
           </router-link>
         </v-row>
       </div>
     </div>
     <v-overlay :value="loading">
-      <v-progress-circular
-        indeterminate
-        size="64"
-      />
+      <v-progress-circular indeterminate size="64" />
     </v-overlay>
   </div>
 </template>
 
 <script>
-import AuthApi from "@/api/auth.api"
+import AuthApi from '@/api/auth.api'
 export default {
   //todo: когда(если) будет свободное время, обязательно перепиши
   // todo: чтобы не повторялся код с логином
-  name: "RegistrationForm",
+  name: 'RegistrationForm',
   data() {
     return {
       valid: false,
       form: {
-        firstName: "",
-        lastName: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
       },
-      nameRules: [
-        v => !!v || 'Имя обязательно',
-      ],
+      nameRules: [(v) => !!v || 'Имя обязательно'],
       emailRules: [
-        v => !!v || 'E-mail обязателен',
-        v => /.+@.+/.test(v) || 'E-mail неверный',
+        (v) => !!v || 'E-mail обязателен',
+        (v) => /.+@.+/.test(v) || 'E-mail неверный',
       ],
-      passwordRules: [
-        v => !!v || "Пароль обязателен",
-      ],
+      passwordRules: [(v) => !!v || 'Пароль обязателен'],
       confirmPasswordRules: [
-        v => !!v || "Пароль обязателен",
-        v => v === this.form.password || "Пароли должны совпадать",
+        (v) => !!v || 'Пароль обязателен',
+        (v) => v === this.form.password || 'Пароли должны совпадать',
       ],
 
       errorRegistration: '',
       loading: false,
-
     }
   },
   methods: {
     async signUp() {
-      this.errorRegistration = '';
-      this.loading = true;
+      this.errorRegistration = ''
+      this.loading = true
       try {
-        await AuthApi.signUp(this.form);
-        await this.$router.push('/login');
+        await AuthApi.signUp(this.form)
+        await this.$router.push('/login')
       } catch (error) {
         if (!error.response) {
           console.error(error)
@@ -134,17 +113,16 @@ export default {
           this.errorRegistration = error.response.data
         }
       } finally {
-        this.loading = false;
+        this.loading = false
       }
-
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style lang="scss" scoped>
 .error-text {
-  color: #ec0101
+  color: #ec0101;
 }
 
 #login {
@@ -158,7 +136,7 @@ export default {
   background: #fff;
   box-shadow: 0 1px 4px 0 #b7b7b7;
   border-radius: 6px;
-  padding: .5rem;
+  padding: 0.5rem;
   min-width: 315px;
 
   &-wrapper {
@@ -187,15 +165,11 @@ export default {
   &-main {
     padding: 1.5rem;
 
-
     &-footer {
       display: flex;
 
       justify-content: space-between;
     }
-
   }
 }
-
-
 </style>

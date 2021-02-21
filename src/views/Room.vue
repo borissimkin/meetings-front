@@ -1,12 +1,7 @@
 <template>
-  <div
-    class="room p-4"
-    style=""
-  >
+  <div class="room p-4" style="">
     <div>
-      <Videos
-        :room-id="id"
-      />
+      <StreamingArea :room-id="id" />
       <SettingsMediaDevices />
     </div>
     <Chat />
@@ -14,34 +9,33 @@
 </template>
 
 <script>
-import Chat from "@/components/Chat";
-import Videos from "@/components/Videos";
-import SettingsMediaDevices from "@/components/SettingMediaDevices";
+import Chat from '@/components/Chat'
+import StreamingArea from '@/components/StreamingArea'
+import SettingsMediaDevices from '@/components/SettingMediaDevices'
+
 export default {
-  name: "Room",
+  name: 'Room',
   components: {
     SettingsMediaDevices,
-    Videos,
+    StreamingArea,
     Chat,
   },
   props: {
     id: {
       type: String,
       required: true,
-      default: ''
+      default: '',
     },
-
   },
   data() {
     return {
-      usersInChatRoom: []
+      usersInChatRoom: [],
     }
   },
 
   mounted() {
-    this.$socket.client.emit('join-room', this.id);
+    this.$socket.client.emit('join-room', this.id)
   },
-
 }
 </script>
 
@@ -50,6 +44,5 @@ export default {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-
 }
 </style>

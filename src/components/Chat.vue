@@ -1,34 +1,30 @@
 <template>
   <div class="chat">
-    <div
-      id="chat-area"
-      class="chat-area"
-    >
+    <div id="chat-area" class="chat-area">
       <Message
         v-for="message of messages"
         :key="message.id"
-        :user="message.user"
-        :text="message.message.text"
         :date="message.message.date"
+        :text="message.message.text"
+        :user="message.user"
       />
     </div>
     <v-textarea
-        v-model="inputMessage"
-        append-icon="mdi-send"
-        filled
-        no-resize
-        label="Сообщение"
-        rows="3"
-        row-height="20"
-        @click:append="sendMessage"
-        @keyup.enter="sendMessage"
-    ></v-textarea>
+      v-model="inputMessage"
+      append-icon="mdi-send"
+      filled
+      label="Сообщение"
+      no-resize
+      row-height="20"
+      rows="3"
+      @click:append="sendMessage"
+      @keyup.enter="sendMessage"
+    />
   </div>
 </template>
 <script>
-
-import Message from "./Message";
-import {mapState} from "vuex"
+import Message from './Message'
+import { mapState } from 'vuex'
 
 export default {
   /** todo: может передавать только id?
@@ -52,24 +48,22 @@ export default {
    *
    * }**/
 
-  name: "Chat",
+  name: 'Chat',
   components: {
     Message,
-
   },
 
   data() {
     return {
-      "inputMessage": "",
-      "users": [],
-      "messages": [],
-
+      inputMessage: '',
+      users: [],
+      messages: [],
     }
   },
 
   computed: {
-    ...mapState("auth", {
-      currentUser: state => state.currentUser,
+    ...mapState('auth', {
+      currentUser: (state) => state.currentUser,
     }),
 
     isEmptyInputMessage() {
@@ -79,11 +73,10 @@ export default {
 
   sockets: {
     newMessage(data) {
-      this.messages.push(data);
+      this.messages.push(data)
       this.$nextTick(() => {
         this.scrollDown()
       })
-
     },
 
     // userConnected(user) {
@@ -93,7 +86,6 @@ export default {
     // userDisconnected(user) {
     //   console.log(user);
     // }
-
   },
   methods: {
     sendMessage() {
@@ -102,24 +94,22 @@ export default {
       }
       this.$socket.client.emit('new-message', {
         message: {
-          text: this.inputMessage
-        }
-      });
-      this.inputMessage = "";
+          text: this.inputMessage,
+        },
+      })
+      this.inputMessage = ''
     },
 
     scrollDown() {
       const chat = document.getElementById('chat-area')
-      chat.scrollTop = chat.scrollHeight;
-    }
-
+      chat.scrollTop = chat.scrollHeight
+    },
   },
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .chat {
-
 }
 
 .chat-area {
@@ -132,8 +122,7 @@ export default {
   min-height: 700px;
   max-height: 700px;
   overflow-y: auto;
-  background-color: #EEEEEE;
-  border-bottom: 1px solid #BDBDBD;
+  background-color: #eeeeee;
+  border-bottom: 1px solid #bdbdbd;
 }
-
 </style>

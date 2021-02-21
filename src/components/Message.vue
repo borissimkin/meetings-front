@@ -15,27 +15,27 @@
 </template>
 
 <script>
-import {getFullName} from "@/helpers/username.process";
-import * as dayjs from "dayjs";
+import { getFullName } from '@/helpers/username.process'
+import * as dayjs from 'dayjs'
 
 export default {
-  name: "Message",
+  name: 'Message',
   props: {
     text: {
       required: true,
       type: String,
-      default: ''
+      default: '',
     },
     user: {
       required: true,
       type: Object,
-      default: ()=>{}
+      default: () => {},
     },
     date: {
       required: true,
-      type: String || Date,
-      default: new Date()
-    }
+      type: [String, Date],
+      default: new Date(),
+    },
   },
   computed: {
     name() {
@@ -43,15 +43,13 @@ export default {
     },
 
     processedDate() {
-      return dayjs(new Date(this.date)).format("HH:mm")
-    }
-
-  }
-
+      return dayjs(new Date(this.date)).format('HH:mm')
+    },
+  },
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .message {
   text-align: left;
   border-radius: 0.1rem;
@@ -65,9 +63,8 @@ export default {
   }
 
   &-text {
-    word-wrap:break-word;
-    font-size: .8rem;
-
+    word-wrap: break-word;
+    font-size: 0.8rem;
   }
 
   &-author {
@@ -78,15 +75,9 @@ export default {
 
   &-created {
     font-size: 0.75rem;
-
   }
-
 }
 
 .author-text {
-
-
-
 }
-
 </style>
