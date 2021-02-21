@@ -1,6 +1,13 @@
 <template>
   <div>
-    <div id="video-grid" />
+    <div id="video-grid">
+      <video class="post-1" v-if="myStream" autoplay  muted style="border: 1px solid black" :srcObject.prop="myStream"></video>
+      <video v-for="peer in peers"
+             :key="peer.peerId"
+             autoplay
+             :srcObject.prop="peer.stream">
+      </video>
+    </div>
   </div>
 </template>
 
@@ -11,6 +18,18 @@ import meetingApi from "@/api/meeting.api";
 import {mapState} from "vuex"
 import {STOP_USER_STREAM} from "@/store/mutations.type";
 
+/**
+ * peer {
+ *   user: {
+ *     id
+ *     firstName
+ *     lastName
+ *   },
+ *   peerId
+ *   call,
+ *   stream
+ * }
+ * **/
 export default {
   name: "Videos",
   props: {
@@ -22,7 +41,6 @@ export default {
   data() {
     return {
       myPeer: new Peer(undefined, getPeerConfig()),
-      videoGrid: null,
       peers: [],
       maxCountVideos: 6,
     }
@@ -34,34 +52,26 @@ export default {
   },
   async mounted() {
     await this.fetchPeers();
-    console.log(this.peers)
-    const myVideo = document.createElement('video')
-    myVideo.classList.add('post-1')
-    this.videoGrid = document.getElementById('video-grid')
-    myVideo.muted = true
+    console.log({peers: this.peers})
     navigator.mediaDevices.getUserMedia({
       video: true,
       audio: true
     }).then(stream => {
       this.$store.dispatch("meeting/setUserStream", stream)
-      this.addVideoStream(myVideo, this.myStream);
       this.myPeer.on('call', call => {
         call.answer(this.myStream);
-        const video = document.createElement('video')
-        call.on('stream', userVideoStream => {
+        call.on('stream', userStream => {
           const peer = this.getPeerByPeerId(call.peer)
           if (peer) {
-            peer.video = video;
-            peer.call = call;
+            this.$set(peer, "stream", userStream)
+            this.$set(peer, "call", call)
           } else {
             console.log(`peer not found ${call.peer}`);
           }
-          this.addVideoStream(video, userVideoStream)
         })
       })
-      this.$socket.client.on('callConnected', (peerId, userId) => {
-        console.log({peerId, userId})
-        this.connectToNewUser(peerId, userId, this.myStream)
+      this.$socket.client.on('callConnected', (user, peerId) => {
+        this.connectToNewUser(user, peerId, this.myStream)
       })
     });
     this.myPeer.on('open', peerId => {
@@ -78,15 +88,14 @@ export default {
 
   sockets: {
     userDisconnected(user) {
-      let indexPeerElement = this.peers.findIndex(x => {
-        return x.userId === user.id
+      //todo: проблема в том что щас один пользователь может создавать кучу стримов
+      let indexPeerElement = this.peers.findIndex(peer => {
+        return peer.user.id === user.id
       })
       if (indexPeerElement === -1) {
         return
       }
       const peer = this.peers[indexPeerElement];
-      const video = peer.video;
-      video.remove();
       peer.call.close();
       this.peers.splice(indexPeerElement, 1);
     }
@@ -99,45 +108,35 @@ export default {
     },
 
     async fetchPeers() {
-      //todo: конечно же прорефакторить
       let response = await meetingApi.getPeers(this.roomId);
       this.peers = response.data;
     },
 
-    connectToNewUser(peerId, userId, stream) {
-      console.log('connect new uer')
+    connectToNewUser(user, peerId, stream) {
       const call = this.myPeer.call(peerId, stream)
-      const video = document.createElement('video')
-      call.on('stream', userVideoStream => {
-        this.addVideoStream(video, userVideoStream)
+      const peer = {
+        user,
+        peerId,
+        call,
+      }
+      call.on('stream', userStream => {
+        this.$set(peer, "stream", userStream)
       })
+
       call.on('close', () => {
-        video.remove()
+        console.log('call close')
+        //todo: надо подумать, может быть что когда дисконектед то в обработке сокета уже все делается
+        // this.peers.
+        // video.remove()
       })
-      this.peers.push(
-          {
-            userId: userId,
-            peerId: peerId,
-            call: call,
-            video: video
-          }
-      )
+      this.peers.push(peer)
     },
-
-    addVideoStream(video, stream) {
-      video.srcObject = stream;
-      video.addEventListener('loadedmetadata', () => {
-        video.play()
-      });
-      this.videoGrid.append(video);
-
-    }
   }
 
 }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 #video-grid {
   display: grid;
   grid-template-areas: "post-1 post-1 post-2"

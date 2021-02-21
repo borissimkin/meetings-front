@@ -79,7 +79,6 @@ export default {
 
   sockets: {
     newMessage(data) {
-      console.log({data})
       this.messages.push(data);
       this.$nextTick(() => {
         this.scrollDown()
@@ -87,13 +86,13 @@ export default {
 
     },
 
-    userConnected(user) {
-      console.log(user);
-    },
-
-    userDisconnected(user) {
-      console.log(user);
-    }
+    // userConnected(user) {
+    //   console.log(user);
+    // },
+    //
+    // userDisconnected(user) {
+    //   console.log(user);
+    // }
 
   },
   methods: {
