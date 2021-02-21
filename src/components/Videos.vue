@@ -2,9 +2,10 @@
   <div>
     <div id="video-grid">
       <video class="post-1" v-if="myStream" autoplay  muted style="border: 1px solid black" :srcObject.prop="myStream"></video>
-      <video v-for="peer in peers"
+      <video v-for="(peer, index) in peers"
              :key="peer.peerId"
              autoplay
+             :class="{'hidden-stream': isHiddenStream(index)}"
              :srcObject.prop="peer.stream">
       </video>
     </div>
@@ -103,6 +104,10 @@ export default {
   },
 
   methods: {
+    isHiddenStream(index) {
+      return index > this.maxCountVideos
+    },
+
     getPeerByPeerId(peerId) {
       return this.peers.find(peer => peer.peerId === peerId)
     },
@@ -145,6 +150,11 @@ export default {
   grid-template-rows: repeat(3, 200px);
   grid-template-columns: repeat(3, 1fr);
 }
+
+.hidden-stream {
+  visibility: hidden;
+}
+
 .post-1 {
   grid-area: post-1;
 }
