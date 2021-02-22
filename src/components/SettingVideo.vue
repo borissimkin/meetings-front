@@ -1,12 +1,16 @@
 <template>
-  <div>
-    <template v-if="enabledVideo">
-      <v-icon x-large @click="toggleVideo"> mdi-video </v-icon>
+  <v-btn
+    depressed
+    elevation='6'
+    fab
+    @click='toggleVideo'>
+    <template v-if='enabledVideo'>
+      <v-icon color='black' > mdi-video</v-icon>
     </template>
     <template v-else>
-      <v-icon x-large @click="toggleVideo"> mdi-video-off </v-icon>
+      <v-icon color='black' > mdi-video-off</v-icon>
     </template>
-  </div>
+  </v-btn>
 </template>
 
 <script>

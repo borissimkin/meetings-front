@@ -1,12 +1,16 @@
 <template>
-  <div>
-    <template v-if="enabledMicro">
-      <v-icon x-large @click="toggleMicrophone"> mdi-microphone </v-icon>
+  <v-btn
+    depressed
+    elevation='6'
+    fab
+    @click='toggleMicrophone'>
+    <template v-if='enabledMicro'>
+      <v-icon color='black' > mdi-microphone</v-icon>
     </template>
     <template v-else>
-      <v-icon x-large @click="toggleMicrophone"> mdi-microphone-off </v-icon>
+      <v-icon color='black' > mdi-microphone-off</v-icon>
     </template>
-  </div>
+  </v-btn>
 </template>
 
 <script>
@@ -28,4 +32,4 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang='scss' scoped></style>

@@ -22,14 +22,8 @@ export default {
   display: flex;
 
   &__button {
-    &:first-child {
-      padding-left: 1rem;
-    }
+    margin: .7rem
 
-    color: #ffffff;
-    padding: 0.8rem;
-
-    border: 1px solid #929292;
   }
 }
 </style>
