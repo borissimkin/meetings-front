@@ -115,7 +115,9 @@ export default {
         return
       }
       const peer = this.peers[indexPeerElement]
-      peer.call.close()
+      if (peer.call) {
+        peer.call.close()
+      }
       this.peers.splice(indexPeerElement, 1)
     },
   },
