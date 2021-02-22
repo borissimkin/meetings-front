@@ -1,7 +1,7 @@
 <template>
-  <div class="room p-4" style="">
+  <div class='room p-4'>
     <div>
-      <StreamingArea :room-id="id" />
+      <StreamingArea :room-id='id' />
       <SettingsMediaDevices />
     </div>
     <Chat />
@@ -36,6 +36,10 @@ export default {
   mounted() {
     this.$socket.client.emit('join-room', this.id)
   },
+
+  beforeDestroy() {
+    this.$socket.client.emit('disconnect')
+  }
 }
 </script>
 

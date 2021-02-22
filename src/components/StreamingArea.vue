@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id='video-grid'>
-      <div class='post-1'>
+      <div class='post-1' :class="{'speaking': isSpeaking($store.state.auth.currentUser.id)}">
         <template v-if='myStream'>
           <video :srcObject.prop='myStream' autoplay muted></video>
         </template>
@@ -10,7 +10,9 @@
         </template>
         <span class='stream-name'>{{ getName($store.state.auth.currentUser) }}</span>
       </div>
-      <div v-for='(peer, index) in peers' :key='peer.peerId' :class="{'hidden-stream': isHiddenStream(index)}"
+      <div v-for='(peer, index) in peers' :key='`${peer.peerId}-${peer.user.id}`'
+           :class="{'hidden-stream': isHiddenStream(index),
+                    'speaking': isSpeaking(peer.user.id)}"
            class='video-stream'>
         <template v-if='peer.stream'>
           <video
@@ -31,10 +33,11 @@
 import Peer from 'peerjs'
 import { getPeerConfig } from '@/peer.server'
 import meetingApi from '@/api/meeting.api'
-import { mapState } from 'vuex'
-import { STOP_USER_STREAM } from '@/store/mutations.type'
+import { mapMutations, mapState } from 'vuex'
+import { ADD_SPEAKING_USER_ID, REMOVE_SPEAKING_USER_ID, STOP_USER_STREAM } from '@/store/mutations.type'
 import VideoStreamPlaceholder from '@/components/VideoStreamPlaceholder'
 import { getFullName } from '@/helpers/username.process'
+import hark from 'hark'
 
 /**
  * peer {
@@ -67,6 +70,7 @@ export default {
   computed: {
     ...mapState('meeting', {
       myStream: (state) => state.userStream,
+      speakingUserIds: (state => state.speakingUserIds)
     }),
   },
   async mounted() {
@@ -79,7 +83,13 @@ export default {
       })
       .then((stream) => {
         this.$store.dispatch('meeting/setUserStream', stream)
+
+        const speechEvents = hark(this.myStream, {})
+        speechEvents.on('speaking', this.speakHandler)
+        speechEvents.on('stopped_speaking', this.stopSpeakHandler)
+
         this.myPeer.on('call', (call) => {
+          console.log({ call })
           call.answer(this.myStream)
           call.on('stream', (userStream) => {
             const peer = this.getPeerByPeerId(call.peer)
@@ -120,12 +130,36 @@ export default {
       }
       this.peers.splice(indexPeerElement, 1)
     },
+    userSpeak(user) {
+      this.addSpeakingUserId(user.id)
+    },
+
+    userStopSpeak(user) {
+      this.removeSpeakingUserId(user.id)
+    },
   },
 
   methods: {
+    ...mapMutations('meeting', {
+      addSpeakingUserId: ADD_SPEAKING_USER_ID,
+      removeSpeakingUserId: REMOVE_SPEAKING_USER_ID,
+    }),
+    isSpeaking(userId) {
+      return this.speakingUserIds.includes(userId)
+
+    },
     getName(user) {
       return getFullName(user.firstName, user.lastName)
+    },
 
+    speakHandler() {
+      this.addSpeakingUserId(this.$store.state.auth.currentUser.id)
+      this.$socket.client.emit('user-speak')
+    },
+
+    stopSpeakHandler() {
+      this.removeSpeakingUserId(this.$store.state.auth.currentUser.id)
+      this.$socket.client.emit('user-stop-speak')
     },
 
     isHiddenStream(index) {

@@ -1,6 +1,8 @@
 import {
-  SET_ENABLED_VIDEO,
+  ADD_SPEAKING_USER_ID,
+  REMOVE_SPEAKING_USER_ID,
   SET_ENABLED_MICRO,
+  SET_ENABLED_VIDEO,
   SET_USER_STREAM,
   STOP_USER_STREAM,
 } from '@/store/mutations.type'
@@ -12,6 +14,7 @@ const meetings = {
     enabledMicro: true,
     enabledVideo: true,
     userStream: null,
+    speakingUserIds: [],
   },
 
   mutations: {
@@ -43,6 +46,17 @@ const meetings = {
           track.stop()
         }
       })
+    },
+
+    [ADD_SPEAKING_USER_ID](state, userId) {
+      state.speakingUserIds.push(userId)
+    },
+
+    [REMOVE_SPEAKING_USER_ID](state, userId) {
+      const index = state.speakingUserIds.indexOf(userId)
+      if (index > -1) {
+        state.speakingUserIds.splice(index, 1)
+      }
     },
   },
   actions: {
