@@ -87,6 +87,7 @@ export default {
         const speechEvents = hark(this.myStream, {})
         speechEvents.on('speaking', this.speakHandler)
         speechEvents.on('stopped_speaking', this.stopSpeakHandler)
+        //todo: если уже есть в комнате то не давать стрим
 
         this.myPeer.on('call', (call) => {
           console.log({ call })
@@ -176,6 +177,7 @@ export default {
     },
 
     connectToNewUser(user, peerId, stream) {
+      console.log({user, peerId, stream})
       const call = this.myPeer.call(peerId, stream)
       const peer = {
         user,

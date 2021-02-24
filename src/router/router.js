@@ -65,11 +65,12 @@ let router = new Router({
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.name !== '/login') {
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
     store.dispatch('auth/fetchCurrentUser').then(next)
   }
   if (
     to.name !== '/login' &&
+    to.name !== '/registration' &&
     to.matched.some((record) => record.meta.requiresAuth) &&
     !store.getters['auth/isLoggedIn']
   ) {

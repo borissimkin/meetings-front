@@ -55,12 +55,19 @@ export default {
     }
   },
 
+  sockets: {
+    userDisconnected(user) {
+      console.log(`Отключился ${user}`)
+    }
+  },
+
   mounted() {
     this.$socket.client.emit('join-room', this.id)
   },
 
   beforeDestroy() {
-    this.$socket.client.emit('disconnect')
+    console.log('destroy')
+    this.$socket.client.emit('leave-room', this.id)
   },
 }
 </script>
