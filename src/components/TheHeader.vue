@@ -2,7 +2,9 @@
   <v-toolbar dark flat>
     <v-app-bar-nav-icon />
 
-    <v-toolbar-title>Meetings</v-toolbar-title>
+    <v-toolbar-title class="mr-5">
+      <v-btn text to="/">Meetings</v-btn>
+    </v-toolbar-title>
     <v-spacer />
     <AccountMenu v-if="isLoggedIn" />
   </v-toolbar>
