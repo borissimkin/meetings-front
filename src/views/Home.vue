@@ -1,6 +1,10 @@
 <template>
   <div id='page'>
+
     <v-container>
+      <div class='title mb-2'>
+        Комнаты
+      </div>
       <v-card>
         <ModalCreateRoom>
         </ModalCreateRoom>

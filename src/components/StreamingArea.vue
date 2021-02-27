@@ -55,7 +55,7 @@ export default {
   name: 'StreamingArea',
   components: { VideoStreamPlaceholder },
   props: {
-    roomId: {
+    meetingId: {
       type: String,
       required: true,
     },
@@ -172,7 +172,7 @@ export default {
     },
 
     async fetchPeers() {
-      let response = await meetingApi.getPeers(this.roomId)
+      let response = await meetingApi.getPeers(this.meetingId)
       this.peers = response.data
     },
 

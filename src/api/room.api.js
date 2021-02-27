@@ -12,4 +12,8 @@ export default {
   getAllRooms() {
     return server.get('/rooms')
   },
+
+  getAllMeetings(roomId) {
+    return server.get(`/room/${roomId}/meetings`)
+  },
 }
