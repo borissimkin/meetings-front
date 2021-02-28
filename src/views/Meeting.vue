@@ -14,7 +14,7 @@
       </v-tabs>
       <v-tabs-items v-model='tab'>
         <v-tab-item>
-          <StreamingArea :meeting-id='id' />
+          <StreamingArea :meeting-id='meetingId' />
           <SettingsMediaDevices />
         </v-tab-item>
         <v-tab-item :eager='true'>
@@ -41,7 +41,12 @@ export default {
     Chat,
   },
   props: {
-    id: {
+    roomId: {
+      type: String,
+      required: true,
+      default: ''
+    },
+    meetingId: {
       type: String,
       required: true,
       default: '',
@@ -49,7 +54,6 @@ export default {
   },
   data() {
     return {
-      usersInChatMeeting: [],
       tab: null,
     }
   },

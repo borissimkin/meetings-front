@@ -5,10 +5,12 @@ import Home from '@/views/Home'
 import Login from '@/views/Login'
 import NotFound from '@/views/NotFound'
 import roomApi from '../api/room.api'
+import meetingApi from '../api/meeting.api'
 import store from '@/store'
 import redirectService from '@/services/redirect.service'
 import RegistrationForm from '@/views/RegistrationForm'
 import Room from '@/views/Room'
+import Meeting from '@/views/Meeting'
 
 Vue.use(Router)
 
@@ -33,6 +35,26 @@ let router = new Router({
       props: true,
       async beforeEnter(to, from, next) {
         const response = await roomApi.isRoomExist(to.params.id)
+        if (!response.data.exists) {
+          next('404')
+        } else {
+          next()
+        }
+      },
+    },
+    {
+      path: `/room/:roomId/meeting/:meetingId`,
+      name: 'meeting',
+      component: Meeting,
+      meta: {
+        requiresAuth: true,
+      },
+      props: true,
+      async beforeEnter(to, from, next) {
+        const response = await meetingApi.isMeetingExist(
+          to.params.roomId,
+          to.params.meetingId
+        )
         if (!response.data.exists) {
           next('404')
         } else {
