@@ -4,7 +4,7 @@
       Собрания
     </div>
     <v-card>
-      <ModalCreateMeeting>
+      <ModalCreateMeeting :room-id='id'>
       </ModalCreateMeeting>
       <v-list two-line>
         <v-subheader>
@@ -26,6 +26,7 @@
 
 <script>
 import ModalCreateMeeting from '@/components/ModalCreateMeeting'
+import { RESET_STATE } from '@/store/mutations.type'
 export default {
   name: 'Room',
   components: { ModalCreateMeeting },
@@ -45,6 +46,10 @@ export default {
     this.$store.dispatch('room/fetchMeetings', {
       roomId: this.id
     })
+  },
+
+  beforeDestroy() {
+    this.$store.commit(`room/${RESET_STATE}`)
   }
 }
 </script>

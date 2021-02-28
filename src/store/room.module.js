@@ -1,20 +1,26 @@
 import roomApi from '../api/room.api'
+import meetingApi from '../api/meeting.api'
 
 import {
   SET_ERROR,
   SET_LOADING,
   SET_MEETINGS,
   ADD_MEETING,
+  RESET_STATE,
 } from './mutations.type'
+
+const getDefaultState = () => {
+  return {
+    meetings: [],
+    loading: false,
+    error: false,
+  }
+}
 
 const room = {
   namespaced: true,
 
-  state: {
-    meetings: [],
-    loading: false,
-    error: false,
-  },
+  state: getDefaultState(),
 
   mutations: {
     [SET_MEETINGS](state, meetings) {
@@ -32,6 +38,10 @@ const room = {
     [SET_LOADING](state, value) {
       state.loading = value
     },
+
+    [RESET_STATE](state) {
+      Object.assign(state, getDefaultState())
+    },
   },
 
   actions: {
@@ -48,16 +58,15 @@ const room = {
       }
     },
 
-    // async addMeeting({ commit }, payload) {
-    //   try {
-    //     const { name } = { ...payload }
-    //     const response = await roomApi.createRoom(name)
-    //     commit(ADD_MEETING, response.data)
-    //   } catch (e) {
-    //     console.log(e)
-    //     todo
-    // }
-    // },
+    async addMeeting({ commit }, payload) {
+      try {
+        const response = await meetingApi.createMeeting(payload)
+        commit(ADD_MEETING, response.data)
+      } catch (e) {
+        console.log(e)
+        throw e
+      }
+    },
   },
 }
 export default room
