@@ -1,46 +1,35 @@
 <template>
-  <div class='room p-4'>
-    <div>
-
-      <v-tabs v-model='tab'
-              background-color='primary'
-              dark>
-
-        <v-tab>
-          Стримы
-        </v-tab>
-        <v-tab>
-          Доска
-        </v-tab>
-      </v-tabs>
-      <v-tabs-items v-model='tab'>
-        <v-tab-item>
-          <StreamingArea :room-id='id' />
-          <SettingsMediaDevices />
-        </v-tab-item>
-        <v-tab-item :eager='true'>
-          <Whiteboard :height='600' :width='900' style='min-width: 900px; min-height: 600px'></Whiteboard>
-        </v-tab-item>
-      </v-tabs-items>
+  <v-container>
+    <div class='title mb-2'>
+      Собрания
     </div>
-    <Chat />
-  </div>
+    <v-card>
+      <ModalCreateMeeting :room-id='id'>
+      </ModalCreateMeeting>
+      <v-list two-line>
+        <v-subheader>
+          {{ headerText }}
+        </v-subheader>
+        <v-list-item-group>
+          <v-list-item v-for='meeting in $store.state.room.meetings'
+                       :key='meeting.id' :to='`/room/${id}/meeting/${meeting.hashId}`'>
+            <v-list-item-content>
+
+              {{ meeting.hashId }}
+            </v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-card>
+  </v-container>
 </template>
 
 <script>
-import Chat from '@/components/Chat'
-import StreamingArea from '@/components/StreamingArea'
-import SettingsMediaDevices from '@/components/SettingMediaDevices'
-import Whiteboard from '@/components/Whiteboard'
-
+import ModalCreateMeeting from '@/components/ModalCreateMeeting'
+import { RESET_STATE } from '@/store/mutations.type'
 export default {
   name: 'Room',
-  components: {
-    Whiteboard,
-    SettingsMediaDevices,
-    StreamingArea,
-    Chat,
-  },
+  components: { ModalCreateMeeting },
   props: {
     id: {
       type: String,
@@ -48,34 +37,23 @@ export default {
       default: '',
     },
   },
-  data() {
-    return {
-      usersInChatRoom: [],
-      tab: null,
+  computed: {
+    headerText() {
+      return this.$store.state.room.meetings.length ? 'Собрания' : 'Собраний нет'
     }
   },
-
-  sockets: {
-    userDisconnected(user) {
-      console.log(`Отключился ${user}`)
-    }
-  },
-
   mounted() {
-    this.$socket.client.emit('join-room', this.id)
+    this.$store.dispatch('room/fetchMeetings', {
+      roomId: this.id
+    })
   },
 
   beforeDestroy() {
-    console.log('destroy')
-    this.$socket.client.emit('leave-room', this.id)
-  },
+    this.$store.commit(`room/${RESET_STATE}`)
+  }
 }
 </script>
 
 <style scoped>
-.room {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
+
 </style>

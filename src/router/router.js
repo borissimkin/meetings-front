@@ -2,13 +2,13 @@ import Vue from 'vue'
 
 import Router from 'vue-router'
 import Home from '@/views/Home'
-import Room from '@/views/Room'
 import Login from '@/views/Login'
 import NotFound from '@/views/NotFound'
 import roomApi from '../api/room.api'
 import store from '@/store'
 import redirectService from '@/services/redirect.service'
 import RegistrationForm from '@/views/RegistrationForm'
+import Room from '@/views/Room'
 
 Vue.use(Router)
 
