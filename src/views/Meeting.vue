@@ -65,12 +65,11 @@ export default {
   },
 
   mounted() {
-    this.$socket.client.emit('join-meeting', this.id)
+    this.$socket.client.emit('join-meeting', this.meetingId)
   },
 
   beforeDestroy() {
-    console.log('destroy')
-    this.$socket.client.emit('leave-meeting', this.id)
+    this.$socket.client.emit('leave-meeting', this.meetingId)
   },
 }
 </script>

@@ -11,6 +11,7 @@ import redirectService from '@/services/redirect.service'
 import RegistrationForm from '@/views/RegistrationForm'
 import Room from '@/views/Room'
 import Meeting from '@/views/Meeting'
+import socket from '@/socket'
 
 Vue.use(Router)
 
@@ -69,6 +70,7 @@ let router = new Router({
       beforeEnter: async (to, from, next) => {
         if (store.getters['auth/isLoggedIn']) {
           await store.dispatch('auth/logout')
+          socket.close()
         }
         next()
       },

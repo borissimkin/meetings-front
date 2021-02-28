@@ -66,7 +66,7 @@ export default {
       try {
         await this.$store.dispatch('auth/signIn', this.form)
         await this.$router.push(redirectService.getRedirectPath() || '/')
-        socket.emit('authenticate', { token: this.$store.state.auth.token })
+        socket.connect()
         redirectService.removeRedirectPath()
       } catch (error) {
         if (!error.response) {
