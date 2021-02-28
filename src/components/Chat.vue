@@ -1,96 +1,128 @@
 <template>
   <div class="chat">
     <div id="chat-area" class="chat-area">
-      <Message v-for="message of messages" :key="message.id" :author="message.author.name"
-               :text="message.text">
-      </Message>
+      <Message
+        v-for="message of messages"
+        :key="message.id"
+        :date="message.message.date"
+        :text="message.message.text"
+        :user="message.user"
+      />
     </div>
-    <div class="d-flex">
-      <b-textarea v-model="inputMessage" placeholder="Написать сообщение..." @keyup.enter="sendMessage">
-      </b-textarea>
-      <button class="send-button" v-on:click="sendMessage">Отправить</button>
-    </div>
+    <v-textarea
+      v-model="inputMessage"
+      append-icon="mdi-send"
+      filled
+      label="Сообщение"
+      no-resize
+      row-height="20"
+      rows="3"
+      @click:append="sendMessage"
+      @keyup.enter="sendMessage"
+    />
   </div>
-
 </template>
 <script>
-/**todo: Нужно как то чтобы элементы добавлялись к низу чата, но вместо аншифт был пуш */
-
-import Message from "./Message";
-
+import Message from './Message'
+import { mapState } from 'vuex'
 
 export default {
-  name: "Chat",
+  /** todo: может передавать только id?
+   * send message {
+   *   message: {
+   *     text
+   *   }
+   * }
+   *
+   * receive message {
+   *   user {
+   *     id,
+   *     firstName,
+   *     lastName,
+   *   },
+   *   message {
+   *     id
+   *     text,
+   *     date
+   *   }
+   *
+   * }**/
+
+  name: 'Chat',
   components: {
     Message,
-
   },
 
   data() {
     return {
-      "inputMessage": "",
-      "users": [],
-      "messages": [],
-
+      inputMessage: '',
+      users: [],
+      messages: [],
     }
+  },
+
+  computed: {
+    ...mapState('auth', {
+      currentUser: (state) => state.currentUser,
+    }),
+
+    isEmptyInputMessage() {
+      return !/\S/.test(this.inputMessage)
+    },
   },
 
   sockets: {
     newMessage(data) {
-      this.messages.push({'text': data, 'author': {'name': 'Аноним'}})
-    },
-
-    userConnected(userId) {
-      this.messages.push({'text': 'Присоединился', author: {'name': userId}})
-    },
-
-    userDisconnected(userId) {
-      this.messages.push({'text': 'Отсоединился', author: {'name': userId}})
-    }
-
-  },
-  methods: {
-    sendMessage() {
-      if (!this.inputMessage) {
-        //todo: сделать кнопку не активной
-        return
-      }
-      this.$socket.client.emit('new-message', this.inputMessage);
-      this.messages.push({text: this.inputMessage, author: {name: 'Я'}})
-      this.inputMessage = "";
+      this.messages.push(data)
       this.$nextTick(() => {
         this.scrollDown()
       })
     },
 
+    // userConnected(user) {
+    //   console.log(user);
+    // },
+    //
+    // userDisconnected(user) {
+    //   console.log(user);
+    // }
+  },
+  methods: {
+    sendMessage() {
+      if (this.isEmptyInputMessage) {
+        return
+      }
+      this.$socket.client.emit('new-message', {
+        message: {
+          text: this.inputMessage,
+        },
+      })
+      this.inputMessage = ''
+    },
+
     scrollDown() {
       const chat = document.getElementById('chat-area')
-      console.log(chat)
-      chat.scrollTop = chat.scrollHeight;
-    }
-
+      chat.scrollTop = chat.scrollHeight
+    },
   },
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .chat {
-  /*float: right;*/
-  padding-right: 50px;
 }
 
 .chat-area {
   display: flex;
   flex-direction: column;
   position: relative;
-  border: 1px solid black;
+  border-radius: 0.2rem;
   min-width: 300px;
   width: 300px;
-  min-height: 800px;
-  height: 800px;
+  min-height: 700px;
+  max-height: 700px;
   overflow-y: auto;
-  /*overflow-x: hidden;*/
+  background-color: #eeeeee;
+  border-bottom: 1px solid #bdbdbd;
 }
-
-
 </style>

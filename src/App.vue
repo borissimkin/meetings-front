@@ -1,25 +1,23 @@
 <template>
-  <div id="app">
-    <router-view></router-view>
-  </div>
+  <v-app>
+    <v-card>
+      <TheHeader />
+    </v-card>
+    <v-main>
+      <router-view />
+    </v-main>
+  </v-app>
 </template>
 
 <script>
-import router from "@/router/router";
+import router from '@/router/router'
+import store from '@/store'
+import TheHeader from '@/components/TheHeader'
 
 export default {
-  router: router,
   name: 'App',
-
+  components: { TheHeader },
+  router: router,
+  store: store,
 }
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-  /*margin-top: 60px;*/
-}
-</style>

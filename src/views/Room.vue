@@ -1,41 +1,81 @@
 <template>
-  <div style="display: flex; justify-content: space-between">
-    <Videos :room-id="id" :user-id="userId"></Videos>
-    <Chat></Chat>
+  <div class='room p-4'>
+    <div>
+
+      <v-tabs v-model='tab'
+              background-color='primary'
+              dark>
+
+        <v-tab>
+          Стримы
+        </v-tab>
+        <v-tab>
+          Доска
+        </v-tab>
+      </v-tabs>
+      <v-tabs-items v-model='tab'>
+        <v-tab-item>
+          <StreamingArea :room-id='id' />
+          <SettingsMediaDevices />
+        </v-tab-item>
+        <v-tab-item :eager='true'>
+          <Whiteboard :height='600' :width='900' style='min-width: 900px; min-height: 600px'></Whiteboard>
+        </v-tab-item>
+      </v-tabs-items>
+    </div>
+    <Chat />
   </div>
 </template>
 
 <script>
-import Chat from "@/components/Chat";
-import Videos from "@/components/Videos";
+import Chat from '@/components/Chat'
+import StreamingArea from '@/components/StreamingArea'
+import SettingsMediaDevices from '@/components/SettingMediaDevices'
+import Whiteboard from '@/components/Whiteboard'
+
 export default {
-  name: "Room",
+  name: 'Room',
   components: {
-    Videos,
+    Whiteboard,
+    SettingsMediaDevices,
+    StreamingArea,
     Chat,
   },
   props: {
     id: {
       type: String,
       required: true,
-      default: ''
+      default: '',
     },
-
   },
   data() {
     return {
-      userId: '' + Math.random(),
-      usersInChatRoom: []
+      usersInChatRoom: [],
+      tab: null,
+    }
+  },
+
+  sockets: {
+    userDisconnected(user) {
+      console.log(`Отключился ${user}`)
     }
   },
 
   mounted() {
-    this.$socket.client.emit('join-room', this.id, this.userId);
+    this.$socket.client.emit('join-room', this.id)
   },
 
+  beforeDestroy() {
+    console.log('destroy')
+    this.$socket.client.emit('leave-room', this.id)
+  },
 }
 </script>
 
 <style scoped>
-
+.room {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
 </style>

@@ -1,4 +1,4 @@
-const Dotenv = require('dotenv-webpack');
+const Dotenv = require('dotenv-webpack')
 const ContextReplacementPlugin = require('webpack').ContextReplacementPlugin
 
 module.exports = {
@@ -6,13 +6,12 @@ module.exports = {
     devtool: 'source-map',
     plugins: [
       new Dotenv(),
-      new ContextReplacementPlugin(
-        /\/package-name\//,
-        (data) => {
-          delete data.dependencies[0].critical;
-          return data;
-        },
-      ),
-    ]
-  }
-};
+      new ContextReplacementPlugin(/\/package-name\//, (data) => {
+        delete data.dependencies[0].critical
+        return data
+      }),
+    ],
+  },
+
+  transpileDependencies: ['vuetify'],
+}

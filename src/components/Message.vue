@@ -1,55 +1,83 @@
 <template>
-  <div class="message m-2 p-2">
+  <div class="message ma-2 pa-2">
+    <div class="message__header">
+      <span class="message-author">
+        {{ name }}
+      </span>
+      <span class="message-created">
+        {{ processedDate }}
+      </span>
+    </div>
     <div class="message-text">
       {{ text }}
     </div>
-<!--    <div class="message__area ">-->
-<!--      <div class="message-text">-->
-<!--        -->
-<!--      </div>-->
-<!--    </div>-->
-    <div class="author">
-      <div class="author-text">
-        {{ author }}
-      </div>
-    </div>
   </div>
-
 </template>
 
 <script>
+import { getFullName } from '@/helpers/username.process'
+import * as dayjs from 'dayjs'
+
 export default {
-  name: "Message",
+  name: 'Message',
   props: {
-    text: String,
-    author: String,
+    text: {
+      required: true,
+      type: String,
+      default: '',
+    },
+    user: {
+      required: true,
+      type: Object,
+      default: () => {},
+    },
+    date: {
+      required: true,
+      type: [String, Date],
+      default: new Date(),
+    },
   },
-  methods: {
+  computed: {
+    name() {
+      return getFullName(this.user.firstName, this.user.lastName)
+    },
 
+    processedDate() {
+      return dayjs(new Date(this.date)).format('HH:mm')
+    },
   },
-
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .message {
-  background-color: cornflowerblue;
   text-align: left;
   border-radius: 0.1rem;
   bottom: 0;
   min-width: 250px;
+  background-color: white;
 
-}
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
 
-.message-text {
-  word-wrap:break-word;
-  color: white;
+  &-text {
+    word-wrap: break-word;
+    font-size: 0.8rem;
+  }
+
+  &-author {
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding-right: 0.5rem;
+  }
+
+  &-created {
+    font-size: 0.75rem;
+  }
 }
 
 .author-text {
-  font-size: 0.75rem;
-  padding-right: 0.5rem;
-
 }
-
 </style>
