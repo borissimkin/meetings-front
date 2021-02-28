@@ -3,11 +3,12 @@ import {
   REMOVE_SPEAKING_USER_ID,
   SET_ENABLED_MICRO,
   SET_ENABLED_VIDEO,
+  SET_PARTICIPANTS,
   SET_USER_STREAM,
   STOP_USER_STREAM,
 } from '@/store/mutations.type'
+import meetingApi from '@/api/meeting.api'
 
-//todo: здесь потом еще будет говорит он или нет
 const meetings = {
   namespaced: true,
   state: {
@@ -15,6 +16,7 @@ const meetings = {
     enabledVideo: true,
     userStream: null,
     speakingUserIds: [],
+    participants: [],
   },
 
   mutations: {
@@ -58,8 +60,17 @@ const meetings = {
         state.speakingUserIds.splice(index, 1)
       }
     },
+
+    [SET_PARTICIPANTS](state, participants) {
+      state.participants = participants
+    },
   },
   actions: {
+    async fetchParticipants({ commit }, payload) {
+      let response = await meetingApi.getPeers(payload.meetingId)
+      commit(SET_PARTICIPANTS, response.data)
+    },
+
     setUserStream({ commit, state }, stream) {
       commit(SET_USER_STREAM, stream)
       commit(SET_ENABLED_MICRO, state.enabledMicro)

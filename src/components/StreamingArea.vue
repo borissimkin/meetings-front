@@ -32,7 +32,6 @@
 <script>
 import Peer from 'peerjs'
 import { getPeerConfig } from '@/peer.server'
-import meetingApi from '@/api/meeting.api'
 import { mapMutations, mapState } from 'vuex'
 import { ADD_SPEAKING_USER_ID, REMOVE_SPEAKING_USER_ID, STOP_USER_STREAM } from '@/store/mutations.type'
 import VideoStreamPlaceholder from '@/components/VideoStreamPlaceholder'
@@ -63,19 +62,17 @@ export default {
   data() {
     return {
       myPeer: new Peer(undefined, getPeerConfig()),
-      peers: [],
       maxCountVideos: 6,
     }
   },
   computed: {
     ...mapState('meeting', {
       myStream: (state) => state.userStream,
+      peers: (state) => state.participants,
       speakingUserIds: (state => state.speakingUserIds)
     }),
   },
-  async mounted() {
-    await this.fetchPeers()
-    console.log({ peers: this.peers })
+  mounted() {
     navigator.mediaDevices
       .getUserMedia({
         video: true,
@@ -169,11 +166,6 @@ export default {
 
     getPeerByPeerId(peerId) {
       return this.peers.find((peer) => peer.peerId === peerId)
-    },
-
-    async fetchPeers() {
-      let response = await meetingApi.getPeers(this.meetingId)
-      this.peers = response.data
     },
 
     connectToNewUser(user, peerId, stream) {

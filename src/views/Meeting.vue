@@ -2,7 +2,7 @@
   <div class='meeting p-4'>
     <div>
       <v-tabs v-model='tab'
-              background-color='primary'
+              background-color='secondary'
               dark>
 
         <v-tab>
@@ -22,7 +22,32 @@
         </v-tab-item>
       </v-tabs-items>
     </div>
-    <Chat />
+    <v-card max-height='600px' max-width='300px' min-height='600px' min-width='300px' flat>
+      <v-tabs
+        class='rounded-0'
+        v-model="tabChat"
+        fixed-tabs
+        dark
+        background-color='secondary'
+      >
+        <v-tab>
+          <v-icon>mdi-message</v-icon>
+        </v-tab>
+
+        <v-tab>
+          <v-icon>mdi-account-group</v-icon>
+        </v-tab>
+      </v-tabs>
+      <v-tabs-items v-model="tabChat">
+        <v-tab-item >
+          <Chat />
+        </v-tab-item>
+        <v-tab-item>
+          <MeetingParticipantsList />
+        </v-tab-item>
+      </v-tabs-items>
+    </v-card>
+
   </div>
 </template>
 
@@ -31,10 +56,12 @@ import Chat from '@/components/Chat'
 import StreamingArea from '@/components/StreamingArea'
 import SettingsMediaDevices from '@/components/SettingMediaDevices'
 import Whiteboard from '@/components/Whiteboard'
+import MeetingParticipantsList from '@/components/MeetingParticipantsList'
 
 export default {
   name: 'Meeting',
   components: {
+    MeetingParticipantsList,
     Whiteboard,
     SettingsMediaDevices,
     StreamingArea,
@@ -55,6 +82,7 @@ export default {
   data() {
     return {
       tab: null,
+      tabChat: null
     }
   },
 
@@ -64,8 +92,11 @@ export default {
     },
   },
 
-  mounted() {
+  async mounted() {
     this.$socket.client.emit('join-meeting', this.meetingId)
+    await this.$store.dispatch(`meeting/fetchParticipants`, {
+      meetingId: this.meetingId
+    })
   },
 
   beforeDestroy() {
@@ -80,4 +111,6 @@ export default {
   justify-content: center;
   flex-wrap: wrap;
 }
+
+
 </style>

@@ -79,13 +79,6 @@ export default {
       })
     },
 
-    // userConnected(user) {
-    //   console.log(user);
-    // },
-    //
-    // userDisconnected(user) {
-    //   console.log(user);
-    // }
   },
   methods: {
     sendMessage() {
@@ -114,13 +107,11 @@ export default {
 
 .chat-area {
   display: flex;
+  height: 600px;
+
   flex-direction: column;
   position: relative;
   border-radius: 0.2rem;
-  min-width: 300px;
-  width: 300px;
-  min-height: 700px;
-  max-height: 700px;
   overflow-y: auto;
   background-color: #eeeeee;
   border-bottom: 1px solid #bdbdbd;
