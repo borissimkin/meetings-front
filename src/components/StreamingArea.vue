@@ -33,7 +33,11 @@
 import Peer from 'peerjs'
 import { getPeerConfig } from '@/peer.server'
 import { mapMutations, mapState } from 'vuex'
-import { ADD_SPEAKING_USER_ID, REMOVE_SPEAKING_USER_ID, STOP_USER_STREAM } from '@/store/mutations.type'
+import {
+  ADD_SPEAKING_USER_ID,
+  REMOVE_SPEAKING_USER_ID,
+  STOP_USER_STREAM,
+} from '@/store/mutations.type'
 import VideoStreamPlaceholder from '@/components/VideoStreamPlaceholder'
 import { getFullName } from '@/helpers/username.process'
 import hark from 'hark'

@@ -4,12 +4,7 @@
     elevation='6'
     fab
     @click='toggleMicrophone'>
-    <template v-if='enabledMicro'>
-      <v-icon color='black' > mdi-microphone</v-icon>
-    </template>
-    <template v-else>
-      <v-icon color='black' > mdi-microphone-off</v-icon>
-    </template>
+      <v-icon>{{enabledMicro ? 'mdi-microphone' : 'mdi-microphone-off'}}</v-icon>
   </v-btn>
 </template>
 
