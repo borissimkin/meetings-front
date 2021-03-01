@@ -1,16 +1,14 @@
 <template>
   <v-container class='participants'>
     <h3 class='heading pa-1'>
-      Участников: {{10}}
+      Участников: {{countParticipants}}
     </h3>
     <v-divider />
     <v-spacer></v-spacer>
-
-    <MeetingParticipantsListItem v-for='i in 10' :key='i' :user='currentUser'></MeetingParticipantsListItem>
-
-
+    <MeetingParticipantsListItem :user='currentUser' />
+    <MeetingParticipantsListItem v-for='participant in participants' :key='participant.user.id'
+                                 :user='participant.user' />
   </v-container>
-
 </template>
 
 <script>
