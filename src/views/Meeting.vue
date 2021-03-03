@@ -44,7 +44,7 @@
           </v-tabs>
           <v-tabs-items v-model="tabChat">
             <v-tab-item >
-              <Chat />
+              <Chat :meeting-id='meetingId' />
             </v-tab-item>
             <v-tab-item>
               <MeetingParticipantsList />

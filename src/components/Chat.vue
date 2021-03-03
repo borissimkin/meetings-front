@@ -24,33 +24,20 @@
 </template>
 <script>
 import Message from './Message'
+import meetingApi from "@/api/meeting.api"
 import { mapState } from 'vuex'
 
 export default {
-  /** todo: может передавать только id?
-   * send message {
-   *   message: {
-   *     text
-   *   }
-   * }
-   *
-   * receive message {
-   *   user {
-   *     id,
-   *     firstName,
-   *     lastName,
-   *   },
-   *   message {
-   *     id
-   *     text,
-   *     date
-   *   }
-   *
-   * }**/
-
   name: 'Chat',
   components: {
     Message,
+  },
+  props: {
+    meetingId: {
+      type: String,
+      required: true,
+      default: ''
+    }
   },
 
   data() {
@@ -80,6 +67,15 @@ export default {
     },
 
   },
+
+  async mounted() {
+    const response = await meetingApi.getMeetingMessages(this.meetingId)
+    this.messages =  response.data
+    this.$nextTick(() => {
+      this.scrollDown()
+    })
+  },
+
   methods: {
     sendMessage() {
       if (this.isEmptyInputMessage) {
@@ -102,8 +98,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.chat {
-}
 
 .chat-area {
   display: flex;

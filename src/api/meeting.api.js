@@ -12,4 +12,8 @@ export default {
   isMeetingExist(roomId, meetingId) {
     return server.get(`/room/${roomId}/meeting/${meetingId}/exists`)
   },
+
+  getMeetingMessages(meetingId) {
+    return server.get(`/meeting/${meetingId}/messages`)
+  },
 }

@@ -41,7 +41,7 @@
           :disabled='!valid'
           color='blue darken-1'
           text
-          @click='dialog = false'
+          @click='createNewRoom'
         >
           Создать
         </v-btn>
@@ -66,6 +66,7 @@ export default {
   },
   methods: {
     async createNewRoom() {
+      console.log('create')
       await this.$store.dispatch('home/addRoom', {
         name: this.nameRoom,
       })

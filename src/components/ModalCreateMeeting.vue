@@ -257,8 +257,6 @@ export default {
   },
   methods: {
     async createMeeting() {
-      console.log('create')
-
       this.loading = true
       try {
         await this.$store.dispatch(`room/${ADD_MEETING}`, {
@@ -272,7 +270,6 @@ export default {
         this.loading = false
         this.dialog = false
       }
-      console.log('create')
     },
 
     allowedStartDates(date) {
