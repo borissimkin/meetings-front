@@ -20,7 +20,7 @@ export default {
   methods: {
     checkListeners() {
       //todo: тоаст
-      this.$emit('check-listeners');
+      this.$socket.client.emit('check-listeners');
     }
   }
 }
