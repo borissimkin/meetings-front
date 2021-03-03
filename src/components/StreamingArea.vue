@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id='video-grid'>
-      <div class='post-1' :class="{'speaking': isSpeaking($store.state.auth.currentUser.id)}">
+      <div :class="{'speaking': isSpeaking($store.state.auth.currentUser.id)}" class='post-1'>
         <template v-if='myStream'>
           <video :srcObject.prop='myStream' autoplay muted></video>
         </template>
@@ -32,10 +32,11 @@
 <script>
 import Peer from 'peerjs'
 import { getPeerConfig } from '@/peer.server'
-import { mapMutations, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import {
   ADD_SPEAKING_USER_ID,
-  REMOVE_SPEAKING_USER_ID,
+  REMOVE_SPEAKING_USER_ID, SET_CALL_TO_PARTICIPANT,
+  SET_STREAM_TO_PARTICIPANT,
   STOP_USER_STREAM,
 } from '@/store/mutations.type'
 import VideoStreamPlaceholder from '@/components/VideoStreamPlaceholder'
@@ -73,8 +74,11 @@ export default {
     ...mapState('meeting', {
       myStream: (state) => state.userStream,
       peers: (state) => state.participants,
-      speakingUserIds: (state => state.speakingUserIds)
+      speakingUserIds: (state => state.speakingUserIds),
     }),
+    ...mapGetters('meeting',
+      ['getParticipantByPeerId']
+    ),
   },
   mounted() {
     navigator.mediaDevices
@@ -88,18 +92,22 @@ export default {
         const speechEvents = hark(this.myStream, {})
         speechEvents.on('speaking', this.speakHandler)
         speechEvents.on('stopped_speaking', this.stopSpeakHandler)
-        //todo: если уже есть в комнате то не давать стрим
 
         this.myPeer.on('call', (call) => {
-          console.log({ call })
           call.answer(this.myStream)
           call.on('stream', (userStream) => {
-            const peer = this.getPeerByPeerId(call.peer)
-            if (peer) {
-              this.$set(peer, 'stream', userStream)
-              this.$set(peer, 'call', call)
+            const participant = this.getParticipantByPeerId(call.peer)
+            if (participant) {
+              this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`, {
+                userId: participant.user.id,
+                stream: userStream
+              })
+              this.$store.commit(`meeting/${SET_CALL_TO_PARTICIPANT}`, {
+                userId: participant.user.id,
+                call
+              })
             } else {
-              console.log(`peer not found ${call.peer}`)
+              console.log(`participant not found ${call.peer}`)
             }
           })
         })
@@ -118,20 +126,6 @@ export default {
   },
 
   sockets: {
-    userDisconnected(user) {
-      //todo: проблема в том что щас один пользователь может создавать кучу стримов (щас неверно закрываются стримы)
-      let indexPeerElement = this.peers.findIndex((peer) => {
-        return peer.user.id === user.id
-      })
-      if (indexPeerElement === -1) {
-        return
-      }
-      const peer = this.peers[indexPeerElement]
-      if (peer.call) {
-        peer.call.close()
-      }
-      this.peers.splice(indexPeerElement, 1)
-    },
     userSpeak(user) {
       this.addSpeakingUserId(user.id)
     },
@@ -168,29 +162,15 @@ export default {
       return index > this.maxCountVideos
     },
 
-    getPeerByPeerId(peerId) {
-      return this.peers.find((peer) => peer.peerId === peerId)
-    },
-
     connectToNewUser(user, peerId, stream) {
-      console.log({user, peerId, stream})
       const call = this.myPeer.call(peerId, stream)
-      const peer = {
-        user,
-        peerId,
-        call,
-      }
       call.on('stream', (userStream) => {
-        this.$set(peer, 'stream', userStream)
+        this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`,
+          {
+            userId: user.id,
+            stream: userStream,
+          })
       })
-
-      call.on('close', () => {
-        console.log('call close')
-        //todo: надо подумать, может быть что когда дисконектед то в обработке сокета уже все делается
-        // this.peers.
-        // video.remove()
-      })
-      this.peers.push(peer)
     },
   },
 }

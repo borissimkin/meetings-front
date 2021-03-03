@@ -63,6 +63,7 @@ import SettingsMediaDevices from '@/components/SettingMediaDevices'
 import Whiteboard from '@/components/Whiteboard'
 import MeetingParticipantsList from '@/components/MeetingParticipantsList'
 import ModalSettingDevices from '@/components/ModalSettingDevices'
+import { ADD_PARTICIPANT, REMOVE_PARTICIPANT } from '@/store/mutations.type'
 
 export default {
   name: 'Meeting',
@@ -95,9 +96,14 @@ export default {
   },
 
   sockets: {
-    userDisconnected(user) {
-      console.log(`Отключился ${user}`)
+    userConnected(user) {
+      this.$store.commit(`meeting/${ADD_PARTICIPANT}`, { user })
     },
+
+    userDisconnected(user) {
+      this.$store.commit(`meeting/${REMOVE_PARTICIPANT}`, user.id)
+    },
+
   },
 
   async mounted() {

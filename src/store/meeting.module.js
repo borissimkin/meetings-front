@@ -1,9 +1,13 @@
 import {
+  ADD_PARTICIPANT,
   ADD_SPEAKING_USER_ID,
+  REMOVE_PARTICIPANT,
   REMOVE_SPEAKING_USER_ID,
+  SET_CALL_TO_PARTICIPANT,
   SET_ENABLED_MICRO,
   SET_ENABLED_VIDEO,
   SET_PARTICIPANTS,
+  SET_STREAM_TO_PARTICIPANT,
   SET_USER_STREAM,
   STOP_USER_STREAM,
 } from '@/store/mutations.type'
@@ -64,6 +68,30 @@ const meetings = {
     [SET_PARTICIPANTS](state, participants) {
       state.participants = participants
     },
+
+    [ADD_PARTICIPANT](state, participant) {
+      state.participants.push(participant)
+    },
+
+    [REMOVE_PARTICIPANT](state, userId) {
+      const indexParticipant = state.participants.findIndex((participant) => {
+        return participant.user.id === userId
+      })
+      state.participants.splice(indexParticipant, 1)
+    },
+
+    [SET_STREAM_TO_PARTICIPANT](state, payload) {
+      const { stream, userId } = { ...payload }
+      console.log(state.participants)
+      const participant = state.participants.find((x) => x.user.id === userId)
+      this._vm.$set(participant, 'stream', stream)
+    },
+
+    [SET_CALL_TO_PARTICIPANT](state, payload) {
+      const { userId, call } = { ...payload }
+      const participant = state.participants.find((x) => x.user.id === userId)
+      this._vm.$set(participant, 'call', call)
+    },
   },
   actions: {
     async fetchParticipants({ commit }, payload) {
@@ -75,6 +103,11 @@ const meetings = {
       commit(SET_USER_STREAM, stream)
       commit(SET_ENABLED_MICRO, state.enabledMicro)
       commit(SET_ENABLED_VIDEO, state.enabledVideo)
+    },
+  },
+  getters: {
+    getParticipantByPeerId: (state) => (peerId) => {
+      return state.participants.find((x) => x.peerId === peerId)
     },
   },
 }
