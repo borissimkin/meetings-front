@@ -16,4 +16,8 @@ export default {
   getMeetingMessages(meetingId) {
     return server.get(`/meeting/${meetingId}/messages`)
   },
+
+  getMeetingInfo(meetingId) {
+    return server.get(`/meeting/${meetingId}`)
+  },
 }

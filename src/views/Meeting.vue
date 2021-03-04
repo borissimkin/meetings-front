@@ -126,9 +126,12 @@ export default {
 
   },
 
-  async mounted() {
+  mounted() {
     this.$socket.client.emit('join-meeting', this.meetingId)
-    await this.$store.dispatch(`meeting/fetchParticipants`, {
+    this.$store.dispatch('meeting/fetchMeetingInfo', {
+      meetingId: this.meetingId
+    })
+    this.$store.dispatch(`meeting/fetchParticipants`, {
       meetingId: this.meetingId
     })
   },

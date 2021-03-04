@@ -3,9 +3,11 @@ import {
   ADD_SPEAKING_USER_ID,
   REMOVE_PARTICIPANT,
   REMOVE_SPEAKING_USER_ID,
+  RESET_STATE,
   SET_CALL_TO_PARTICIPANT,
   SET_ENABLED_MICRO,
   SET_ENABLED_VIDEO,
+  SET_MEETING_INFO,
   SET_PARTICIPANTS,
   SET_STREAM_TO_PARTICIPANT,
   SET_USER_STREAM,
@@ -13,15 +15,32 @@ import {
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
-const meetings = {
-  namespaced: true,
-  state: {
+const getDefaultState = () => {
+  return {
     enabledMicro: true,
     enabledVideo: true,
     userStream: null,
     speakingUserIds: [],
     participants: [],
-  },
+    meetingInfo: {
+      id: 0,
+      creatorId: 0,
+      createdAt: '',
+      endTime: '',
+      hashId: '',
+      isCheckListeners: false,
+      isExam: false,
+      name: '',
+      roomId: 0,
+      startDate: '',
+      startTime: '',
+    },
+  }
+}
+
+const meetings = {
+  namespaced: true,
+  state: getDefaultState(),
 
   mutations: {
     [SET_ENABLED_MICRO](state, value) {
@@ -92,11 +111,24 @@ const meetings = {
       const participant = state.participants.find((x) => x.user.id === userId)
       this._vm.$set(participant, 'call', call)
     },
+
+    [SET_MEETING_INFO](state, meeting) {
+      state.meetingInfo = meeting
+    },
+
+    [RESET_STATE](state) {
+      Object.assign(state, getDefaultState())
+    },
   },
   actions: {
     async fetchParticipants({ commit }, payload) {
       let response = await meetingApi.getPeers(payload.meetingId)
       commit(SET_PARTICIPANTS, response.data)
+    },
+
+    async fetchMeetingInfo({ commit }, payload) {
+      const response = await meetingApi.getMeetingInfo(payload.meetingId)
+      commit(SET_MEETING_INFO, response.data)
     },
 
     setUserStream({ commit, state }, stream) {
