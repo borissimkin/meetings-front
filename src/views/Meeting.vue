@@ -67,7 +67,13 @@ import SettingsMediaDevices from '@/components/SettingMediaDevices'
 import Whiteboard from '@/components/Whiteboard'
 import MeetingParticipantsList from '@/components/MeetingParticipantsList'
 import ModalSettingDevices from '@/components/ModalSettingDevices'
-import { ADD_PARTICIPANT, REMOVE_PARTICIPANT } from '@/store/mutations.type'
+import {
+  ADD_PARTICIPANT,
+  ADD_RAISED_HAND_USER_ID,
+  REMOVE_PARTICIPANT,
+  REMOVE_RAISED_HAND_USER_ID,
+  RESET_STATE,
+} from '@/store/mutations.type'
 import ModalCheckListener from '@/components/ModalCheckListener'
 
 export default {
@@ -122,6 +128,11 @@ export default {
       this.checkpoint.checkListenersWasStarted = true
 
       this.checkpoint.timeoutHandler = setTimeout(this.resetCheckpoint, this.checkpoint.timeout)
+    },
+
+    raisedHand(userId, isRaiseHand) {
+      const mutationType = isRaiseHand ? ADD_RAISED_HAND_USER_ID : REMOVE_RAISED_HAND_USER_ID
+      this.$store.commit(`meeting/${mutationType}`, userId)
     }
 
   },
@@ -134,10 +145,12 @@ export default {
     this.$store.dispatch(`meeting/fetchParticipants`, {
       meetingId: this.meetingId
     })
+    // this.$store.dispatch()
   },
 
   beforeDestroy() {
     this.$socket.client.emit('leave-meeting', this.meetingId)
+    this.$store.commit(`meeting/${RESET_STATE}`)
   },
 
   methods: {

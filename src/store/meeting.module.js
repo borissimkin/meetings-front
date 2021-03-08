@@ -1,7 +1,9 @@
 import {
   ADD_PARTICIPANT,
+  ADD_RAISED_HAND_USER_ID,
   ADD_SPEAKING_USER_ID,
   REMOVE_PARTICIPANT,
+  REMOVE_RAISED_HAND_USER_ID,
   REMOVE_SPEAKING_USER_ID,
   RESET_STATE,
   SET_CALL_TO_PARTICIPANT,
@@ -9,6 +11,7 @@ import {
   SET_ENABLED_VIDEO,
   SET_MEETING_INFO,
   SET_PARTICIPANTS,
+  SET_RAISED_HAND_USER_IDS,
   SET_STREAM_TO_PARTICIPANT,
   SET_USER_STREAM,
   STOP_USER_STREAM,
@@ -21,6 +24,7 @@ const getDefaultState = () => {
     enabledVideo: true,
     userStream: null,
     speakingUserIds: [],
+    raisedHandUserIds: [],
     participants: [],
     meetingInfo: {
       id: 0,
@@ -81,6 +85,21 @@ const meetings = {
       const index = state.speakingUserIds.indexOf(userId)
       if (index > -1) {
         state.speakingUserIds.splice(index, 1)
+      }
+    },
+
+    [SET_RAISED_HAND_USER_IDS](state, userIds) {
+      state.raisedHandUserIds = userIds
+    },
+
+    [ADD_RAISED_HAND_USER_ID](state, userId) {
+      state.raisedHandUserIds.push(userId)
+    },
+
+    [REMOVE_RAISED_HAND_USER_ID](state, userId) {
+      const index = state.raisedHandUserIds.indexOf(userId)
+      if (index > -1) {
+        state.raisedHandUserIds.splice(index, 1)
       }
     },
 

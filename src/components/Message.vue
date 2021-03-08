@@ -43,7 +43,11 @@ export default {
     },
 
     processedDate() {
-      return dayjs(new Date(this.date)).format('HH:mm')
+      const date = dayjs(new Date(this.date))
+      if (date.isSame(dayjs())) {
+        return date.format('YYYY.MM.D HH:mm')
+      }
+      return date.format('HH:mm')
     },
   },
 }

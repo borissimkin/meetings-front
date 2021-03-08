@@ -1,26 +1,28 @@
 <template>
-  <v-card class='pa-1 mt-2 mb-2'  flat>
+  <v-card class='pa-1 mt-2 mb-2' flat>
     <div class='menu'>
       <v-icon>mdi-dots-horizontal</v-icon>
     </div>
     <div class='content px-1'>
       <div class='font-weight-medium'>
-        {{name}}
+        {{ name }}
       </div>
       <div>
         <v-icon color='black' small>mdi-video-off</v-icon>
         <v-icon color='black' small>mdi-microphone-off</v-icon>
-        <v-icon color='orange'>mdi-hand-right</v-icon>
+        <v-icon color='orange' v-show='isRaisedHand'>mdi-hand-right</v-icon>
       </div>
     </div>
-<!--    <div class='px-1 text-caption font-weight-light'>-->
-<!--      {{new Date().toISOString()}}-->
-<!--    </div>-->
+    <!--    <div class='px-1 text-caption font-weight-light'>-->
+    <!--      {{new Date().toISOString()}}-->
+    <!--    </div>-->
   </v-card>
 </template>
 
 <script>
+//todo: решение с такой проверкой на поднятие руки не годится (единый массив), переделать потом
 import { getFullName } from '@/helpers/username.process'
+import { mapState } from 'vuex'
 
 export default {
   name: 'MeetingParticipantsListItem',
@@ -28,14 +30,22 @@ export default {
     user: {
       type: Object,
       required: true,
-      default: () => {}
-    }
+      default: () => {
+      },
+    },
   },
   computed: {
+    ...mapState('meeting', {
+      raisedHandUserIds: (state) => state.raisedHandUserIds,
+    }),
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
-    }
-  }
+    },
+
+    isRaisedHand() {
+      return this.raisedHandUserIds.includes(this.user?.id)
+    },
+  },
 }
 </script>
 
@@ -44,6 +54,7 @@ export default {
   display: flex;
   justify-content: flex-end;
 }
+
 .content {
   display: flex;
   justify-content: space-between;
