@@ -9,19 +9,19 @@
 </template>
 
 <script>
-import { SET_ENABLED_MICRO } from '@/store/mutations.type'
+import { SET_ENABLED_MICRO_OF_CURRENT_USER } from '@/store/mutations.type'
 import { mapState } from 'vuex'
 
 export default {
   name: 'SettingMicrophone',
   computed: {
     ...mapState('meeting', {
-      enabledMicro: (state) => state.enabledMicro,
+      enabledMicro: (state) => state.meetingStateOfCurrentUser.enabledMicro,
     }),
   },
   methods: {
     toggleMicrophone() {
-      this.$store.commit(`meeting/${SET_ENABLED_MICRO}`, !this.enabledMicro)
+      this.$store.commit(`meeting/${SET_ENABLED_MICRO_OF_CURRENT_USER}`, !this.enabledMicro)
     },
   },
 }

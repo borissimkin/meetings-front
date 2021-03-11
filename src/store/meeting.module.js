@@ -1,29 +1,35 @@
 import {
   ADD_PARTICIPANT,
-  ADD_RAISED_HAND_USER_ID,
+  SET_RAISED_HAND_PARTICIPANT,
   ADD_SPEAKING_USER_ID,
   REMOVE_PARTICIPANT,
-  REMOVE_RAISED_HAND_USER_ID,
   REMOVE_SPEAKING_USER_ID,
   RESET_STATE,
   SET_CALL_TO_PARTICIPANT,
-  SET_ENABLED_MICRO,
-  SET_ENABLED_VIDEO,
+  SET_ENABLED_VIDEO_OF_CURRENT_USER,
+  SET_ENABLED_MICRO_OF_CURRENT_USER,
   SET_MEETING_INFO,
   SET_PARTICIPANTS,
-  SET_RAISED_HAND_USER_IDS,
+  SET_PARTICIPANTS_MEETING_STATE,
+  SET_RAISED_HAND_CURRENT_USER,
   SET_STREAM_TO_PARTICIPANT,
   SET_USER_STREAM,
+  ADD_PARTICIPANTS_MEETING_STATE,
   STOP_USER_STREAM,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
 const getDefaultState = () => {
   return {
-    enabledMicro: true,
-    enabledVideo: true,
+    meetingStateOfCurrentUser: {
+      isRaisedHand: false,
+      enabledMicro: false,
+      enabledVideo: false,
+      isSpeaking: false,
+    },
     userStream: null,
-    speakingUserIds: [],
+    participantsMeetingState: {}, // {id: {isSpeaking, isRaisedHand, enabledAudio, enabledVideo}}
+    speakingUserIds: [], //todo
     raisedHandUserIds: [],
     participants: [],
     meetingInfo: {
@@ -47,8 +53,9 @@ const meetings = {
   state: getDefaultState(),
 
   mutations: {
-    [SET_ENABLED_MICRO](state, value) {
-      state.enabledMicro = value
+    //todo: переименовать под карент юзер
+    [SET_ENABLED_MICRO_OF_CURRENT_USER](state, value) {
+      state.meetingStateOfCurrentUser.enabledMicro = value
       if (state.userStream) {
         for (let track of state.userStream.getAudioTracks()) {
           track.enabled = value
@@ -56,8 +63,8 @@ const meetings = {
       }
     },
 
-    [SET_ENABLED_VIDEO](state, value) {
-      state.enabledVideo = value
+    [SET_ENABLED_VIDEO_OF_CURRENT_USER](state, value) {
+      state.meetingStateOfCurrentUser.enabledVideo = value
       if (state.userStream) {
         for (let track of state.userStream.getVideoTracks()) {
           track.enabled = value
@@ -88,19 +95,13 @@ const meetings = {
       }
     },
 
-    [SET_RAISED_HAND_USER_IDS](state, userIds) {
-      state.raisedHandUserIds = userIds
+    [SET_RAISED_HAND_CURRENT_USER](state, value) {
+      state.meetingStateOfCurrentUser.isRaisedHand = value
     },
 
-    [ADD_RAISED_HAND_USER_ID](state, userId) {
-      state.raisedHandUserIds.push(userId)
-    },
-
-    [REMOVE_RAISED_HAND_USER_ID](state, userId) {
-      const index = state.raisedHandUserIds.indexOf(userId)
-      if (index > -1) {
-        state.raisedHandUserIds.splice(index, 1)
-      }
+    [SET_RAISED_HAND_PARTICIPANT](state, payload) {
+      const {userId, isRaisedHand} = {...payload}
+      state.participantsMeetingState[userId].isRaisedHand = isRaisedHand
     },
 
     [SET_PARTICIPANTS](state, participants) {
@@ -138,6 +139,17 @@ const meetings = {
     [RESET_STATE](state) {
       Object.assign(state, getDefaultState())
     },
+
+    [SET_PARTICIPANTS_MEETING_STATE](state, payload) {
+      state.participantsMeetingState = payload
+    },
+
+    [ADD_PARTICIPANTS_MEETING_STATE](state, payload) {
+      const {userId, meetingState} = {...payload}
+      console.log(state.participantsMeetingState[userId])
+      this._vm.$set(state.participantsMeetingState, userId, meetingState)
+
+    },
   },
   actions: {
     async fetchParticipants({ commit }, payload) {
@@ -150,10 +162,27 @@ const meetings = {
       commit(SET_MEETING_INFO, response.data)
     },
 
+    //todo
+    fetchParticipantsMeetingState({ commit, state }, payload) {
+      //todo: fetch
+      console.log(payload)
+      const participantsMeetingState = {}
+      state.participants.forEach((participant) => {
+        participantsMeetingState[participant.user.id] = {
+          isSpeaking: false,
+          isRaisedHand: false,
+          enabledAudio: false,
+          enabledVideo: false,
+        }
+      })
+      console.log(participantsMeetingState)
+      commit(SET_PARTICIPANTS_MEETING_STATE, participantsMeetingState)
+    },
+
     setUserStream({ commit, state }, stream) {
       commit(SET_USER_STREAM, stream)
-      commit(SET_ENABLED_MICRO, state.enabledMicro)
-      commit(SET_ENABLED_VIDEO, state.enabledVideo)
+      commit(SET_ENABLED_MICRO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledMicro)
+      commit(SET_ENABLED_VIDEO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledVideo)
     },
   },
   getters: {

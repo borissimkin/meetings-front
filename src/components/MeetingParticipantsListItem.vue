@@ -10,7 +10,7 @@
       <div>
         <v-icon color='black' small>mdi-video-off</v-icon>
         <v-icon color='black' small>mdi-microphone-off</v-icon>
-        <v-icon color='orange' v-show='isRaisedHand'>mdi-hand-right</v-icon>
+        <v-icon v-show='isRaisedHand' color='orange'>mdi-hand-right</v-icon>
       </div>
     </div>
     <!--    <div class='px-1 text-caption font-weight-light'>-->
@@ -20,9 +20,7 @@
 </template>
 
 <script>
-//todo: решение с такой проверкой на поднятие руки не годится (единый массив), переделать потом
 import { getFullName } from '@/helpers/username.process'
-import { mapState } from 'vuex'
 
 export default {
   name: 'MeetingParticipantsListItem',
@@ -33,17 +31,20 @@ export default {
       default: () => {
       },
     },
+    participantState: {
+      type: Object,
+      required: true,
+      default: () => {
+      },
+    },
   },
   computed: {
-    ...mapState('meeting', {
-      raisedHandUserIds: (state) => state.raisedHandUserIds,
-    }),
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
     },
 
     isRaisedHand() {
-      return this.raisedHandUserIds.includes(this.user?.id)
+      return this.participantState?.isRaisedHand
     },
   },
 }

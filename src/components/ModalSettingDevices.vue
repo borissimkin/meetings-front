@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { SET_ENABLED_MICRO, SET_ENABLED_VIDEO } from '@/store/mutations.type'
+import { SET_ENABLED_MICRO_OF_CURRENT_USER, SET_ENABLED_VIDEO_OF_CURRENT_USER } from '@/store/mutations.type'
 
 export default {
   name: 'ModalSettingDevices',
@@ -55,8 +55,8 @@ export default {
   },
   methods: {
     handlePassSettings() {
-      this.$store.commit(`meeting/${SET_ENABLED_VIDEO}`, this.form.onVideo)
-      this.$store.commit(`meeting/${SET_ENABLED_MICRO}`, this.form.onMicrophone)
+      this.$store.commit(`meeting/${SET_ENABLED_VIDEO_OF_CURRENT_USER}`, this.form.onVideo)
+      this.$store.commit(`meeting/${SET_ENABLED_MICRO_OF_CURRENT_USER}`, this.form.onMicrophone)
       this.dialog = false
       this.$emit('setting-pass')
     }

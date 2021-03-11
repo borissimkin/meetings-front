@@ -5,8 +5,11 @@
     </h3>
     <v-divider />
     <v-spacer></v-spacer>
-    <MeetingParticipantsListItem :user='currentUser' />
-    <MeetingParticipantsListItem v-for='participant in participants' :key='participant.user.id'
+    <MeetingParticipantsListItem :user='currentUser'
+                                 :participantState='meetingStateOfCurrentUser' />
+    <MeetingParticipantsListItem v-for='participant in participants'
+                                 :key='participant.user.id'
+                                 :participantState='participantsMeetingState[participant.user.id]'
                                  :user='participant.user' />
   </v-container>
 </template>
@@ -23,12 +26,15 @@ export default {
       currentUser: (state) => state.currentUser,
     }),
     ...mapState("meeting", {
-      participants: (state) => state.participants
+      participants: (state) => state.participants,
+      participantsMeetingState: (state) => state.participantsMeetingState,
+      meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
     }),
 
     countParticipants() {
       return this.participants.length + 1
-    }
+    },
+
   }
 }
 </script>

@@ -9,18 +9,18 @@
 </template>
 
 <script>
-import { SET_ENABLED_VIDEO } from '@/store/mutations.type'
+import { SET_ENABLED_VIDEO_OF_CURRENT_USER } from '@/store/mutations.type'
 import { mapState } from 'vuex'
 export default {
   name: 'SettingVideo',
   computed: {
     ...mapState('meeting', {
-      enabledVideo: (state) => state.enabledVideo,
+      enabledVideo: (state) => state.meetingStateOfCurrentUser.enabledVideo,
     }),
   },
   methods: {
     toggleVideo() {
-      this.$store.commit(`meeting/${SET_ENABLED_VIDEO}`, !this.enabledVideo)
+      this.$store.commit(`meeting/${SET_ENABLED_VIDEO_OF_CURRENT_USER}`, !this.enabledVideo)
     },
   },
 }

@@ -11,31 +11,32 @@
 
 <script>
 import { mapState } from 'vuex'
-import { ADD_RAISED_HAND_USER_ID, REMOVE_RAISED_HAND_USER_ID } from '@/store/mutations.type'
+import { SET_RAISED_HAND_CURRENT_USER } from '@/store/mutations.type'
 
 export default {
   name: 'ButtonRaiseHand',
   computed: {
     ...mapState('meeting', {
-      raisedHandUserIds: (state) => state.raisedHandUserIds,
+      meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
     }),
-    isRaiseHand() {
-      return this.raisedHandUserIds.includes(this.$store.state.auth.currentUser.id)
+
+    isRaisedHand() {
+      return this.meetingStateOfCurrentUser.isRaisedHand
     },
 
     colorIconHand() {
-      return this.isRaiseHand ? 'orange' : 'black'
+      return this.isRaisedHand ? 'orange' : 'black'
     },
 
     title() {
-      return this.isRaiseHand ? 'Опустить руку' : 'Поднять руку'
+      return this.isRaisedHand ? 'Опустить руку' : 'Поднять руку'
     }
   },
   methods: {
     toggleRaiseHand() {
-      this.$socket.client.emit('raise-hand', !this.isRaiseHand)
-      const mutationType = this.isRaiseHand ? REMOVE_RAISED_HAND_USER_ID : ADD_RAISED_HAND_USER_ID
-      this.$store.commit(`meeting/${mutationType}`, this.$store.state.auth.currentUser.id)
+      const value = !this.isRaisedHand
+      this.$socket.client.emit('raise-hand', value)
+      this.$store.commit(`meeting/${SET_RAISED_HAND_CURRENT_USER}`, value)
     }
   }
 }
