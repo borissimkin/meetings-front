@@ -20,7 +20,9 @@ export default {
   },
   methods: {
     toggleVideo() {
-      this.$store.commit(`meeting/${SET_ENABLED_VIDEO_OF_CURRENT_USER}`, !this.enabledVideo)
+      const value = !this.enabledVideo
+      this.$socket.client.emit('toggle-video', value)
+      this.$store.commit(`meeting/${SET_ENABLED_VIDEO_OF_CURRENT_USER}`, value)
     },
   },
 }

@@ -25,3 +25,5 @@ export const SET_PARTICIPANTS_MEETING_STATE = 'setParticipantsMeetingState'
 export const ADD_PARTICIPANTS_MEETING_STATE = 'addParticipantsMeetingState'
 export const REMOVE_PARTICIPANTS_MEETING_STATE =
   'removeParticipantsMeetingState'
+export const SET_ENABLED_AUDIO_PARTICIPANT = 'setEnabledAudioParticipant'
+export const SET_ENABLED_VIDEO_PARTICIPANT = 'setEnabledVideoParticipant'

@@ -19,9 +19,11 @@ export default {
   },
   methods: {
     toggleAudio() {
+      const value = !this.enabledAudio
+      this.$socket.client.emit('toggle-audio', value)
       this.$store.commit(
         `meeting/${SET_ENABLED_AUDIO_OF_CURRENT_USER}`,
-        !this.enabledAudio
+        value
       )
     },
   },

@@ -79,7 +79,7 @@ import {
   SET_RAISED_HAND_PARTICIPANT,
   REMOVE_PARTICIPANT,
   RESET_STATE,
-  REMOVE_PARTICIPANTS_MEETING_STATE,
+  REMOVE_PARTICIPANTS_MEETING_STATE, SET_ENABLED_AUDIO_PARTICIPANT, SET_ENABLED_VIDEO_PARTICIPANT,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/ModalCheckListener'
 import { mapState } from 'vuex'
@@ -136,7 +136,6 @@ export default {
         userId: user.id,
         meetingState: {
           isRaisedHand: false,
-          isSpeaking: false,
           enabledVideo,
           enabledAudio,
         }
@@ -162,6 +161,20 @@ export default {
       this.$store.commit(`meeting/${SET_RAISED_HAND_PARTICIPANT}`, {
         userId,
         isRaisedHand,
+      })
+    },
+
+    toggleAudio(userId, enabledAudio) {
+      this.$store.commit(`meeting/${SET_ENABLED_AUDIO_PARTICIPANT}`, {
+        userId,
+        enabledAudio,
+      })
+    },
+
+    toggleVideo(userId, enabledVideo) {
+      this.$store.commit(`meeting/${SET_ENABLED_VIDEO_PARTICIPANT}`, {
+        userId,
+        enabledVideo,
       })
     },
   },

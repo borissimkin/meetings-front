@@ -17,6 +17,8 @@ import {
   SET_USER_STREAM,
   ADD_PARTICIPANTS_MEETING_STATE,
   STOP_USER_STREAM,
+  SET_ENABLED_VIDEO_PARTICIPANT,
+  SET_ENABLED_AUDIO_PARTICIPANT,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
@@ -101,6 +103,16 @@ const meetings = {
     [SET_RAISED_HAND_PARTICIPANT](state, payload) {
       const { userId, isRaisedHand } = { ...payload }
       state.participantsMeetingState[userId].isRaisedHand = isRaisedHand
+    },
+
+    [SET_ENABLED_AUDIO_PARTICIPANT](state, payload) {
+      const { userId, enabledAudio } = { ...payload }
+      state.participantsMeetingState[userId].enabledAudio = enabledAudio
+    },
+
+    [SET_ENABLED_VIDEO_PARTICIPANT](state, payload) {
+      const { userId, enabledVideo } = { ...payload }
+      state.participantsMeetingState[userId].enabledVideo = enabledVideo
     },
 
     [SET_PARTICIPANTS](state, participants) {
