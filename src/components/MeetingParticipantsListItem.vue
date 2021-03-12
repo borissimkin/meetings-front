@@ -8,8 +8,8 @@
         {{ name }}
       </div>
       <div>
-        <v-icon color='black' small>mdi-video-off</v-icon>
-        <v-icon color='black' small>mdi-microphone-off</v-icon>
+        <v-icon color='black' small>{{ isEnabledVideo ? `mdi-video` : `mdi-video-off`}}</v-icon>
+        <v-icon color='black' small>{{ isEnabledAudio ? `mdi-microphone` : `mdi-microphone-off`}}</v-icon>
         <v-icon v-show='isRaisedHand' color='orange'>mdi-hand-right</v-icon>
       </div>
     </div>
@@ -46,6 +46,14 @@ export default {
     isRaisedHand() {
       return this.participantState?.isRaisedHand
     },
+
+    isEnabledVideo() {
+      return this.participantState?.enabledVideo
+    },
+
+    isEnabledAudio() {
+      return this.participantState?.enabledAudio
+    }
   },
 }
 </script>

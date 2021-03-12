@@ -79,8 +79,10 @@ import {
   SET_RAISED_HAND_PARTICIPANT,
   REMOVE_PARTICIPANT,
   RESET_STATE,
+  REMOVE_PARTICIPANTS_MEETING_STATE,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/ModalCheckListener'
+import { mapState } from 'vuex'
 
 export default {
   name: 'Meeting',
@@ -120,24 +122,30 @@ export default {
     }
   },
 
+  computed: {
+    ...mapState('meeting', {
+      meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser
+    })
+  },
+
   sockets: {
-    userConnected(user) {
+    userConnected(user, userSettingDevices) {
       this.$store.commit(`meeting/${ADD_PARTICIPANT}`, { user })
-      //todo: сделать чтобы с сервака приходило
+      const {enabledVideo, enabledAudio} = {...userSettingDevices}
       this.$store.commit(`meeting/${ADD_PARTICIPANTS_MEETING_STATE}`, {
         userId: user.id,
         meetingState: {
           isRaisedHand: false,
           isSpeaking: false, 
-          enabledAudio: false,
-          enabledVideo: false,
-          //todo
+          enabledVideo,
+          enabledAudio,
         }
       })
     },
 
     userDisconnected(user) {
       this.$store.commit(`meeting/${REMOVE_PARTICIPANT}`, user.id)
+      this.$store.commit(`meeting/${REMOVE_PARTICIPANTS_MEETING_STATE}`, user.id)
     },
 
     checkListeners(checkpoint) {
@@ -168,16 +176,21 @@ export default {
   methods: {
     async confirmSettingDevices() {
       this.isPassedSettingMeeting = true
-      this.$socket.client.emit('join-meeting', this.meetingId)
+      const meetingId = this.meetingId
+      const settingDevices = {
+        enabledVideo: this.meetingStateOfCurrentUser.enabledVideo,
+        enabledAudio: this.meetingStateOfCurrentUser.enabledAudio
+      }
+      this.$socket.client.emit('join-meeting', meetingId, settingDevices)
       this.$store.dispatch('meeting/fetchMeetingInfo', {
-        meetingId: this.meetingId,
+        meetingId
       })
       await this.$store.dispatch(`meeting/fetchParticipants`, {
-        meetingId: this.meetingId,
+        meetingId,
       })
       //todo: фетчить состояния, пока что костыль
       this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
-        meetingId: this.meetingId,
+        meetingId,
       })
     },
 

@@ -1,4 +1,5 @@
 import {
+  REMOVE_PARTICIPANTS_MEETING_STATE,
   ADD_PARTICIPANT,
   SET_RAISED_HAND_PARTICIPANT,
   ADD_SPEAKING_USER_ID,
@@ -7,7 +8,7 @@ import {
   RESET_STATE,
   SET_CALL_TO_PARTICIPANT,
   SET_ENABLED_VIDEO_OF_CURRENT_USER,
-  SET_ENABLED_MICRO_OF_CURRENT_USER,
+  SET_ENABLED_AUDIO_OF_CURRENT_USER,
   SET_MEETING_INFO,
   SET_PARTICIPANTS,
   SET_PARTICIPANTS_MEETING_STATE,
@@ -23,12 +24,12 @@ const getDefaultState = () => {
   return {
     meetingStateOfCurrentUser: {
       isRaisedHand: false,
-      enabledMicro: false,
+      enabledAudio: false,
       enabledVideo: false,
       isSpeaking: false,
     },
     userStream: null,
-    participantsMeetingState: {}, // {id: {isSpeaking, isRaisedHand, enabledAudio, enabledVideo}}
+    participantsMeetingState: {}, // {userId: {isSpeaking, isRaisedHand, enabledAudio, enabledVideo}}
     speakingUserIds: [], //todo
     raisedHandUserIds: [],
     participants: [],
@@ -53,9 +54,8 @@ const meetings = {
   state: getDefaultState(),
 
   mutations: {
-    //todo: переименовать под карент юзер
-    [SET_ENABLED_MICRO_OF_CURRENT_USER](state, value) {
-      state.meetingStateOfCurrentUser.enabledMicro = value
+    [SET_ENABLED_AUDIO_OF_CURRENT_USER](state, value) {
+      state.meetingStateOfCurrentUser.enabledAudio = value
       if (state.userStream) {
         for (let track of state.userStream.getAudioTracks()) {
           track.enabled = value
@@ -150,6 +150,10 @@ const meetings = {
       this._vm.$set(state.participantsMeetingState, userId, meetingState)
 
     },
+
+    [REMOVE_PARTICIPANTS_MEETING_STATE](state, userId) {
+      this._vm.$delete(state.participantsMeetingState, userId)
+    }
   },
   actions: {
     async fetchParticipants({ commit }, payload) {
@@ -181,7 +185,7 @@ const meetings = {
 
     setUserStream({ commit, state }, stream) {
       commit(SET_USER_STREAM, stream)
-      commit(SET_ENABLED_MICRO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledMicro)
+      commit(SET_ENABLED_AUDIO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledAudio)
       commit(SET_ENABLED_VIDEO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledVideo)
     },
   },
