@@ -1,7 +1,7 @@
 <template>
   <div>
     <div id='video-grid'>
-      <div :class="{'speaking': isSpeaking($store.state.auth.currentUser.id)}" class='post-1'>
+      <div :class="{'speaking': isSpeakingCurrentUser}" class='post-1'>
         <template v-if='myStream'>
           <video :srcObject.prop='myStream' autoplay muted></video>
         </template>
@@ -34,8 +34,8 @@ import Peer from 'peerjs'
 import { getPeerConfig } from '@/peer.server'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import {
-  ADD_SPEAKING_USER_ID,
-  REMOVE_SPEAKING_USER_ID, SET_CALL_TO_PARTICIPANT,
+  SET_IS_SPEAKING_CURRENT_USER,
+  SET_IS_SPEAKING_PARTICIPANT, SET_CALL_TO_PARTICIPANT,
   SET_STREAM_TO_PARTICIPANT,
   STOP_USER_STREAM,
 } from '@/store/mutations.type'
@@ -74,7 +74,8 @@ export default {
     ...mapState('meeting', {
       myStream: (state) => state.userStream,
       peers: (state) => state.participants,
-      speakingUserIds: (state => state.speakingUserIds),
+      isSpeakingCurrentUser: (state) => state.meetingStateOfCurrentUser.isSpeaking,
+      participantsMeetingState: (state) => state.participantsMeetingState
     }),
     ...mapGetters('meeting',
       ['getParticipantByPeerId']
@@ -127,21 +128,29 @@ export default {
 
   sockets: {
     userSpeak(user) {
-      this.addSpeakingUserId(user.id)
+      const payload = {
+        userId: user.id,
+        isSpeaking: true
+      }
+      this.setIsSpeakingParticipant(payload)
     },
 
     userStopSpeak(user) {
-      this.removeSpeakingUserId(user.id)
+      const payload = {
+        userId: user.id,
+        isSpeaking: false
+      }
+      this.setIsSpeakingParticipant(payload)
     },
   },
 
   methods: {
     ...mapMutations('meeting', {
-      addSpeakingUserId: ADD_SPEAKING_USER_ID,
-      removeSpeakingUserId: REMOVE_SPEAKING_USER_ID,
+      setIsSpeakingCurrentUser: SET_IS_SPEAKING_CURRENT_USER,
+      setIsSpeakingParticipant: SET_IS_SPEAKING_PARTICIPANT,
     }),
-    isSpeaking(userId) {
-      return this.speakingUserIds.includes(userId)
+    participantIsSpeaking(userId) {
+      return this.participantsMeetingState[userId]?.isSpeaking
 
     },
     getName(user) {
@@ -149,12 +158,12 @@ export default {
     },
 
     speakHandler() {
-      this.addSpeakingUserId(this.$store.state.auth.currentUser.id)
+      this.setIsSpeakingCurrentUser(true)
       this.$socket.client.emit('user-speak')
     },
 
     stopSpeakHandler() {
-      this.removeSpeakingUserId(this.$store.state.auth.currentUser.id)
+      this.setIsSpeakingCurrentUser(false)
       this.$socket.client.emit('user-stop-speak')
     },
 

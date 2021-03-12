@@ -1,7 +1,7 @@
 <template>
   <div>
     <template v-if="!isPassedSettingMeeting">
-      <ModalSettingDevices @setting-pass="confirmSettingDevices" />
+      <ModalSettingDevices @setting-pass="handleConfirmSettingDevices" />
     </template>
     <template v-else>
       <div class="meeting p-4">
@@ -174,7 +174,7 @@ export default {
   },
 
   methods: {
-    async confirmSettingDevices() {
+    async handleConfirmSettingDevices() {
       this.isPassedSettingMeeting = true
       const meetingId = this.meetingId
       const settingDevices = {

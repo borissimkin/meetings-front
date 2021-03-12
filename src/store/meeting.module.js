@@ -2,9 +2,9 @@ import {
   REMOVE_PARTICIPANTS_MEETING_STATE,
   ADD_PARTICIPANT,
   SET_RAISED_HAND_PARTICIPANT,
-  ADD_SPEAKING_USER_ID,
+  SET_IS_SPEAKING_CURRENT_USER,
   REMOVE_PARTICIPANT,
-  REMOVE_SPEAKING_USER_ID,
+  SET_IS_SPEAKING_PARTICIPANT,
   RESET_STATE,
   SET_CALL_TO_PARTICIPANT,
   SET_ENABLED_VIDEO_OF_CURRENT_USER,
@@ -30,8 +30,6 @@ const getDefaultState = () => {
     },
     userStream: null,
     participantsMeetingState: {}, // {userId: {isSpeaking, isRaisedHand, enabledAudio, enabledVideo}}
-    speakingUserIds: [], //todo
-    raisedHandUserIds: [],
     participants: [],
     meetingInfo: {
       id: 0,
@@ -77,6 +75,9 @@ const meetings = {
     },
 
     [STOP_USER_STREAM](state) {
+      if (!state.userStream) {
+        return
+      }
       state.userStream.getTracks().forEach(function (track) {
         if (track.readyState === 'live') {
           track.stop()
@@ -84,15 +85,14 @@ const meetings = {
       })
     },
 
-    [ADD_SPEAKING_USER_ID](state, userId) {
-      state.speakingUserIds.push(userId)
+    [SET_IS_SPEAKING_CURRENT_USER](state, value) {
+      state.meetingStateOfCurrentUser.isSpeaking = value
+
     },
 
-    [REMOVE_SPEAKING_USER_ID](state, userId) {
-      const index = state.speakingUserIds.indexOf(userId)
-      if (index > -1) {
-        state.speakingUserIds.splice(index, 1)
-      }
+    [SET_IS_SPEAKING_PARTICIPANT](state, payload) {
+      const {userId, isSpeaking} = {...payload}
+      state.participantsMeetingState[userId].isSpeaking = isSpeaking
     },
 
     [SET_RAISED_HAND_CURRENT_USER](state, value) {
