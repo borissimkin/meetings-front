@@ -87,11 +87,10 @@ const meetings = {
 
     [SET_IS_SPEAKING_CURRENT_USER](state, value) {
       state.meetingStateOfCurrentUser.isSpeaking = value
-
     },
 
     [SET_IS_SPEAKING_PARTICIPANT](state, payload) {
-      const {userId, isSpeaking} = {...payload}
+      const { userId, isSpeaking } = { ...payload }
       state.participantsMeetingState[userId].isSpeaking = isSpeaking
     },
 
@@ -100,7 +99,7 @@ const meetings = {
     },
 
     [SET_RAISED_HAND_PARTICIPANT](state, payload) {
-      const {userId, isRaisedHand} = {...payload}
+      const { userId, isRaisedHand } = { ...payload }
       state.participantsMeetingState[userId].isRaisedHand = isRaisedHand
     },
 
@@ -121,7 +120,6 @@ const meetings = {
 
     [SET_STREAM_TO_PARTICIPANT](state, payload) {
       const { stream, userId } = { ...payload }
-      console.log(state.participants)
       const participant = state.participants.find((x) => x.user.id === userId)
       this._vm.$set(participant, 'stream', stream)
     },
@@ -141,19 +139,21 @@ const meetings = {
     },
 
     [SET_PARTICIPANTS_MEETING_STATE](state, payload) {
+      Object.entries(payload).forEach(
+        ([key]) => (payload[key].isSpeaking = false)
+      )
       state.participantsMeetingState = payload
     },
 
     [ADD_PARTICIPANTS_MEETING_STATE](state, payload) {
-      const {userId, meetingState} = {...payload}
-      console.log(state.participantsMeetingState[userId])
+      const { userId, meetingState } = { ...payload }
+      meetingState.isSpeaking = false
       this._vm.$set(state.participantsMeetingState, userId, meetingState)
-
     },
 
     [REMOVE_PARTICIPANTS_MEETING_STATE](state, userId) {
       this._vm.$delete(state.participantsMeetingState, userId)
-    }
+    },
   },
   actions: {
     async fetchParticipants({ commit }, payload) {
@@ -166,27 +166,24 @@ const meetings = {
       commit(SET_MEETING_INFO, response.data)
     },
 
-    //todo
-    fetchParticipantsMeetingState({ commit, state }, payload) {
-      //todo: fetch
-      console.log(payload)
-      const participantsMeetingState = {}
-      state.participants.forEach((participant) => {
-        participantsMeetingState[participant.user.id] = {
-          isSpeaking: false,
-          isRaisedHand: false,
-          enabledAudio: false,
-          enabledVideo: false,
-        }
-      })
-      console.log(participantsMeetingState)
+    async fetchParticipantsMeetingState({ commit }, payload) {
+      const response = await meetingApi.getParticipantsMeetingState(
+        payload.meetingId
+      )
+      const participantsMeetingState = response.data
       commit(SET_PARTICIPANTS_MEETING_STATE, participantsMeetingState)
     },
 
     setUserStream({ commit, state }, stream) {
       commit(SET_USER_STREAM, stream)
-      commit(SET_ENABLED_AUDIO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledAudio)
-      commit(SET_ENABLED_VIDEO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledVideo)
+      commit(
+        SET_ENABLED_AUDIO_OF_CURRENT_USER,
+        state.meetingStateOfCurrentUser.enabledAudio
+      )
+      commit(
+        SET_ENABLED_VIDEO_OF_CURRENT_USER,
+        state.meetingStateOfCurrentUser.enabledVideo
+      )
     },
   },
   getters: {

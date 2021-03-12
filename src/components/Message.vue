@@ -16,7 +16,7 @@
 
 <script>
 import { getFullName } from '@/helpers/username.process'
-import * as dayjs from 'dayjs'
+import dayjs from 'dayjs'
 
 export default {
   name: 'Message',
@@ -44,8 +44,8 @@ export default {
 
     processedDate() {
       const date = dayjs(new Date(this.date))
-      if (date.isSame(dayjs())) {
-        return date.format('YYYY.MM.D HH:mm')
+      if (!date.isSame(dayjs(), "days")) {
+        return date.format('YYYY.MM.DD HH:mm')
       }
       return date.format('HH:mm')
     },

@@ -20,4 +20,8 @@ export default {
   getMeetingInfo(meetingId) {
     return server.get(`/meeting/${meetingId}`)
   },
+
+  getParticipantsMeetingState(meetingId) {
+    return server.get(`/meeting/${meetingId}/states-participants`)
+  }
 }

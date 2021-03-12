@@ -12,7 +12,7 @@
       </div>
       <div v-for='(peer, index) in peers' :key='`${peer.peerId}-${peer.user.id}`'
            :class="{'hidden-stream': isHiddenStream(index),
-                    'speaking': isSpeaking(peer.user.id)}"
+                    'speaking': participantIsSpeaking(peer.user.id)}"
            class='video-stream'>
         <template v-if='peer.stream'>
           <video

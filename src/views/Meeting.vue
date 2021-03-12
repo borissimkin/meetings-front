@@ -136,7 +136,7 @@ export default {
         userId: user.id,
         meetingState: {
           isRaisedHand: false,
-          isSpeaking: false, 
+          isSpeaking: false,
           enabledVideo,
           enabledAudio,
         }
@@ -174,7 +174,7 @@ export default {
   },
 
   methods: {
-    async handleConfirmSettingDevices() {
+    handleConfirmSettingDevices() {
       this.isPassedSettingMeeting = true
       const meetingId = this.meetingId
       const settingDevices = {
@@ -182,15 +182,19 @@ export default {
         enabledAudio: this.meetingStateOfCurrentUser.enabledAudio
       }
       this.$socket.client.emit('join-meeting', meetingId, settingDevices)
-      this.$store.dispatch('meeting/fetchMeetingInfo', {
-        meetingId
-      })
-      await this.$store.dispatch(`meeting/fetchParticipants`, {
-        meetingId,
-      })
-      //todo: фетчить состояния, пока что костыль
-      this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
-        meetingId,
+      Promise.all([
+        this.$store.dispatch('meeting/fetchMeetingInfo', {
+          meetingId
+        }),
+        this.$store.dispatch(`meeting/fetchParticipants`, {
+          meetingId,
+        }),
+        this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
+          meetingId,
+        })
+      ]).catch(error => {
+        //todo: тоаст
+        console.log(error)
       })
     },
 
