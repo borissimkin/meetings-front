@@ -1,29 +1,29 @@
 <template>
   <div>
     <div id='video-grid'>
-      <div :class="{'speaking': isSpeakingCurrentUser}" class='post-1'>
-        <template v-if='myStream'>
-          <video :srcObject.prop='myStream' autoplay muted></video>
+      <div :class="{'speaking': meetingStateOfCurrentUser.isSpeaking}" class='post-1'>
+        <template v-if='isShowStreamCurrentUser'>
+          <video :srcObject.prop='streamCurrentUser' autoplay muted></video>
         </template>
         <template v-else>
-          <VideoStreamPlaceholder :user='$store.state.auth.currentUser'></VideoStreamPlaceholder>
+          <VideoStreamPlaceholder :user='currentUser'></VideoStreamPlaceholder>
         </template>
-        <span class='stream-name'>{{ getName($store.state.auth.currentUser) }}</span>
+        <span class='stream-name'>{{ getName(currentUser) }}</span>
       </div>
       <div v-for='(peer, index) in peers' :key='`${peer.peerId}-${peer.user.id}`'
            :class="{'hidden-stream': isHiddenStream(index),
                     'speaking': participantIsSpeaking(peer.user.id)}"
            class='video-stream'>
-        <template v-if='peer.stream'>
+        <template v-if='isShowStreamParticipant(peer.stream, peer.user.id)'>
           <video
             :srcObject.prop='peer.stream'
             autoplay>
           </video>
-          <span class='stream-name'>{{ getName(peer.user) }}</span>
         </template>
         <template v-else>
           <VideoStreamPlaceholder :user='peer.user'></VideoStreamPlaceholder>
         </template>
+        <span class='stream-name'>{{ getName(peer.user) }}</span>
       </div>
     </div>
   </div>
@@ -42,7 +42,7 @@ import {
 import VideoStreamPlaceholder from '@/components/VideoStreamPlaceholder'
 import { getFullName } from '@/helpers/username.process'
 import hark from 'hark'
-
+//todo: все таки вынести видео в отдельные компоненты
 /**
  * peer {
  *   user: {
@@ -72,14 +72,23 @@ export default {
   },
   computed: {
     ...mapState('meeting', {
-      myStream: (state) => state.userStream,
+      streamCurrentUser: (state) => state.userStream,
       peers: (state) => state.participants,
-      isSpeakingCurrentUser: (state) => state.meetingStateOfCurrentUser.isSpeaking,
+      meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
       participantsMeetingState: (state) => state.participantsMeetingState
     }),
+    ...mapState('auth', {
+      currentUser: state => state.currentUser
+    }),
+
     ...mapGetters('meeting',
       ['getParticipantByPeerId']
     ),
+
+    isShowStreamCurrentUser() {
+      return this.streamCurrentUser && this.meetingStateOfCurrentUser.enabledVideo
+
+    }
   },
   mounted() {
     navigator.mediaDevices
@@ -90,12 +99,12 @@ export default {
       .then((stream) => {
         this.$store.dispatch('meeting/setUserStream', stream)
 
-        const speechEvents = hark(this.myStream, {})
+        const speechEvents = hark(this.streamCurrentUser, {})
         speechEvents.on('speaking', this.speakHandler)
         speechEvents.on('stopped_speaking', this.stopSpeakHandler)
 
         this.myPeer.on('call', (call) => {
-          call.answer(this.myStream)
+          call.answer(this.streamCurrentUser)
           call.on('stream', (userStream) => {
             const participant = this.getParticipantByPeerId(call.peer)
             if (participant) {
@@ -113,7 +122,7 @@ export default {
           })
         })
         this.$socket.client.on('callConnected', (user, peerId) => {
-          this.connectToNewUser(user, peerId, this.myStream)
+          this.connectToNewUser(user, peerId, this.streamCurrentUser)
         })
       })
     this.myPeer.on('open', (peerId) => {
@@ -149,6 +158,10 @@ export default {
       setIsSpeakingCurrentUser: SET_IS_SPEAKING_CURRENT_USER,
       setIsSpeakingParticipant: SET_IS_SPEAKING_PARTICIPANT,
     }),
+    isShowStreamParticipant(stream, userId) {
+      return stream && this.participantsMeetingState[userId]?.enabledVideo
+
+    },
     participantIsSpeaking(userId) {
       return this.participantsMeetingState[userId]?.isSpeaking
 
