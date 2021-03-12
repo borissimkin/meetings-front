@@ -1,6 +1,7 @@
 <template>
-  <v-toolbar dark flat>
-    <v-app-bar-nav-icon />
+  <v-toolbar dark flat
+             class="rounded-0"
+  >
 
     <v-toolbar-title class="mr-5">
       <v-btn text to="/">Meetings</v-btn>
