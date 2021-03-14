@@ -9,6 +9,7 @@
           <v-tabs v-model="tab" background-color="secondary" dark>
             <v-tab> Стримы </v-tab>
             <v-tab> Доска </v-tab>
+            <v-tab> Статистика </v-tab>
           </v-tabs>
           <v-tabs-items v-model="tab">
             <v-tab-item>
@@ -21,6 +22,10 @@
                 :width="900"
                 style="min-width: 900px; min-height: 600px"
               ></Whiteboard>
+            </v-tab-item>
+            <v-tab-item >
+              <AttendanceStatistics
+                style='min-height: 600px; min-width: 900px'/>
             </v-tab-item>
           </v-tabs-items>
         </div>
@@ -79,14 +84,16 @@ import {
   SET_RAISED_HAND_PARTICIPANT,
   REMOVE_PARTICIPANT,
   RESET_STATE,
-  REMOVE_PARTICIPANTS_MEETING_STATE, SET_ENABLED_AUDIO_PARTICIPANT, SET_ENABLED_VIDEO_PARTICIPANT,
+  REMOVE_PARTICIPANTS_MEETING_STATE, SET_ENABLED_AUDIO_PARTICIPANT, SET_ENABLED_VIDEO_PARTICIPANT, STOP_USER_STREAM,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/ModalCheckListener'
 import { mapState } from 'vuex'
+import AttendanceStatistics from '@/components/AttendanceStatisitcs'
 
 export default {
   name: 'Meeting',
   components: {
+    AttendanceStatistics,
     ModalCheckListener,
     ModalSettingDevices,
     MeetingParticipantsList,
@@ -111,6 +118,7 @@ export default {
     return {
       tab: null,
       tabChat: null,
+      tabStatistic: null,
       isPassedSettingMeeting: false,
 
       checkpoint: {
@@ -125,7 +133,7 @@ export default {
   computed: {
     ...mapState('meeting', {
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser
-    })
+    }),
   },
 
   sockets: {
@@ -181,8 +189,9 @@ export default {
 
   beforeDestroy() {
     if (this.isPassedSettingMeeting) {
-      this.$socket.client.emit('leave-meeting', this.meetingId)
+      this.$store.commit(`meeting/${STOP_USER_STREAM}`)
       this.$store.commit(`meeting/${RESET_STATE}`)
+      this.$socket.client.emit('leave-meeting', this.meetingId)
     }
   },
 
