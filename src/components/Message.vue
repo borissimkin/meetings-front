@@ -16,7 +16,7 @@
 
 <script>
 import { getFullName } from '@/helpers/username.process'
-import dayjs from 'dayjs'
+import { toFormatTimeOrDatetime } from '@/helpers/datetime.process'
 
 export default {
   name: 'Message',
@@ -43,11 +43,7 @@ export default {
     },
 
     processedDate() {
-      const date = dayjs(new Date(this.date))
-      if (!date.isSame(dayjs(), "days")) {
-        return date.format('YYYY.MM.DD HH:mm')
-      }
-      return date.format('HH:mm')
+      return toFormatTimeOrDatetime(this.date)
     },
   },
 }

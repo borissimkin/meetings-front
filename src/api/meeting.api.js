@@ -24,4 +24,8 @@ export default {
   getParticipantsMeetingState(meetingId) {
     return server.get(`/meeting/${meetingId}/states-participants`)
   },
+
+  getCheckpoints(meetingId) {
+    return server.get(`/meeting/${meetingId}/checkpoints`)
+  },
 }

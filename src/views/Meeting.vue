@@ -87,11 +87,12 @@ import {
   SET_ENABLED_AUDIO_PARTICIPANT,
   SET_ENABLED_VIDEO_PARTICIPANT,
   STOP_USER_STREAM,
-  SET_ONLINE_PARTICIPANT,
+  SET_ONLINE_PARTICIPANT, ADD_CHECKPOINT, ADD_USER_ID_TO_CHECKPOINT,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/ModalCheckListener'
-import { mapGetters, mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
 import AttendanceStatistics from '@/components/AttendanceStatisitcs'
+import { canStartCheckListeners } from '@/helpers/permissions'
 
 export default {
   name: 'Meeting',
@@ -135,11 +136,15 @@ export default {
 
   computed: {
     ...mapState('meeting', {
-      meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser
+      meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
+      meetingInfo: state => state.meetingInfo
+    }),
+    ...mapState('auth', {
+      currentUser: state => state.currentUser
     }),
     ...mapGetters('meeting', [
       'getParticipantByUserId'
-    ])
+    ]),
   },
 
   sockets: {
@@ -151,7 +156,12 @@ export default {
           online: true
         })
       } else {
-        this.$store.commit(`meeting/${ADD_PARTICIPANT}`, { user })
+        const newParticipant = {
+          user,
+          online: true,
+          peerId: ""
+        }
+        this.$store.commit(`meeting/${ADD_PARTICIPANT}`, newParticipant)
       }
       const {enabledVideo, enabledAudio} = {...userSettingDevices}
       this.$store.commit(`meeting/${ADD_PARTICIPANTS_MEETING_STATE}`, {
@@ -173,6 +183,13 @@ export default {
     },
 
     checkListeners(checkpoint) {
+      this.addCheckpoint({
+        ...checkpoint,
+        userIds: []
+      })
+      if (canStartCheckListeners(this.currentUser.id, this.meetingInfo.creatorId)) {
+        return
+      }
       this.checkpoint.checkpointId = checkpoint.id
       this.checkpoint.checkListenersWasStarted = true
 
@@ -180,6 +197,13 @@ export default {
         this.resetCheckpoint,
         this.checkpoint.timeout
       )
+    },
+
+    passCheckListeners(checkpointId, userId) {
+      this.addUserIdToCheckpoint({
+        checkpointId,
+        userId
+      })
     },
 
     raisedHand(userId, isRaisedHand) {
@@ -213,6 +237,11 @@ export default {
   },
 
   methods: {
+    ...mapMutations('meeting', {
+      addCheckpoint: ADD_CHECKPOINT,
+      addUserIdToCheckpoint: ADD_USER_ID_TO_CHECKPOINT
+    }),
+
     handleConfirmSettingDevices() {
       this.isPassedSettingMeeting = true
       const meetingId = this.meetingId
@@ -230,6 +259,9 @@ export default {
         }),
         this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
           meetingId,
+        }),
+        this.$store.dispatch(`meeting/fetchCheckpoints`, {
+          meetingId
         })
       ]).catch(error => {
         //todo: тоаст
@@ -242,6 +274,10 @@ export default {
         'pass-check-listeners',
         this.checkpoint.checkpointId
       )
+      this.addUserIdToCheckpoint({
+        checkpointId: this.checkpoint.checkpointId,
+        userId: this.currentUser.id
+      })
       this.resetCheckpoint()
     },
 

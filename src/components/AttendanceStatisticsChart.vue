@@ -5,21 +5,15 @@ const {reactiveProp} = mixins
 export default {
   name: 'AttendanceStatisticsChart',
   extends: Bar,
+  props: ['chartData', 'options'],
   mixins: [reactiveProp],
-  data() {
-    return {
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          yAxes: [{
-            ticks: {
-              min: 0,
-              precision: 0
-            }
-          }]
-        }
-      }
+  watch: {
+    options: {
+      handler() {
+        this.$data._chart.options = this.options
+        this.$data._chart.update()
+      },
+      deep: true
     }
   },
   mounted () {
