@@ -7,7 +7,7 @@
     <v-spacer></v-spacer>
     <MeetingParticipantsListItem :user='currentUser'
                                  :participantState='meetingStateOfCurrentUser' />
-    <MeetingParticipantsListItem v-for='participant in participants'
+    <MeetingParticipantsListItem v-for='participant in onlineParticipants'
                                  :key='participant.user.id'
                                  :participantState='participantsMeetingState[participant.user.id]'
                                  :user='participant.user' />
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import MeetingParticipantsListItem from '@/components/MeetingParticipantsListItem'
 
 export default {
@@ -26,13 +26,15 @@ export default {
       currentUser: (state) => state.currentUser,
     }),
     ...mapState("meeting", {
-      participants: (state) => state.participants,
       participantsMeetingState: (state) => state.participantsMeetingState,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
     }),
+    ...mapGetters("meeting", [
+      'onlineParticipants'
+    ]),
 
     countParticipants() {
-      return this.participants.length + 1
+      return this.onlineParticipants.length + 1
     },
 
   }
@@ -47,12 +49,6 @@ export default {
   max-height: 700px;
   overflow: auto;
 
-
-}
-
-.participants-item {
-  /*display: flex;*/
-  /*justify-content: space-between;*/
 
 }
 

@@ -19,6 +19,7 @@ import {
   STOP_USER_STREAM,
   SET_ENABLED_VIDEO_PARTICIPANT,
   SET_ENABLED_AUDIO_PARTICIPANT,
+  SET_ONLINE_PARTICIPANT,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
@@ -142,6 +143,12 @@ const meetings = {
       this._vm.$set(participant, 'call', call)
     },
 
+    [SET_ONLINE_PARTICIPANT](state, payload) {
+      const { userId, online } = { ...payload }
+      const participant = state.participants.find((x) => x.user.id === userId)
+      participant.online = online
+    },
+
     [SET_MEETING_INFO](state, meeting) {
       state.meetingInfo = meeting
     },
@@ -169,7 +176,7 @@ const meetings = {
   },
   actions: {
     async fetchParticipants({ commit }, payload) {
-      let response = await meetingApi.getPeers(payload.meetingId)
+      let response = await meetingApi.getAllParticipants(payload.meetingId)
       commit(SET_PARTICIPANTS, response.data)
     },
 
@@ -201,6 +208,14 @@ const meetings = {
   getters: {
     getParticipantByPeerId: (state) => (peerId) => {
       return state.participants.find((x) => x.peerId === peerId)
+    },
+
+    getParticipantByUserId: (state) => (userId) => {
+      return state.participants.find((x) => x.user.id === userId)
+    },
+
+    onlineParticipants: (state) => {
+      return state.participants.filter((participant) => participant.online)
     },
   },
 }

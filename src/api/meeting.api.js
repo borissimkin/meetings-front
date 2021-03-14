@@ -1,8 +1,8 @@
 import server from './server'
 
 export default {
-  getPeers(meetingId) {
-    return server.get(`/meeting/${meetingId}/peers`)
+  getAllParticipants(meetingId) {
+    return server.get(`/meeting/${meetingId}/all-participants`)
   },
 
   createMeeting(payload) {
@@ -23,5 +23,5 @@ export default {
 
   getParticipantsMeetingState(meetingId) {
     return server.get(`/meeting/${meetingId}/states-participants`)
-  }
+  },
 }

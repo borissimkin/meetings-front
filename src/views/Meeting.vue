@@ -82,12 +82,15 @@ import {
   ADD_PARTICIPANT,
   ADD_PARTICIPANTS_MEETING_STATE,
   SET_RAISED_HAND_PARTICIPANT,
-  REMOVE_PARTICIPANT,
   RESET_STATE,
-  REMOVE_PARTICIPANTS_MEETING_STATE, SET_ENABLED_AUDIO_PARTICIPANT, SET_ENABLED_VIDEO_PARTICIPANT, STOP_USER_STREAM,
+  REMOVE_PARTICIPANTS_MEETING_STATE,
+  SET_ENABLED_AUDIO_PARTICIPANT,
+  SET_ENABLED_VIDEO_PARTICIPANT,
+  STOP_USER_STREAM,
+  SET_ONLINE_PARTICIPANT,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/ModalCheckListener'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import AttendanceStatistics from '@/components/AttendanceStatisitcs'
 
 export default {
@@ -134,11 +137,22 @@ export default {
     ...mapState('meeting', {
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser
     }),
+    ...mapGetters('meeting', [
+      'getParticipantByUserId'
+    ])
   },
 
   sockets: {
     userConnected(user, userSettingDevices) {
-      this.$store.commit(`meeting/${ADD_PARTICIPANT}`, { user })
+      const participant = this.getParticipantByUserId(user.id)
+      if (participant) {
+        this.$store.commit(`meeting/${SET_ONLINE_PARTICIPANT}`, {
+          userId: user.id,
+          online: true
+        })
+      } else {
+        this.$store.commit(`meeting/${ADD_PARTICIPANT}`, { user })
+      }
       const {enabledVideo, enabledAudio} = {...userSettingDevices}
       this.$store.commit(`meeting/${ADD_PARTICIPANTS_MEETING_STATE}`, {
         userId: user.id,
@@ -151,7 +165,10 @@ export default {
     },
 
     userDisconnected(user) {
-      this.$store.commit(`meeting/${REMOVE_PARTICIPANT}`, user.id)
+      this.$store.commit(`meeting/${SET_ONLINE_PARTICIPANT}`, {
+        userId: user.id,
+        online: false
+      })
       this.$store.commit(`meeting/${REMOVE_PARTICIPANTS_MEETING_STATE}`, user.id)
     },
 

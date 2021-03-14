@@ -10,7 +10,7 @@
         </template>
         <span class='stream-name'>{{ getName(currentUser) }}</span>
       </div>
-      <div v-for='(peer, index) in peers' :key='`${peer.peerId}-${peer.user.id}`'
+      <div v-for='(peer, index) in onlineParticipants' :key='`${peer.peerId}-${peer.user.id}`'
            :class="{'hidden-stream': isHiddenStream(index),
                     'speaking': participantIsSpeaking(peer.user.id)}"
            class='video-stream'>
@@ -73,7 +73,6 @@ export default {
   computed: {
     ...mapState('meeting', {
       streamCurrentUser: (state) => state.userStream,
-      peers: (state) => state.participants,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
       participantsMeetingState: (state) => state.participantsMeetingState
     }),
@@ -82,7 +81,7 @@ export default {
     }),
 
     ...mapGetters('meeting',
-      ['getParticipantByPeerId']
+      ['getParticipantByPeerId', 'onlineParticipants']
     ),
 
     isShowStreamCurrentUser() {
