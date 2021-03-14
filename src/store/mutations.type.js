@@ -27,3 +27,7 @@ export const REMOVE_PARTICIPANTS_MEETING_STATE =
   'removeParticipantsMeetingState'
 export const SET_ENABLED_AUDIO_PARTICIPANT = 'setEnabledAudioParticipant'
 export const SET_ENABLED_VIDEO_PARTICIPANT = 'setEnabledVideoParticipant'
+export const SET_ONLINE_PARTICIPANT = 'setOnlineParticipant'
+export const SET_CHECKPOINTS = 'setCheckpoints'
+export const ADD_CHECKPOINT = 'addCheckpoint'
+export const ADD_USER_ID_TO_CHECKPOINT = 'addUserIdToCheckpoint'

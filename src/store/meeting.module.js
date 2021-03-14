@@ -19,6 +19,10 @@ import {
   STOP_USER_STREAM,
   SET_ENABLED_VIDEO_PARTICIPANT,
   SET_ENABLED_AUDIO_PARTICIPANT,
+  SET_ONLINE_PARTICIPANT,
+  SET_CHECKPOINTS,
+  ADD_CHECKPOINT,
+  ADD_USER_ID_TO_CHECKPOINT,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
@@ -33,6 +37,7 @@ const getDefaultState = () => {
     userStream: null,
     participantsMeetingState: {}, // {userId: {isSpeaking, isRaisedHand, enabledAudio, enabledVideo}}
     participants: [],
+    checkpoints: [],
     meetingInfo: {
       id: 0,
       creatorId: 0,
@@ -142,6 +147,12 @@ const meetings = {
       this._vm.$set(participant, 'call', call)
     },
 
+    [SET_ONLINE_PARTICIPANT](state, payload) {
+      const { userId, online } = { ...payload }
+      const participant = state.participants.find((x) => x.user.id === userId)
+      participant.online = online
+    },
+
     [SET_MEETING_INFO](state, meeting) {
       state.meetingInfo = meeting
     },
@@ -157,6 +168,22 @@ const meetings = {
       state.participantsMeetingState = payload
     },
 
+    [SET_CHECKPOINTS](state, payload) {
+      state.checkpoints = payload
+    },
+
+    [ADD_CHECKPOINT](state, checkpoint) {
+      state.checkpoints.push(checkpoint)
+    },
+
+    [ADD_USER_ID_TO_CHECKPOINT](state, payload) {
+      const { userId, checkpointId } = { ...payload }
+      const checkpoint = state.checkpoints.find(
+        (checkpoint) => checkpoint.id === checkpointId
+      )
+      checkpoint.userIds.push(userId)
+    },
+
     [ADD_PARTICIPANTS_MEETING_STATE](state, payload) {
       const { userId, meetingState } = { ...payload }
       meetingState.isSpeaking = false
@@ -169,8 +196,13 @@ const meetings = {
   },
   actions: {
     async fetchParticipants({ commit }, payload) {
-      let response = await meetingApi.getPeers(payload.meetingId)
+      const response = await meetingApi.getAllParticipants(payload.meetingId)
       commit(SET_PARTICIPANTS, response.data)
+    },
+
+    async fetchCheckpoints({ commit }, payload) {
+      const response = await meetingApi.getCheckpoints(payload.meetingId)
+      commit(SET_CHECKPOINTS, response.data)
     },
 
     async fetchMeetingInfo({ commit }, payload) {
@@ -201,6 +233,14 @@ const meetings = {
   getters: {
     getParticipantByPeerId: (state) => (peerId) => {
       return state.participants.find((x) => x.peerId === peerId)
+    },
+
+    getParticipantByUserId: (state) => (userId) => {
+      return state.participants.find((x) => x.user.id === userId)
+    },
+
+    onlineParticipants: (state) => {
+      return state.participants.filter((participant) => participant.online)
     },
   },
 }

@@ -21,3 +21,6 @@ export default {
   store: store,
 }
 </script>
+<style>
+
+</style>

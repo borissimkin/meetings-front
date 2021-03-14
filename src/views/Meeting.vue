@@ -9,6 +9,7 @@
           <v-tabs v-model="tab" background-color="secondary" dark>
             <v-tab> Стримы </v-tab>
             <v-tab> Доска </v-tab>
+            <v-tab> Статистика </v-tab>
           </v-tabs>
           <v-tabs-items v-model="tab">
             <v-tab-item>
@@ -21,6 +22,10 @@
                 :width="900"
                 style="min-width: 900px; min-height: 600px"
               ></Whiteboard>
+            </v-tab-item>
+            <v-tab-item >
+              <AttendanceStatistics
+                style='min-height: 600px; min-width: 900px'/>
             </v-tab-item>
           </v-tabs-items>
         </div>
@@ -77,16 +82,22 @@ import {
   ADD_PARTICIPANT,
   ADD_PARTICIPANTS_MEETING_STATE,
   SET_RAISED_HAND_PARTICIPANT,
-  REMOVE_PARTICIPANT,
   RESET_STATE,
-  REMOVE_PARTICIPANTS_MEETING_STATE, SET_ENABLED_AUDIO_PARTICIPANT, SET_ENABLED_VIDEO_PARTICIPANT,
+  REMOVE_PARTICIPANTS_MEETING_STATE,
+  SET_ENABLED_AUDIO_PARTICIPANT,
+  SET_ENABLED_VIDEO_PARTICIPANT,
+  STOP_USER_STREAM,
+  SET_ONLINE_PARTICIPANT, ADD_CHECKPOINT, ADD_USER_ID_TO_CHECKPOINT,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/ModalCheckListener'
-import { mapState } from 'vuex'
+import { mapGetters, mapMutations, mapState } from 'vuex'
+import AttendanceStatistics from '@/components/AttendanceStatisitcs'
+import { canStartCheckListeners } from '@/helpers/permissions'
 
 export default {
   name: 'Meeting',
   components: {
+    AttendanceStatistics,
     ModalCheckListener,
     ModalSettingDevices,
     MeetingParticipantsList,
@@ -111,6 +122,7 @@ export default {
     return {
       tab: null,
       tabChat: null,
+      tabStatistic: null,
       isPassedSettingMeeting: false,
 
       checkpoint: {
@@ -124,13 +136,33 @@ export default {
 
   computed: {
     ...mapState('meeting', {
-      meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser
-    })
+      meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
+      meetingInfo: state => state.meetingInfo
+    }),
+    ...mapState('auth', {
+      currentUser: state => state.currentUser
+    }),
+    ...mapGetters('meeting', [
+      'getParticipantByUserId'
+    ]),
   },
 
   sockets: {
     userConnected(user, userSettingDevices) {
-      this.$store.commit(`meeting/${ADD_PARTICIPANT}`, { user })
+      const participant = this.getParticipantByUserId(user.id)
+      if (participant) {
+        this.$store.commit(`meeting/${SET_ONLINE_PARTICIPANT}`, {
+          userId: user.id,
+          online: true
+        })
+      } else {
+        const newParticipant = {
+          user,
+          online: true,
+          peerId: ""
+        }
+        this.$store.commit(`meeting/${ADD_PARTICIPANT}`, newParticipant)
+      }
       const {enabledVideo, enabledAudio} = {...userSettingDevices}
       this.$store.commit(`meeting/${ADD_PARTICIPANTS_MEETING_STATE}`, {
         userId: user.id,
@@ -143,11 +175,21 @@ export default {
     },
 
     userDisconnected(user) {
-      this.$store.commit(`meeting/${REMOVE_PARTICIPANT}`, user.id)
+      this.$store.commit(`meeting/${SET_ONLINE_PARTICIPANT}`, {
+        userId: user.id,
+        online: false
+      })
       this.$store.commit(`meeting/${REMOVE_PARTICIPANTS_MEETING_STATE}`, user.id)
     },
 
     checkListeners(checkpoint) {
+      this.addCheckpoint({
+        ...checkpoint,
+        userIds: []
+      })
+      if (canStartCheckListeners(this.currentUser.id, this.meetingInfo.creatorId)) {
+        return
+      }
       this.checkpoint.checkpointId = checkpoint.id
       this.checkpoint.checkListenersWasStarted = true
 
@@ -155,6 +197,13 @@ export default {
         this.resetCheckpoint,
         this.checkpoint.timeout
       )
+    },
+
+    passCheckListeners(checkpointId, userId) {
+      this.addUserIdToCheckpoint({
+        checkpointId,
+        userId
+      })
     },
 
     raisedHand(userId, isRaisedHand) {
@@ -181,12 +230,18 @@ export default {
 
   beforeDestroy() {
     if (this.isPassedSettingMeeting) {
-      this.$socket.client.emit('leave-meeting', this.meetingId)
+      this.$store.commit(`meeting/${STOP_USER_STREAM}`)
       this.$store.commit(`meeting/${RESET_STATE}`)
+      this.$socket.client.emit('leave-meeting', this.meetingId)
     }
   },
 
   methods: {
+    ...mapMutations('meeting', {
+      addCheckpoint: ADD_CHECKPOINT,
+      addUserIdToCheckpoint: ADD_USER_ID_TO_CHECKPOINT
+    }),
+
     handleConfirmSettingDevices() {
       this.isPassedSettingMeeting = true
       const meetingId = this.meetingId
@@ -204,6 +259,9 @@ export default {
         }),
         this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
           meetingId,
+        }),
+        this.$store.dispatch(`meeting/fetchCheckpoints`, {
+          meetingId
         })
       ]).catch(error => {
         //todo: тоаст
@@ -216,6 +274,10 @@ export default {
         'pass-check-listeners',
         this.checkpoint.checkpointId
       )
+      this.addUserIdToCheckpoint({
+        checkpointId: this.checkpoint.checkpointId,
+        userId: this.currentUser.id
+      })
       this.resetCheckpoint()
     },
 

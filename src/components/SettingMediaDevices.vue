@@ -4,9 +4,6 @@
       <SettingAudio class='toolbar__button' />
       <SettingVideo class='toolbar__button' />
       <ButtonRaiseHand class='toolbar__button' />
-      <v-btn v-if='canStartCheckListeners' class='toolbar__button' @click='checkListeners' >
-        Проверить слушателей
-      </v-btn>
     </div>
   </div>
 </template>
@@ -20,17 +17,6 @@ import ButtonRaiseHand from '@/components/ButtonRaiseHand'
 export default {
   name: 'SettingsMediaDevices',
   components: { ButtonRaiseHand, SettingVideo, SettingAudio },
-  computed: {
-    canStartCheckListeners() {
-      return this.$store.state.meeting.meetingInfo.creatorId === this.$store.state.auth.currentUser.id
-    }
-  },
-  methods: {
-    checkListeners() {
-      //todo: тоаст
-      this.$socket.client.emit('check-listeners');
-    }
-  }
 }
 </script>
 
