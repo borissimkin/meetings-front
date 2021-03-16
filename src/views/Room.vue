@@ -6,18 +6,20 @@
     <v-card>
       <ModalCreateMeeting :room-id='id'>
       </ModalCreateMeeting>
-      <v-list two-line>
+      <v-list three-line>
         <v-subheader>
           {{ headerText }}
         </v-subheader>
         <v-list-item-group>
-          <v-list-item v-for='meeting in $store.state.room.meetings'
-                       :key='meeting.id' :to='`/room/${id}/meeting/${meeting.hashId}`'>
-            <v-list-item-content>
-
-              {{ meeting.hashId }}
-            </v-list-item-content>
-          </v-list-item>
+          <template v-for='(meeting, index) in meetings'>
+            <MeetingListItem :meeting='meeting'
+                             :room-hash-id='id'
+                             :key='meeting.id' />
+            <v-divider
+              v-if="index < meetings.length - 1"
+              :key="`divider-${index}`"
+            ></v-divider>
+          </template>
         </v-list-item-group>
       </v-list>
     </v-card>
@@ -27,9 +29,11 @@
 <script>
 import ModalCreateMeeting from '@/components/ModalCreateMeeting'
 import { RESET_STATE } from '@/store/mutations.type'
+import MeetingListItem from '@/components/MeetingListItem'
+import { mapState } from 'vuex'
 export default {
   name: 'Room',
-  components: { ModalCreateMeeting },
+  components: { MeetingListItem, ModalCreateMeeting },
   props: {
     id: {
       type: String,
@@ -39,8 +43,11 @@ export default {
   },
   computed: {
     headerText() {
-      return this.$store.state.room.meetings.length ? 'Собрания' : 'Собраний нет'
-    }
+      return this.meetings ? 'Собрания' : 'Собраний нет'
+    },
+    ...mapState('room', {
+      meetings: state => state.meetings
+    })
   },
   mounted() {
     this.$store.dispatch('room/fetchMeetings', {

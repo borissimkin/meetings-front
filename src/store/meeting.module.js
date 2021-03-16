@@ -40,7 +40,11 @@ const getDefaultState = () => {
     checkpoints: [],
     meetingInfo: {
       id: 0,
-      creatorId: 0,
+      creator: {
+        id: 0,
+        firstName: '',
+        lastName: '',
+      },
       createdAt: '',
       endTime: '',
       hashId: '',

@@ -187,7 +187,7 @@ export default {
         ...checkpoint,
         userIds: []
       })
-      if (canStartCheckListeners(this.currentUser.id, this.meetingInfo.creatorId)) {
+      if (canStartCheckListeners(this.currentUser.id, this.meetingInfo.creator.id)) {
         return
       }
       this.checkpoint.checkpointId = checkpoint.id

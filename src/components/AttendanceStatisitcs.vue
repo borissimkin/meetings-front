@@ -51,7 +51,7 @@ export default {
     ...mapState('meeting', {
       checkpoints: state => state.checkpoints,
       participants: state => state.participants,
-      meetingHostId: state => state.meetingInfo.creatorId
+      meetingHostId: state => state.meetingInfo.creator.id
     }),
 
     ...mapState('auth', {
