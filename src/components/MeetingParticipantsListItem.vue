@@ -1,6 +1,8 @@
 <template>
   <v-card class='pa-1 mt-2 mb-2' flat>
     <div class='menu'>
+      <v-icon v-if='isHostOfMeeting' title='Создатель собрания'>mdi-chess-king</v-icon>
+      <v-spacer v-else/>
       <v-icon>mdi-dots-horizontal</v-icon>
     </div>
     <div class='content px-1'>
@@ -21,6 +23,7 @@
 
 <script>
 import { getFullName } from '@/helpers/username.process'
+import { mapState } from 'vuex'
 
 export default {
   name: 'MeetingParticipantsListItem',
@@ -39,6 +42,9 @@ export default {
     },
   },
   computed: {
+    ...mapState("meeting", {
+      meetingHostId: state => state.meetingInfo.creator.id
+    }),
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
     },
@@ -53,6 +59,10 @@ export default {
 
     isEnabledAudio() {
       return this.participantState?.enabledAudio
+    },
+
+    isHostOfMeeting() {
+      return this.user.id === this.meetingHostId
     }
   },
 }
@@ -61,7 +71,7 @@ export default {
 <style scoped>
 .menu {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .content {
