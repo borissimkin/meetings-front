@@ -10,21 +10,29 @@
         </template>
         <span class='stream-name'>{{ getName(currentUser) }}</span>
       </div>
-      <div v-for='(peer, index) in onlineParticipants' :key='`${peer.peerId}-${peer.user.id}`'
-           :class="{'hidden-stream': isHiddenStream(index),
-                    'speaking': participantIsSpeaking(peer.user.id)}"
-           class='video-stream'>
-        <template v-if='isShowStreamParticipant(peer.stream, peer.user.id)'>
-          <video
-            :srcObject.prop='peer.stream'
-            autoplay>
-          </video>
-        </template>
+      <template v-for='(place, index) in Object.keys(streamPlaces)' >
+        <div v-if='streamPlaces[place]'
+             :class='place'
+             :key='`place-${index}`'
+        >
+          <template v-if='isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'>
+            <video
+              :srcObject.prop='streamPlaces[place].stream'
+              autoplay>
+            </video>
+          </template>
+          <template v-else>
+            <VideoStreamPlaceholder :user='streamPlaces[place].user' :key='`place-${index}`'></VideoStreamPlaceholder>
+          </template>
+          <span class='stream-name' :key='`name-${streamPlaces[place].user.id}`'>{{ getName(streamPlaces[place].user) }}</span>
+        </div>
         <template v-else>
-          <VideoStreamPlaceholder :user='peer.user'></VideoStreamPlaceholder>
+          <div class='video-placeholder'
+               :class='place'
+               v-bind:style="{ 'background-image': 'url(' + placeholderImage + ')', 'background-size': '300px'}"
+               :key='`place-${index}`'/>
         </template>
-        <span class='stream-name'>{{ getName(peer.user) }}</span>
-      </div>
+      </template>
     </div>
   </div>
 </template>
@@ -68,6 +76,7 @@ export default {
     return {
       myPeer: new Peer(undefined, getPeerConfig()),
       maxCountVideos: 6,
+      placeholderImage: require("@/assets/stream_placeholder.png")
     }
   },
   computed: {
@@ -86,7 +95,16 @@ export default {
 
     isShowStreamCurrentUser() {
       return this.streamCurrentUser && this.meetingStateOfCurrentUser.enabledVideo
+    },
 
+    streamPlaces() {
+      const places = {}
+      //todo: пока что в главном окне всегда текущий пользователь, потом переделается
+      //todo: пока что тупой вариант без приоритетов
+      for (let i = 1; i < this.maxCountVideos; i++) {
+        places[`post-${i+1}`] = this.onlineParticipants[i-1]
+      }
+      return places
     }
   },
   mounted() {
@@ -230,12 +248,19 @@ export default {
   position: relative;
 }
 
+.video-placeholder {
+  background-color: #7b7dbd;
+
+}
+
 .post-1 {
   @extend .video-stream;
   grid-area: post-1;
 }
 
 .post-2 {
+  @extend .video-stream;
+
   grid-area: post-2;
 }
 

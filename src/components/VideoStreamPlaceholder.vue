@@ -1,5 +1,5 @@
 <template>
-  <div class='video-placeholder'>
+  <div class='user-video-placeholder'>
     <v-avatar v-if='initials' color='teal' size='72'>
       <span class='white--text headline'>
       {{ initials }}
@@ -35,7 +35,7 @@ export default {
 
 <style scoped>
 
-.video-placeholder {
+.user-video-placeholder {
   display: flex;
   justify-content: center;
   align-items: center;
