@@ -108,7 +108,7 @@
                   <v-btn
                     color='primary'
                     text
-                    @click='$refs.menuStartTime.save(form.startTime)'
+                    @click='handleSaveStartTime'
                   >
                     OK
                   </v-btn>
@@ -198,6 +198,7 @@
 //todo: валидировать время чтобы в прошлое нельзя было ставить и чтобы время начала не было больше времени окончания
 import dayjs from "dayjs";
 import { ADD_MEETING } from '@/store/mutations.type'
+import { fromTimeToDayjs } from '@/helpers/datetime.process'
 export default {
   name: 'ModalCreateMeeting',
   props: {
@@ -209,6 +210,7 @@ export default {
   },
   data() {
     return {
+      defaultMeetingDurationMinutes: 90,
       loading: false,
       dialog: false,
       menus: {
@@ -270,6 +272,22 @@ export default {
         this.loading = false
         this.dialog = false
       }
+    },
+
+    calculateEndTime(starTime) {
+      let endTime = fromTimeToDayjs(starTime)
+      endTime = endTime.add(this.defaultMeetingDurationMinutes, "minutes")
+      endTime = endTime.format("HH:mm")
+      return endTime
+    },
+
+    handleSaveStartTime() {
+      const time = this.form.startTime
+      this.$refs.menuStartTime.save(time)
+
+      const endTime = this.calculateEndTime(time)
+      this.form.endTime = endTime
+      this.$refs.menuEndTime.save(endTime)
     },
 
     allowedStartDates(date) {
