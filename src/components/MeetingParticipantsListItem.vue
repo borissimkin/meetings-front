@@ -1,7 +1,7 @@
 <template>
-  <v-card class='pa-1 mt-2 mb-2' flat>
+  <v-card class='pa-1 mt-2 mb-2 ' flat>
     <div class='menu'>
-      <v-icon v-if='isHostOfMeeting' title='Создатель собрания'>mdi-chess-king</v-icon>
+      <span v-if='isHostOfMeeting' class='text-caption px-1'>создатель собрания</span>
       <v-spacer v-else/>
       <v-icon>mdi-dots-horizontal</v-icon>
     </div>
@@ -12,6 +12,7 @@
       <div>
         <v-icon color='black' small>{{ isEnabledVideo ? `mdi-video` : `mdi-video-off`}}</v-icon>
         <v-icon color='black' small>{{ isEnabledAudio ? `mdi-microphone` : `mdi-microphone-off`}}</v-icon>
+        <v-icon v-show='isSpeaking' color='black' small>mdi-account-voice</v-icon>
         <v-icon v-show='isRaisedHand' color='orange'>mdi-hand-right</v-icon>
       </div>
     </div>
@@ -53,6 +54,10 @@ export default {
       return this.participantState?.isRaisedHand
     },
 
+    isSpeaking() {
+      return this.participantState?.isSpeaking
+    },
+
     isEnabledVideo() {
       return this.participantState?.enabledVideo
     },
@@ -73,7 +78,10 @@ export default {
   display: flex;
   justify-content: space-between;
 }
+.is-speaking {
+  box-shadow: 0 0 20px #0002ff;
 
+}
 .content {
   display: flex;
   justify-content: space-between;
