@@ -2,37 +2,43 @@
   <div>
     <div id='video-grid'>
       <div :class="{'speaking': meetingStateOfCurrentUser.isSpeaking}" class='post-1'>
-        <template v-if='isShowStreamCurrentUser'>
-          <video :srcObject.prop='streamCurrentUser' autoplay muted></video>
-        </template>
-        <template v-else>
-          <VideoStreamPlaceholder :user='currentUser'></VideoStreamPlaceholder>
-        </template>
+        <video v-show='isShowStreamCurrentUser' :srcObject.prop='streamCurrentUser' autoplay muted></video>
+        <VideoStreamPlaceholder v-show='!isShowStreamCurrentUser' :user='currentUser'></VideoStreamPlaceholder>
         <span class='stream-name'>{{ getName(currentUser) }}</span>
       </div>
-      <template v-for='(place, index) in Object.keys(streamPlaces)' >
+      <template v-for='(place, index) in Object.keys(streamPlaces)'>
         <div v-if='streamPlaces[place]'
-             :class='place'
              :key='`place-${index}`'
+             :class='place'
         >
-          <template v-if='isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'>
-            <video
-              :srcObject.prop='streamPlaces[place].stream'
-              autoplay>
-            </video>
-          </template>
-          <template v-else>
-            <VideoStreamPlaceholder :user='streamPlaces[place].user' :key='`place-${index}`'></VideoStreamPlaceholder>
-          </template>
-          <span class='stream-name' :key='`name-${streamPlaces[place].user.id}`'>{{ getName(streamPlaces[place].user) }}</span>
+
+          <div style='width: 100%; height: 100%' :class="{'speaking': participantIsSpeaking(streamPlaces[place].user.id)}">
+              <video
+                v-show='isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
+                :srcObject.prop='streamPlaces[place].stream'
+                autoplay>
+              </video>
+              <VideoStreamPlaceholder
+                v-show='!isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
+                :key='`place-${index}`' :user='streamPlaces[place].user'></VideoStreamPlaceholder>
+            <span :key='`name-${streamPlaces[place].user.id}`' class='stream-name'>{{ getName(streamPlaces[place].user)
+              }}</span>
+
+          </div>
+
         </div>
         <template v-else>
-          <div class='video-placeholder'
+          <div :key='`place-${index}`'
                :class='place'
-               v-bind:style="{ 'background-image': 'url(' + placeholderImage + ')', 'background-size': '300px'}"
-               :key='`place-${index}`'/>
+               class='video-placeholder'
+               v-bind:style="{ 'background-image': 'url(' + placeholderImage + ')'}" />
         </template>
       </template>
+      <video v-for='stashedParticipant in stashedParticipantsStream'
+             :key='`stashed-stream-${stashedParticipant.user.id}`'
+             :srcObject.prop='stashedParticipant.stream'
+             autoplay
+             v-show='false'/>
     </div>
   </div>
 </template>
@@ -42,8 +48,9 @@ import Peer from 'peerjs'
 import { getPeerConfig } from '@/peer.server'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import {
+  SET_CALL_TO_PARTICIPANT,
   SET_IS_SPEAKING_CURRENT_USER,
-  SET_IS_SPEAKING_PARTICIPANT, SET_CALL_TO_PARTICIPANT,
+  SET_IS_SPEAKING_PARTICIPANT,
   SET_STREAM_TO_PARTICIPANT,
   STOP_USER_STREAM,
 } from '@/store/mutations.type'
@@ -76,21 +83,21 @@ export default {
     return {
       myPeer: new Peer(undefined, getPeerConfig()),
       maxCountVideos: 6,
-      placeholderImage: require("@/assets/stream_placeholder.png")
+      placeholderImage: require('@/assets/stream-placeholder.png'),
     }
   },
   computed: {
     ...mapState('meeting', {
       streamCurrentUser: (state) => state.userStream,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
-      participantsMeetingState: (state) => state.participantsMeetingState
+      participantsMeetingState: (state) => state.participantsMeetingState,
     }),
     ...mapState('auth', {
-      currentUser: state => state.currentUser
+      currentUser: state => state.currentUser,
     }),
 
     ...mapGetters('meeting',
-      ['getParticipantByPeerId', 'onlineParticipants']
+      ['getParticipantByPeerId', 'onlineParticipants'],
     ),
 
     isShowStreamCurrentUser() {
@@ -102,9 +109,27 @@ export default {
       //todo: пока что в главном окне всегда текущий пользователь, потом переделается
       //todo: пока что тупой вариант без приоритетов
       for (let i = 1; i < this.maxCountVideos; i++) {
-        places[`post-${i+1}`] = this.onlineParticipants[i-1]
+        places[`post-${i + 1}`] = this.onlineParticipants[i - 1]
       }
       return places
+    },
+
+    stashedParticipantsStream() {
+      return this.onlineParticipants.filter(participant => {
+        for (let place of Object.keys(this.streamPlaces)) {
+          const streamPlace = this.streamPlaces[place]
+          if (!streamPlace) {
+            continue
+          }
+          const user = streamPlace.user
+          if (user) {
+            if (user.id === participant.id) {
+              return false
+            }
+          }
+        }
+        return true
+      })
     }
   },
   mounted() {
@@ -127,11 +152,11 @@ export default {
             if (participant) {
               this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`, {
                 userId: participant.user.id,
-                stream: userStream
+                stream: userStream,
               })
               this.$store.commit(`meeting/${SET_CALL_TO_PARTICIPANT}`, {
                 userId: participant.user.id,
-                call
+                call,
               })
             } else {
               console.log(`participant not found ${call.peer}`)
@@ -156,7 +181,7 @@ export default {
     userSpeak(user) {
       const payload = {
         userId: user.id,
-        isSpeaking: true
+        isSpeaking: true,
       }
       this.setIsSpeakingParticipant(payload)
     },
@@ -164,7 +189,7 @@ export default {
     userStopSpeak(user) {
       const payload = {
         userId: user.id,
-        isSpeaking: false
+        isSpeaking: false,
       }
       this.setIsSpeakingParticipant(payload)
     },
@@ -197,10 +222,6 @@ export default {
       this.$socket.client.emit('user-stop-speak')
     },
 
-    isHiddenStream(index) {
-      return index > this.maxCountVideos
-    },
-
     connectToNewUser(user, peerId, stream) {
       const call = this.myPeer.call(peerId, stream)
       call.on('stream', (userStream) => {
@@ -216,7 +237,12 @@ export default {
 </script>
 
 <style lang='scss' scoped>
+$border-color: #cdcdcd;
+
+
 #video-grid {
+  border:  1px solid $border-color;
+  border-right: 0;
   display: grid;
   grid-template-areas:
     'post-1 post-1 post-2'
@@ -228,8 +254,7 @@ export default {
 }
 
 .speaking {
-  border: 5px solid #7b7dbd;
-  box-shadow: 0 0 20px #48496d;
+  box-shadow: 0 0 20px #0002ff;
 }
 
 .stream-name {
@@ -246,11 +271,17 @@ export default {
 
 .video-stream {
   position: relative;
+  border: 1px solid $border-color;
+}
+
+.video-stream + .video-stream {
+  border-left: 0;
+  border-bottom: 0;
 }
 
 .video-placeholder {
-  background-color: #7b7dbd;
-
+  background-size: 100px;
+  background-position: center;
 }
 
 .post-1 {
@@ -265,18 +296,26 @@ export default {
 }
 
 .post-3 {
+  @extend .video-stream;
+
   grid-area: post-3;
 }
 
 .post-4 {
+  @extend .video-stream;
+
   grid-area: post-4;
 }
 
 .post-5 {
+  @extend .video-stream;
+
   grid-area: post-5;
 }
 
 .post-6 {
+  @extend .video-stream;
+
   grid-area: post-6;
 }
 
@@ -284,8 +323,6 @@ video {
   width: 100%;
   height: auto;
   max-height: 100%;
-  //height: 100%;
-  //width: 100%;
   object-fit: cover;
 }
 
