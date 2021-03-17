@@ -101,11 +101,10 @@ export default {
 
 .chat-area {
   display: flex;
-  height: 600px;
+  height: 602px;
 
   flex-direction: column;
   position: relative;
-  border-radius: 0.2rem;
   overflow-y: auto;
   background-color: #eeeeee;
   border-bottom: 1px solid #bdbdbd;
