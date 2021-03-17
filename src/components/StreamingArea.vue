@@ -146,6 +146,7 @@ export default {
         speechEvents.on('stopped_speaking', this.stopSpeakHandler)
 
         this.myPeer.on('call', (call) => {
+          console.log({ call })
           call.answer(this.streamCurrentUser)
           call.on('stream', (userStream) => {
             const participant = this.getParticipantByPeerId(call.peer)
@@ -168,6 +169,7 @@ export default {
         })
       })
     this.myPeer.on('open', (peerId) => {
+      console.log({peerId})
       this.$socket.client.emit('call-connect', peerId)
     })
   },

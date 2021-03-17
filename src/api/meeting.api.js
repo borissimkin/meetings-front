@@ -9,8 +9,8 @@ export default {
     return server.post(`/meeting`, payload)
   },
 
-  isMeetingExist(roomId, meetingId) {
-    return server.get(`/room/${roomId}/meeting/${meetingId}/exists`)
+  canConnectToMeeting(roomId, meetingId) {
+    return server.get(`/room/${roomId}/meeting/${meetingId}/can-connect`)
   },
 
   getMeetingMessages(meetingId) {

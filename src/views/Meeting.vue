@@ -93,6 +93,7 @@ import ModalCheckListener from '@/components/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import AttendanceStatistics from '@/components/AttendanceStatisitcs'
 import { canStartCheckListeners } from '@/helpers/permissions'
+import meetingApi from '@/api/meeting.api'
 
 export default {
   name: 'Meeting',
@@ -242,12 +243,26 @@ export default {
       addUserIdToCheckpoint: ADD_USER_ID_TO_CHECKPOINT
     }),
 
-    handleConfirmSettingDevices() {
+    async handleConfirmSettingDevices() {
       this.isPassedSettingMeeting = true
       const meetingId = this.meetingId
       const settingDevices = {
         enabledVideo: this.meetingStateOfCurrentUser.enabledVideo,
         enabledAudio: this.meetingStateOfCurrentUser.enabledAudio
+      }
+      try {
+        await meetingApi.canConnectToMeeting(
+          this.roomId,
+          this.meetingId
+        )
+      }
+      catch (error) {
+        if (error.response.status === 404) {
+          return this.$router.push("/404")
+        } else if (error.response.status === 400) {
+          return this.$router.push("/was-connected-to-meeting")
+        }
+        //todo:
       }
       this.$socket.client.emit('join-meeting', meetingId, settingDevices)
       Promise.all([

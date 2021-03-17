@@ -154,7 +154,9 @@ const meetings = {
     [SET_ONLINE_PARTICIPANT](state, payload) {
       const { userId, online } = { ...payload }
       const participant = state.participants.find((x) => x.user.id === userId)
-      participant.online = online
+      if (participant) {
+        participant.online = online
+      }
     },
 
     [SET_MEETING_INFO](state, meeting) {

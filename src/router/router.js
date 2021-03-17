@@ -12,6 +12,7 @@ import RegistrationForm from '@/views/RegistrationForm'
 import Room from '@/views/Room'
 import Meeting from '@/views/Meeting'
 import socket from '@/socket'
+import WasConnectedToMeeting from '@/views/WasConnectedToMeeting'
 
 Vue.use(Router)
 
@@ -52,14 +53,18 @@ let router = new Router({
       },
       props: true,
       async beforeEnter(to, from, next) {
-        const response = await meetingApi.isMeetingExist(
-          to.params.roomId,
-          to.params.meetingId
-        )
-        if (!response.data.exists) {
-          next('404')
-        } else {
+        try {
+          await meetingApi.canConnectToMeeting(
+            to.params.roomId,
+            to.params.meetingId
+          )
           next()
+        } catch (error) {
+          if (error.response.status === 404) {
+            next('404')
+          } else if (error.response.status === 400) {
+            next('wasConnectedToMeeting')
+          }
         }
       },
     },
@@ -79,6 +84,11 @@ let router = new Router({
       path: '/registration',
       name: 'registration',
       component: RegistrationForm,
+    },
+    {
+      path: '/was-connected-to-meeting',
+      name: 'wasConnectedToMeeting',
+      component: WasConnectedToMeeting,
     },
     {
       path: '*',
