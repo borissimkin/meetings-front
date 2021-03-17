@@ -1,14 +1,14 @@
 <template>
   <v-container>
     <div class='title mb-2'>
-      Собрания
+      {{titleText}}
     </div>
     <v-card>
       <ModalCreateMeeting :room-id='id'>
       </ModalCreateMeeting>
       <v-list three-line>
         <v-subheader>
-          {{ headerText }}
+          {{ subtitleText }}
         </v-subheader>
         <v-list-item-group>
           <template v-for='(meeting, index) in meetings'>
@@ -30,6 +30,7 @@
 import ModalCreateMeeting from '@/components/ModalCreateMeeting'
 import { RESET_STATE } from '@/store/mutations.type'
 import MeetingListItem from '@/components/MeetingListItem'
+import roomApi from "@/api/room.api"
 import { mapState } from 'vuex'
 export default {
   name: 'Room',
@@ -41,8 +42,17 @@ export default {
       default: '',
     },
   },
+  data() {
+    return {
+      roomInfo: {}
+    }
+  },
   computed: {
-    headerText() {
+    titleText() {
+      return this.roomInfo?.name
+    },
+
+    subtitleText() {
       return this.meetings ? 'Собрания' : 'Собраний нет'
     },
     ...mapState('room', {
@@ -52,6 +62,9 @@ export default {
   mounted() {
     this.$store.dispatch('room/fetchMeetings', {
       roomId: this.id
+    })
+    roomApi.getRoom(this.id).then((response) => {
+      this.roomInfo = response.data
     })
   },
 
