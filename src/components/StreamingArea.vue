@@ -133,43 +133,16 @@ export default {
     }
   },
   mounted() {
-    navigator.mediaDevices
-      .getUserMedia({
+    navigator.mediaDevices.getUserMedia({
         video: true,
         audio: true,
       })
-      .then((stream) => {
-        this.$store.dispatch('meeting/setUserStream', stream)
-
-        const speechEvents = hark(this.streamCurrentUser, {})
-        speechEvents.on('speaking', this.speakHandler)
-        speechEvents.on('stopped_speaking', this.stopSpeakHandler)
-
-        this.myPeer.on('call', (call) => {
-          console.log({ call })
-          call.answer(this.streamCurrentUser)
-          call.on('stream', (userStream) => {
-            const participant = this.getParticipantByPeerId(call.peer)
-            if (participant) {
-              this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`, {
-                userId: participant.user.id,
-                stream: userStream,
-              })
-              this.$store.commit(`meeting/${SET_CALL_TO_PARTICIPANT}`, {
-                userId: participant.user.id,
-                call,
-              })
-            } else {
-              console.log(`participant not found ${call.peer}`)
-            }
-          })
-        })
-        this.$socket.client.on('callConnected', (user, peerId) => {
-          this.connectToNewUser(user, peerId, this.streamCurrentUser)
-        })
+      .then(this.callInit)
+      .catch(() => {
+        console.log('ДАЙТЕ ДОСТУП!!') //todo
       })
+
     this.myPeer.on('open', (peerId) => {
-      console.log({peerId})
       this.$socket.client.emit('call-connect', peerId)
     })
   },
@@ -180,6 +153,10 @@ export default {
   },
 
   sockets: {
+    callConnected(user, peerId) {
+      this.connectToNewUser(user, peerId, this.streamCurrentUser)
+    },
+
     userSpeak(user) {
       const payload = {
         userId: user.id,
@@ -202,6 +179,40 @@ export default {
       setIsSpeakingCurrentUser: SET_IS_SPEAKING_CURRENT_USER,
       setIsSpeakingParticipant: SET_IS_SPEAKING_PARTICIPANT,
     }),
+
+    callInit(stream) {
+      this.$store.dispatch('meeting/setUserStream', stream)
+      if (this.streamCurrentUser) {
+        this.initSpeechDetection()
+      }
+      this.myPeer.on('call', this.answerToCall)
+    },
+
+    initSpeechDetection() {
+      const speechEvents = hark(this.streamCurrentUser, {})
+      speechEvents.on('speaking', this.speakHandler)
+      speechEvents.on('stopped_speaking', this.stopSpeakHandler)
+    },
+
+    answerToCall(call) {
+      call.answer(this.streamCurrentUser)
+      call.on('stream', (userStream) => {
+        const participant = this.getParticipantByPeerId(call.peer)
+        if (participant) {
+          this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`, {
+            userId: participant.user.id,
+            stream: userStream,
+          })
+          this.$store.commit(`meeting/${SET_CALL_TO_PARTICIPANT}`, {
+            userId: participant.user.id,
+            call,
+          })
+        } else {
+          console.log(`participant not found ${call.peer}`)
+        }
+      })
+    },
+
     isShowStreamParticipant(stream, userId) {
       return stream && this.participantsMeetingState[userId]?.enabledVideo
 
