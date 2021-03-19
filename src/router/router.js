@@ -63,7 +63,7 @@ let router = new Router({
           if (error.response.status === 404) {
             next('404')
           } else if (error.response.status === 400) {
-            next('wasConnectedToMeeting')
+            next('was-connected-to-meeting')
           }
         }
       },
