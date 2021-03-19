@@ -198,6 +198,9 @@ export default {
         this.resetCheckpoint,
         this.checkpoint.timeout
       )
+      if (document.fullscreenElement) {
+        document.exitFullscreen()
+      }
     },
 
     passCheckListeners(checkpointId, userId) {

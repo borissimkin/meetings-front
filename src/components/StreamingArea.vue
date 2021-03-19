@@ -2,7 +2,7 @@
   <div>
     <div id='video-grid'>
       <div :class="{'speaking': meetingStateOfCurrentUser.isSpeaking}" class='post-1'>
-        <video v-show='isShowStreamCurrentUser' :srcObject.prop='streamCurrentUser' autoplay muted></video>
+        <VideoPlayer v-show='isShowStreamCurrentUser' :stream='streamCurrentUser'></VideoPlayer>
         <VideoStreamPlaceholder v-show='!isShowStreamCurrentUser' :user='currentUser'></VideoStreamPlaceholder>
         <span class='stream-name'>{{ getName(currentUser) }}</span>
       </div>
@@ -12,15 +12,17 @@
              :class='place'
         >
 
-          <div style='width: 100%; height: 100%' :class="{'speaking': participantIsSpeaking(streamPlaces[place].user.id)}">
-              <video
-                v-show='isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
-                :srcObject.prop='streamPlaces[place].stream'
-                autoplay>
-              </video>
-              <VideoStreamPlaceholder
-                v-show='!isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
-                :key='`place-${index}`' :user='streamPlaces[place].user'></VideoStreamPlaceholder>
+          <div :class="{'speaking': participantIsSpeaking(streamPlaces[place].user.id)}"
+               style='width: 100%; height: 100%'>
+            <VideoPlayer v-show='isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
+                         :stream='streamPlaces[place].stream'>
+
+            </VideoPlayer>
+            <VideoStreamPlaceholder
+              v-show='!isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
+              :key='`place-${index}`' :user='streamPlaces[place].user'>
+
+            </VideoStreamPlaceholder>
             <span :key='`name-${streamPlaces[place].user.id}`' class='stream-name'>{{ getName(streamPlaces[place].user)
               }}</span>
 
@@ -35,10 +37,10 @@
         </template>
       </template>
       <video v-for='stashedParticipant in stashedParticipantsStream'
+             v-show='false'
              :key='`stashed-stream-${stashedParticipant.user.id}`'
              :srcObject.prop='stashedParticipant.stream'
-             autoplay
-             v-show='false'/>
+             autoplay />
     </div>
   </div>
 </template>
@@ -57,6 +59,7 @@ import {
 import VideoStreamPlaceholder from '@/components/VideoStreamPlaceholder'
 import { getFullName } from '@/helpers/username.process'
 import hark from 'hark'
+import VideoPlayer from '@/components/VideoPlayer'
 //todo: все таки вынести видео в отдельные компоненты
 /**
  * peer {
@@ -72,7 +75,7 @@ import hark from 'hark'
  * **/
 export default {
   name: 'StreamingArea',
-  components: { VideoStreamPlaceholder },
+  components: { VideoPlayer, VideoStreamPlaceholder },
   props: {
     meetingId: {
       type: String,
@@ -130,13 +133,13 @@ export default {
         }
         return true
       })
-    }
+    },
   },
   mounted() {
     navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      })
+      video: true,
+      audio: true,
+    })
       .then(this.callInit)
       .catch(() => {
         console.log('ДАЙТЕ ДОСТУП!!') //todo
@@ -254,7 +257,7 @@ $border-color: #cdcdcd;
 
 
 #video-grid {
-  border:  1px solid $border-color;
+  border: 1px solid $border-color;
   border-right: 0;
   display: grid;
   grid-template-areas:
@@ -332,11 +335,6 @@ $border-color: #cdcdcd;
   grid-area: post-6;
 }
 
-video {
-  width: 100%;
-  height: auto;
-  max-height: 100%;
-  object-fit: cover;
-}
+
 
 </style>
