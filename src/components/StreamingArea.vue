@@ -60,6 +60,7 @@ import VideoStreamPlaceholder from '@/components/VideoStreamPlaceholder'
 import { getFullName } from '@/helpers/username.process'
 import hark from 'hark'
 import VideoPlayer from '@/components/VideoPlayer'
+import streamTypes from '@/helpers/stream.type'
 //todo: все таки вынести видео в отдельные компоненты
 /**
  * peer {
@@ -81,6 +82,10 @@ export default {
       type: String,
       required: true,
     },
+    streamType: {
+      type: Number,
+      required: true
+    }
   },
   data() {
     return {
@@ -136,13 +141,29 @@ export default {
     },
   },
   mounted() {
-    navigator.mediaDevices.getUserMedia({
-      video: true,
-      audio: true,
-    })
+    //todo: менять css свйоство видео в зависимости от типа стрима
+    //todo: нельзя записывать функцию с медиа девайсов в переменную, переписать это
+    let constraints;
+    let funcGetStream;
+    if (this.streamType === streamTypes.WEBCAM) {
+      constraints = {
+        video: true,
+        audio: true,
+      }
+      funcGetStream = navigator.mediaDevices.getUserMedia
+    } else if (this.streamType === streamTypes.DESKTOP) {
+      funcGetStream = navigator.mediaDevices.getDisplayMedia
+      constraints = {}
+    } else {
+      console.error(`Stream type=${this.streamType} not found`)
+      return
+    }
+    console.log({funcGetStream})
+    navigator.mediaDevices.getDisplayMedia(constraints)
       .then(this.callInit)
-      .catch(() => {
-        console.log('ДАЙТЕ ДОСТУП!!') //todo
+      .catch((error) => {
+        console.error(error)
+        console.log('дайте доступ к медиаустройствам') //todo:
       })
 
     this.myPeer.on('open', (peerId) => {

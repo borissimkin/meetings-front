@@ -41,9 +41,9 @@ export default {
 }
 video {
   width: 100%;
-  height: auto;
+  height: 100%;
   max-height: 100%;
-  object-fit: cover;
+  object-fit: fill;
 
 }
 
