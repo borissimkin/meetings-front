@@ -141,30 +141,28 @@ export default {
     },
   },
   mounted() {
-    //todo: менять css свйоство видео в зависимости от типа стрима
-    //todo: нельзя записывать функцию с медиа девайсов в переменную, переписать это
-    let constraints;
-    let funcGetStream;
     if (this.streamType === streamTypes.WEBCAM) {
-      constraints = {
+      const constraints = {
         video: true,
         audio: true,
       }
-      funcGetStream = navigator.mediaDevices.getUserMedia
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(this.callInit)
+        .catch((error) => {
+          console.error(error)
+          console.log('дайте доступ к вебкамере') //todo:
+        })
     } else if (this.streamType === streamTypes.DESKTOP) {
-      funcGetStream = navigator.mediaDevices.getDisplayMedia
-      constraints = {}
+      navigator.mediaDevices.getDisplayMedia({})
+        .then(this.callInit)
+        .catch((error) => {
+          console.error(error)
+          console.log('дайте доступ к трансляции экрана') //todo:
+        })
     } else {
       console.error(`Stream type=${this.streamType} not found`)
       return
     }
-    console.log({funcGetStream})
-    navigator.mediaDevices.getDisplayMedia(constraints)
-      .then(this.callInit)
-      .catch((error) => {
-        console.error(error)
-        console.log('дайте доступ к медиаустройствам') //todo:
-      })
 
     this.myPeer.on('open', (peerId) => {
       this.$socket.client.emit('call-connect', peerId)
