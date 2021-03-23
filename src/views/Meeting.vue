@@ -13,10 +13,11 @@
           </v-tabs>
           <v-tabs-items v-model="tab">
             <v-tab-item>
-              <StreamingArea :meeting-id="meetingId" />
+              <StreamingArea :meeting-id="meetingId"
+                             :stream-type='streamType' />
               <SettingsMediaDevices />
             </v-tab-item>
-            <v-tab-item :eager="true">
+            <v-tab-item eager>
               <Whiteboard
                 :height="600"
                 :width="900"
@@ -94,6 +95,7 @@ import { mapGetters, mapMutations, mapState } from 'vuex'
 import AttendanceStatistics from '@/components/AttendanceStatisitcs'
 import { canStartCheckListeners } from '@/helpers/permissions'
 import meetingApi from '@/api/meeting.api'
+import streamTypes from '@/helpers/stream.type'
 
 export default {
   name: 'Meeting',
@@ -125,6 +127,7 @@ export default {
       tabChat: null,
       tabStatistic: null,
       isPassedSettingMeeting: false,
+      streamType: streamTypes.WEBCAM,
 
       checkpoint: {
         checkListenersWasStarted: false,
@@ -198,6 +201,9 @@ export default {
         this.resetCheckpoint,
         this.checkpoint.timeout
       )
+      if (document.fullscreenElement) {
+        document.exitFullscreen()
+      }
     },
 
     passCheckListeners(checkpointId, userId) {
@@ -243,8 +249,9 @@ export default {
       addUserIdToCheckpoint: ADD_USER_ID_TO_CHECKPOINT
     }),
 
-    async handleConfirmSettingDevices() {
+    async handleConfirmSettingDevices(streamType) {
       this.isPassedSettingMeeting = true
+      this.streamType = streamType;
       const meetingId = this.meetingId
       const settingDevices = {
         enabledVideo: this.meetingStateOfCurrentUser.enabledVideo,

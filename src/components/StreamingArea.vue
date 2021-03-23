@@ -2,7 +2,7 @@
   <div>
     <div id='video-grid'>
       <div :class="{'speaking': meetingStateOfCurrentUser.isSpeaking}" class='post-1'>
-        <video v-show='isShowStreamCurrentUser' :srcObject.prop='streamCurrentUser' autoplay muted></video>
+        <VideoPlayer v-show='isShowStreamCurrentUser' :stream='streamCurrentUser' muted></VideoPlayer>
         <VideoStreamPlaceholder v-show='!isShowStreamCurrentUser' :user='currentUser'></VideoStreamPlaceholder>
         <span class='stream-name'>{{ getName(currentUser) }}</span>
       </div>
@@ -12,15 +12,17 @@
              :class='place'
         >
 
-          <div style='width: 100%; height: 100%' :class="{'speaking': participantIsSpeaking(streamPlaces[place].user.id)}">
-              <video
-                v-show='isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
-                :srcObject.prop='streamPlaces[place].stream'
-                autoplay>
-              </video>
-              <VideoStreamPlaceholder
-                v-show='!isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
-                :key='`place-${index}`' :user='streamPlaces[place].user'></VideoStreamPlaceholder>
+          <div :class="{'speaking': participantIsSpeaking(streamPlaces[place].user.id)}"
+               style='width: 100%; height: 100%'>
+            <VideoPlayer v-show='isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
+                         :stream='streamPlaces[place].stream'>
+
+            </VideoPlayer>
+            <VideoStreamPlaceholder
+              v-show='!isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
+              :key='`place-${index}`' :user='streamPlaces[place].user'>
+
+            </VideoStreamPlaceholder>
             <span :key='`name-${streamPlaces[place].user.id}`' class='stream-name'>{{ getName(streamPlaces[place].user)
               }}</span>
 
@@ -35,10 +37,10 @@
         </template>
       </template>
       <video v-for='stashedParticipant in stashedParticipantsStream'
+             v-show='false'
              :key='`stashed-stream-${stashedParticipant.user.id}`'
              :srcObject.prop='stashedParticipant.stream'
-             autoplay
-             v-show='false'/>
+             autoplay />
     </div>
   </div>
 </template>
@@ -57,6 +59,9 @@ import {
 import VideoStreamPlaceholder from '@/components/VideoStreamPlaceholder'
 import { getFullName } from '@/helpers/username.process'
 import hark from 'hark'
+import VideoPlayer from '@/components/VideoPlayer'
+import streamTypes from '@/helpers/stream.type'
+import { concatDesktopStreamAndAudioStream } from '@/helpers/stream.process'
 //todo: все таки вынести видео в отдельные компоненты
 /**
  * peer {
@@ -72,10 +77,14 @@ import hark from 'hark'
  * **/
 export default {
   name: 'StreamingArea',
-  components: { VideoStreamPlaceholder },
+  components: { VideoPlayer, VideoStreamPlaceholder },
   props: {
     meetingId: {
       type: String,
+      required: true,
+    },
+    streamType: {
+      type: Number,
       required: true,
     },
   },
@@ -130,46 +139,19 @@ export default {
         }
         return true
       })
-    }
+    },
   },
   mounted() {
-    navigator.mediaDevices
-      .getUserMedia({
-        video: true,
-        audio: true,
-      })
-      .then((stream) => {
-        this.$store.dispatch('meeting/setUserStream', stream)
+    if (this.streamType === streamTypes.WEBCAM) {
+      this.initWebcamStream()
+    } else if (this.streamType === streamTypes.DESKTOP) {
+      this.initDesktopStream()
+    } else {
+      console.error(`Stream type=${this.streamType} not found`)
+      return
+    }
 
-        const speechEvents = hark(this.streamCurrentUser, {})
-        speechEvents.on('speaking', this.speakHandler)
-        speechEvents.on('stopped_speaking', this.stopSpeakHandler)
-
-        this.myPeer.on('call', (call) => {
-          console.log({ call })
-          call.answer(this.streamCurrentUser)
-          call.on('stream', (userStream) => {
-            const participant = this.getParticipantByPeerId(call.peer)
-            if (participant) {
-              this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`, {
-                userId: participant.user.id,
-                stream: userStream,
-              })
-              this.$store.commit(`meeting/${SET_CALL_TO_PARTICIPANT}`, {
-                userId: participant.user.id,
-                call,
-              })
-            } else {
-              console.log(`participant not found ${call.peer}`)
-            }
-          })
-        })
-        this.$socket.client.on('callConnected', (user, peerId) => {
-          this.connectToNewUser(user, peerId, this.streamCurrentUser)
-        })
-      })
     this.myPeer.on('open', (peerId) => {
-      console.log({peerId})
       this.$socket.client.emit('call-connect', peerId)
     })
   },
@@ -180,6 +162,10 @@ export default {
   },
 
   sockets: {
+    callConnected(user, peerId) {
+      this.connectToNewUser(user, peerId, this.streamCurrentUser)
+    },
+
     userSpeak(user) {
       const payload = {
         userId: user.id,
@@ -202,6 +188,37 @@ export default {
       setIsSpeakingCurrentUser: SET_IS_SPEAKING_CURRENT_USER,
       setIsSpeakingParticipant: SET_IS_SPEAKING_PARTICIPANT,
     }),
+
+    callInit(stream) {
+      this.$store.dispatch('meeting/setUserStream', stream)
+      this.myPeer.on('call', this.answerToCall)
+    },
+
+    initSpeechDetection(stream) {
+      const speechEvents = hark(stream, {})
+      speechEvents.on('speaking', this.speakHandler)
+      speechEvents.on('stopped_speaking', this.stopSpeakHandler)
+    },
+
+    answerToCall(call) {
+      call.answer(this.streamCurrentUser)
+      call.on('stream', (userStream) => {
+        const participant = this.getParticipantByPeerId(call.peer)
+        if (participant) {
+          this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`, {
+            userId: participant.user.id,
+            stream: userStream,
+          })
+          this.$store.commit(`meeting/${SET_CALL_TO_PARTICIPANT}`, {
+            userId: participant.user.id,
+            call,
+          })
+        } else {
+          console.log(`participant not found ${call.peer}`)
+        }
+      })
+    },
+
     isShowStreamParticipant(stream, userId) {
       return stream && this.participantsMeetingState[userId]?.enabledVideo
 
@@ -234,6 +251,42 @@ export default {
           })
       })
     },
+
+    initWebcamStream() {
+      const constraints = {
+        video: true,
+        audio: true,
+      }
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then((stream) => {
+          this.initSpeechDetection(stream)
+          this.callInit(stream)
+        })
+        .catch((error) => {
+          console.error(error)
+          console.log('дайте доступ к вебкамере') //todo:
+        })
+    },
+
+    initDesktopStream() {
+      navigator.mediaDevices.getDisplayMedia({ video: true })
+        .then( async (stream) => {
+          try {
+            const audioStream = await navigator.mediaDevices.getUserMedia({audio: true})
+            const concatenatedStream = concatDesktopStreamAndAudioStream(stream, audioStream)
+            this.initSpeechDetection(concatenatedStream)
+            this.callInit(concatenatedStream)
+          } catch (error) {
+            console.log(error)
+            //todo: toast
+            this.callInit(stream)
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+          console.log('дайте доступ к трансляции экрана') //todo:
+        })
+    }
   },
 }
 </script>
@@ -243,7 +296,7 @@ $border-color: #cdcdcd;
 
 
 #video-grid {
-  border:  1px solid $border-color;
+  border: 1px solid $border-color;
   border-right: 0;
   display: grid;
   grid-template-areas:
@@ -321,11 +374,5 @@ $border-color: #cdcdcd;
   grid-area: post-6;
 }
 
-video {
-  width: 100%;
-  height: auto;
-  max-height: 100%;
-  object-fit: cover;
-}
 
 </style>
