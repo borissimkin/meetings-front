@@ -143,37 +143,9 @@ export default {
   },
   mounted() {
     if (this.streamType === streamTypes.WEBCAM) {
-      const constraints = {
-        video: true,
-        audio: true,
-      }
-      navigator.mediaDevices.getUserMedia(constraints)
-        .then((stream) => {
-          this.initSpeechDetection(stream)
-          this.callInit(stream)
-        })
-        .catch((error) => {
-          console.error(error)
-          console.log('дайте доступ к вебкамере') //todo:
-        })
+      this.initWebcamStream()
     } else if (this.streamType === streamTypes.DESKTOP) {
-      navigator.mediaDevices.getDisplayMedia({ video: true })
-        .then( async (stream) => {
-          try {
-            const audioStream = await navigator.mediaDevices.getUserMedia({audio: true})
-            const concatenatedStream = concatDesktopStreamAndAudioStream(stream, audioStream)
-            this.initSpeechDetection(concatenatedStream)
-            this.callInit(concatenatedStream)
-          } catch (error) {
-            console.log(error)
-            //todo: toast
-            this.callInit(stream)
-          }
-        })
-        .catch((error) => {
-          console.error(error)
-          console.log('дайте доступ к трансляции экрана') //todo:
-        })
+      this.initDesktopStream()
     } else {
       console.error(`Stream type=${this.streamType} not found`)
       return
@@ -279,6 +251,42 @@ export default {
           })
       })
     },
+
+    initWebcamStream() {
+      const constraints = {
+        video: true,
+        audio: true,
+      }
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then((stream) => {
+          this.initSpeechDetection(stream)
+          this.callInit(stream)
+        })
+        .catch((error) => {
+          console.error(error)
+          console.log('дайте доступ к вебкамере') //todo:
+        })
+    },
+
+    initDesktopStream() {
+      navigator.mediaDevices.getDisplayMedia({ video: true })
+        .then( async (stream) => {
+          try {
+            const audioStream = await navigator.mediaDevices.getUserMedia({audio: true})
+            const concatenatedStream = concatDesktopStreamAndAudioStream(stream, audioStream)
+            this.initSpeechDetection(concatenatedStream)
+            this.callInit(concatenatedStream)
+          } catch (error) {
+            console.log(error)
+            //todo: toast
+            this.callInit(stream)
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+          console.log('дайте доступ к трансляции экрана') //todo:
+        })
+    }
   },
 }
 </script>
