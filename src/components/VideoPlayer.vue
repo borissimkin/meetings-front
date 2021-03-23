@@ -1,6 +1,7 @@
 <template>
   <div class='video-player' ref='video'>
     <video
+      :muted='muted'
       :srcObject.prop='stream'
       autoplay>
     </video>
@@ -16,7 +17,12 @@ export default {
     stream: {
       required: true,
       default: null
-    }
+    },
+    muted: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
   },
   methods: {
     toggleFullScreen() {

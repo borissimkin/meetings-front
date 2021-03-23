@@ -2,7 +2,7 @@
   <div>
     <div id='video-grid'>
       <div :class="{'speaking': meetingStateOfCurrentUser.isSpeaking}" class='post-1'>
-        <VideoPlayer v-show='isShowStreamCurrentUser' :stream='streamCurrentUser'></VideoPlayer>
+        <VideoPlayer v-show='isShowStreamCurrentUser' :stream='streamCurrentUser' muted></VideoPlayer>
         <VideoStreamPlaceholder v-show='!isShowStreamCurrentUser' :user='currentUser'></VideoStreamPlaceholder>
         <span class='stream-name'>{{ getName(currentUser) }}</span>
       </div>
