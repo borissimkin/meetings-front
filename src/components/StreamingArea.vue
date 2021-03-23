@@ -61,6 +61,7 @@ import { getFullName } from '@/helpers/username.process'
 import hark from 'hark'
 import VideoPlayer from '@/components/VideoPlayer'
 import streamTypes from '@/helpers/stream.type'
+import { concatDesktopStreamAndAudioStream } from '@/helpers/stream.process'
 //todo: все таки вынести видео в отдельные компоненты
 /**
  * peer {
@@ -84,8 +85,8 @@ export default {
     },
     streamType: {
       type: Number,
-      required: true
-    }
+      required: true,
+    },
   },
   data() {
     return {
@@ -147,14 +148,28 @@ export default {
         audio: true,
       }
       navigator.mediaDevices.getUserMedia(constraints)
-        .then(this.callInit)
+        .then((stream) => {
+          this.initSpeechDetection(stream)
+          this.callInit(stream)
+        })
         .catch((error) => {
           console.error(error)
           console.log('дайте доступ к вебкамере') //todo:
         })
     } else if (this.streamType === streamTypes.DESKTOP) {
-      navigator.mediaDevices.getDisplayMedia({})
-        .then(this.callInit)
+      navigator.mediaDevices.getDisplayMedia({ video: true })
+        .then( async (stream) => {
+          try {
+            const audioStream = await navigator.mediaDevices.getUserMedia({audio: true})
+            const concatenatedStream = concatDesktopStreamAndAudioStream(stream, audioStream)
+            this.initSpeechDetection(concatenatedStream)
+            this.callInit(concatenatedStream)
+          } catch (error) {
+            console.log(error)
+            //todo: toast
+            this.callInit(stream)
+          }
+        })
         .catch((error) => {
           console.error(error)
           console.log('дайте доступ к трансляции экрана') //todo:
@@ -204,14 +219,11 @@ export default {
 
     callInit(stream) {
       this.$store.dispatch('meeting/setUserStream', stream)
-      if (this.streamCurrentUser) {
-        this.initSpeechDetection()
-      }
       this.myPeer.on('call', this.answerToCall)
     },
 
-    initSpeechDetection() {
-      const speechEvents = hark(this.streamCurrentUser, {})
+    initSpeechDetection(stream) {
+      const speechEvents = hark(stream, {})
       speechEvents.on('speaking', this.speakHandler)
       speechEvents.on('stopped_speaking', this.stopSpeakHandler)
     },
@@ -353,7 +365,6 @@ $border-color: #cdcdcd;
 
   grid-area: post-6;
 }
-
 
 
 </style>
