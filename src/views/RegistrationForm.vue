@@ -103,6 +103,7 @@ export default {
       this.loading = true
       try {
         await AuthApi.signUp(this.form)
+        this.$toast.success('Вы успешно зарегистрировались')
         await this.$router.push('/login')
       } catch (error) {
         if (!error.response) {

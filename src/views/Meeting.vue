@@ -269,7 +269,6 @@ export default {
         } else if (error.response.status === 400) {
           return this.$router.push("/was-connected-to-meeting")
         }
-        //todo:
       }
       this.$socket.client.emit('join-meeting', meetingId, settingDevices)
       Promise.all([
@@ -286,7 +285,7 @@ export default {
           meetingId
         })
       ]).catch(error => {
-        //todo: тоаст
+        this.$toast.error('Произошла ошибка загрузки данных, перезагрузите страницу')
         console.log(error)
       })
     },
