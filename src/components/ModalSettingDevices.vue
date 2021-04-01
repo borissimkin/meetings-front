@@ -20,7 +20,9 @@
             >
               <template v-slot:label>
                 <v-icon color='black' title='Веб-камера'>mdi-webcam</v-icon>
+                <small>Веб-камера</small>
               </template>
+
             </v-radio>
             <v-radio
               :value=streamTypes.DESKTOP
@@ -28,6 +30,7 @@
             >
               <template v-slot:label>
                 <v-icon color='black' title='Рабочий стол'>mdi-monitor-screenshot</v-icon>
+                <small>Демонстрация экрана</small>
               </template>
             </v-radio>
           </v-radio-group>
