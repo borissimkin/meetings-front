@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { ERROR_MESSAGE } from '@/helpers/toast.messages'
+import { ERROR_MESSAGE, ROOM_WAS_CREATED } from '@/helpers/toast.messages'
 
 export default {
   name: 'ModalCreateRoom',
@@ -72,7 +72,7 @@ export default {
         await this.$store.dispatch('home/addRoom', {
           name: this.nameRoom,
         })
-        this.$toast.success('Комната успешно создана')
+        this.$toast.success(ROOM_WAS_CREATED)
       } catch (e) {
         console.log(e)
         this.$toast.error(ERROR_MESSAGE)

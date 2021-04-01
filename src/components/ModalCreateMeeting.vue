@@ -199,7 +199,7 @@
 import dayjs from "dayjs";
 import { ADD_MEETING } from '@/store/mutations.type'
 import { fromTimeToDayjs } from '@/helpers/datetime.process'
-import { ERROR_MESSAGE } from '@/helpers/toast.messages'
+import { ERROR_MESSAGE, MEETING_WAS_CREATED } from '@/helpers/toast.messages'
 export default {
   name: 'ModalCreateMeeting',
   props: {
@@ -266,7 +266,7 @@ export default {
           roomId: this.roomId,
           ...this.form,
         })
-        this.$toast.success('Собрание успешно создано')
+        this.$toast.success(MEETING_WAS_CREATED)
       } catch (e) {
         console.log(e)
         this.$toast.error(ERROR_MESSAGE)

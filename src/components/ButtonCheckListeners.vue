@@ -6,11 +6,14 @@
 
 <script>
 
+import { CHECK_LISTENERS_STARTED } from '@/helpers/toast.messages'
+
 export default {
   name: 'ButtonCheckListeners',
   methods: {
     checkListeners() {
       this.$socket.client.emit('check-listeners');
+      this.$toast.info(CHECK_LISTENERS_STARTED)
     }
   }
 }

@@ -96,6 +96,9 @@ import AttendanceStatistics from '@/components/AttendanceStatisitcs'
 import { canStartCheckListeners } from '@/helpers/permissions'
 import meetingApi from '@/api/meeting.api'
 import streamTypes from '@/helpers/stream.type'
+import { CHECK_LISTENERS_STARTED, ERROR_DATA_DOWNLOAD } from '@/helpers/toast.messages'
+import { contentToastRaisedHand } from '@/toasts'
+import { getFullName } from '@/helpers/username.process'
 
 export default {
   name: 'Meeting',
@@ -149,6 +152,10 @@ export default {
     ...mapGetters('meeting', [
       'getParticipantByUserId'
     ]),
+
+    isBossOfThisMeeting() {
+      return this.currentUser.id === this.meetingInfo.creator.id
+    }
   },
 
   sockets: {
@@ -192,6 +199,7 @@ export default {
         userIds: []
       })
       if (canStartCheckListeners(this.currentUser.id, this.meetingInfo.creator.id)) {
+        this.$toast.info(CHECK_LISTENERS_STARTED)
         return
       }
       this.checkpoint.checkpointId = checkpoint.id
@@ -218,6 +226,9 @@ export default {
         userId,
         isRaisedHand,
       })
+      if (this.isBossOfThisMeeting && isRaisedHand) {
+        this.showToastRaisedHand(userId)
+      }
     },
 
     toggleAudio(userId, enabledAudio) {
@@ -248,6 +259,23 @@ export default {
       addCheckpoint: ADD_CHECKPOINT,
       addUserIdToCheckpoint: ADD_USER_ID_TO_CHECKPOINT
     }),
+
+    showToastRaisedHand(userId) {
+      const participant = this.getParticipantByUserId(userId)
+      if (!participant) {
+        console.error("Raised hand toast doesnt show, participant not found!")
+        return;
+      }
+      const toastId = this.$toast(contentToastRaisedHand({
+        userFullName: getFullName(participant.user.firstName,
+          participant.user.lastName)
+      }, {
+        click: () => {
+          //todo: давать права на рисование
+          this.$toast.dismiss(toastId)
+        }
+      }))
+    },
 
     async handleConfirmSettingDevices(streamType) {
       this.isPassedSettingMeeting = true
@@ -285,7 +313,7 @@ export default {
           meetingId
         })
       ]).catch(error => {
-        this.$toast.error('Произошла ошибка загрузки данных, перезагрузите страницу')
+        this.$toast.error(ERROR_DATA_DOWNLOAD)
         console.log(error)
       })
     },

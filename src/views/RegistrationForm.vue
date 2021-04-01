@@ -68,6 +68,7 @@
 
 <script>
 import AuthApi from '@/api/auth.api'
+import { REGISTRATION_SUCCESS } from '@/helpers/toast.messages'
 export default {
   //todo: когда(если) будет свободное время, обязательно перепиши
   // todo: чтобы не повторялся код с логином
@@ -103,7 +104,7 @@ export default {
       this.loading = true
       try {
         await AuthApi.signUp(this.form)
-        this.$toast.success('Вы успешно зарегистрировались')
+        this.$toast.success(REGISTRATION_SUCCESS)
         await this.$router.push('/login')
       } catch (error) {
         if (!error.response) {

@@ -62,6 +62,7 @@ import hark from 'hark'
 import VideoPlayer from '@/components/VideoPlayer'
 import streamTypes from '@/helpers/stream.type'
 import { concatDesktopStreamAndAudioStream } from '@/helpers/stream.process'
+import { ERROR_MEDIA_DEVICES, ERROR_MICRO } from '@/helpers/toast.messages'
 //todo: все таки вынести видео в отдельные компоненты
 /**
  * peer {
@@ -264,7 +265,7 @@ export default {
         })
         .catch((error) => {
           console.error(error)
-          console.log('дайте доступ к вебкамере') //todo:
+          this.$toast.error(ERROR_MEDIA_DEVICES)
         })
     },
 
@@ -278,13 +279,13 @@ export default {
             this.callInit(concatenatedStream)
           } catch (error) {
             console.log(error)
-            //todo: toast
+            this.$toast.error(ERROR_MICRO)
             this.callInit(stream)
           }
         })
         .catch((error) => {
           console.error(error)
-          console.log('дайте доступ к трансляции экрана') //todo:
+          this.$toast.error(ERROR_MEDIA_DEVICES)
         })
     }
   },
