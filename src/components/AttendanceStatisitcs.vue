@@ -4,7 +4,7 @@
       <AttendanceStatisticsChart
         class='statistics-chart'
         :options='chartOptions'
-        :chart-data='testChartData'/>
+        :chart-data='resultChartData'/>
       <div class='ml-3'>
         <ButtonCheckListeners v-if='canStartCheckListeners' />
         <template v-if='showFilterLastCheckpoint'>
@@ -147,9 +147,7 @@ export default {
       return result
     },
 
-    testChartData() {
-      //labels: ['Иванов Иван', 'Иванов Иван', 'Иванов Иван', 'Иванов Иван', 'Иванов Иван', 'Иванов Иван', 'Иванов Иван'],
-      //data: [1, 5, 2, 1, 3, 1, 2],
+    resultChartData() {
       return {
         labels: this.chartData.labels,
         datasets: [{

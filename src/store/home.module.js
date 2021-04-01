@@ -43,14 +43,9 @@ const auth = {
     },
 
     async addRoom({ commit }, payload) {
-      try {
-        const { name } = { ...payload }
-        const response = await roomApi.createRoom(name)
-        commit(ADD_ROOM, response.data)
-      } catch (e) {
-        console.log(e)
-        //todo
-      }
+      const { name } = { ...payload }
+      const response = await roomApi.createRoom(name)
+      commit(ADD_ROOM, response.data)
     },
   },
 }

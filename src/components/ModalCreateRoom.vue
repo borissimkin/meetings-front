@@ -51,6 +51,8 @@
 </template>
 
 <script>
+import { ERROR_MESSAGE, ROOM_WAS_CREATED } from '@/helpers/toast.messages'
+
 export default {
   name: 'ModalCreateRoom',
   data() {
@@ -66,10 +68,15 @@ export default {
   },
   methods: {
     async createNewRoom() {
-      console.log('create')
-      await this.$store.dispatch('home/addRoom', {
-        name: this.nameRoom,
-      })
+      try {
+        await this.$store.dispatch('home/addRoom', {
+          name: this.nameRoom,
+        })
+        this.$toast.success(ROOM_WAS_CREATED)
+      } catch (e) {
+        console.log(e)
+        this.$toast.error(ERROR_MESSAGE)
+      }
       this.dialog = false
       this.nameRoom = ''
     },
