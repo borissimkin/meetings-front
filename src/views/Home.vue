@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import ModalCreateRoom from '@/components/ModalCreateRoom'
+import ModalCreateRoom from '@/components/modals/ModalCreateRoom'
 
 export default {
   name: 'Home',

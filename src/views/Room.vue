@@ -27,7 +27,7 @@
 </template>
 
 <script>
-import ModalCreateMeeting from '@/components/ModalCreateMeeting'
+import ModalCreateMeeting from '@/components/modals/ModalCreateMeeting'
 import { RESET_STATE } from '@/store/mutations.type'
 import MeetingListItem from '@/components/MeetingListItem'
 import roomApi from "@/api/room.api"

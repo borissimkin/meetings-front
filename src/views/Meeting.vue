@@ -54,7 +54,7 @@
           </v-tabs>
           <v-tabs-items v-model="tabChat">
             <v-tab-item>
-              <Chat :meeting-id="meetingId" />
+              <MeetingChat :meeting-id="meetingId" />
             </v-tab-item>
             <v-tab-item>
               <MeetingParticipantsList />
@@ -73,12 +73,12 @@
 </template>
 
 <script>
-import Chat from '@/components/Chat'
+import MeetingChat from '@/components/MeetingChat'
 import StreamingArea from '@/components/StreamingArea'
 import SettingsMediaDevices from '@/components/SettingMediaDevices'
 import Whiteboard from '@/components/Whiteboard'
 import MeetingParticipantsList from '@/components/MeetingParticipantsList'
-import ModalSettingDevices from '@/components/ModalSettingDevices'
+import ModalSettingDevices from '@/components/modals/ModalSettingDevices'
 import {
   ADD_PARTICIPANT,
   ADD_PARTICIPANTS_MEETING_STATE,
@@ -90,7 +90,7 @@ import {
   STOP_USER_STREAM,
   SET_ONLINE_PARTICIPANT, ADD_CHECKPOINT, ADD_USER_ID_TO_CHECKPOINT,
 } from '@/store/mutations.type'
-import ModalCheckListener from '@/components/ModalCheckListener'
+import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
 import AttendanceStatistics from '@/components/AttendanceStatisitcs'
 import { canStartCheckListeners } from '@/helpers/permissions'
@@ -110,7 +110,7 @@ export default {
     Whiteboard,
     SettingsMediaDevices,
     StreamingArea,
-    Chat,
+    MeetingChat,
   },
   props: {
     roomId: {
