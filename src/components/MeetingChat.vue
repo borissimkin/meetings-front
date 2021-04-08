@@ -28,7 +28,7 @@ import meetingApi from "@/api/meeting.api"
 import { mapState } from 'vuex'
 
 export default {
-  name: 'Chat',
+  name: 'MeetingChat',
   components: {
     Message,
   },

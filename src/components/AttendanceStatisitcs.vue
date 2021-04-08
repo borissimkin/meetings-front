@@ -6,7 +6,6 @@
         :options='chartOptions'
         :chart-data='resultChartData'/>
       <div class='ml-3'>
-        <ButtonCheckListeners v-if='canStartCheckListeners' />
         <template v-if='showFilterLastCheckpoint'>
           <v-switch
             v-model="statisticFilters.lastCheckpoint"
@@ -20,8 +19,10 @@
       </div>
     </template>
     <template v-else>
-      <div class='text-h5  mt-2 '>Проверка слушателей еще не проводилась</div>
+      <div class='text-h5  my-4 '>Проверка слушателей еще не проводилась</div>
     </template>
+    <ButtonCheckListeners v-if='canStartCheckListeners' />
+
   </div>
 </template>
 
