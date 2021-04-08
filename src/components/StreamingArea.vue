@@ -254,6 +254,7 @@ export default {
     },
 
     initWebcamStream() {
+      //todo: нужно брать по отдельности, иначе если нет вебки то вообще нельзя ниче делать + будет ошибка
       const constraints = {
         video: true,
         audio: true,

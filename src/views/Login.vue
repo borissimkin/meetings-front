@@ -66,7 +66,6 @@ export default {
         await this.$store.dispatch('auth/signIn', this.form)
         await this.$router.push(redirectService.getRedirectPath() || '/')
         this.$toast.success('Вы авторизованы!')
-
         this.$socket.client.emit('authenticate', { token: this.$store.state.auth.token })
         redirectService.removeRedirectPath()
       } catch (error) {
