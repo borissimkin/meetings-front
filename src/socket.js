@@ -2,7 +2,7 @@ import io from 'socket.io-client'
 import store from '@/store'
 import router from '@/router/router'
 
-const socket = io.connect(process.env.VUE_APP_SERVER_PATH)
+export const socket = io.connect(process.env.VUE_APP_SERVER_PATH)
 
 socket.on('connect', () => {
   socket
@@ -14,5 +14,3 @@ socket.on('connect', () => {
       store.dispatch('auth/logout')
     })
 })
-
-export default socket

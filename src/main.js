@@ -7,7 +7,7 @@ import 'vue-toastification/dist/index.css'
 require('dayjs/locale/ru')
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
 
-import socket from '@/socket'
+import { socket } from '@/socket'
 import vuetify from './plugins/vuetify'
 import { optionsToast } from '@/toasts'
 

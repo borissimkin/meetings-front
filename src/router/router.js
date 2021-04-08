@@ -11,7 +11,7 @@ import redirectService from '@/services/redirect.service'
 import RegistrationForm from '@/views/RegistrationForm'
 import Room from '@/views/Room'
 import Meeting from '@/views/Meeting'
-import socket from '@/socket'
+import { socket } from '@/socket'
 import WasConnectedToMeeting from '@/views/WasConnectedToMeeting'
 
 Vue.use(Router)
