@@ -61,8 +61,8 @@ import { getFullName } from '@/helpers/username.process'
 import hark from 'hark'
 import VideoPlayer from '@/components/VideoPlayer'
 import streamTypes from '@/helpers/stream.type'
-import { concatDesktopStreamAndAudioStream } from '@/helpers/stream.process'
-import { ERROR_MEDIA_DEVICES, ERROR_MICRO } from '@/helpers/toast.messages'
+import { concatVideoStreamAndAudioStream } from '@/helpers/stream.process'
+import { ERROR_MEDIA_DEVICES, ERROR_MICRO, ERROR_VIDEO } from '@/helpers/toast.messages'
 //todo: все таки вынести видео в отдельные компоненты
 /**
  * peer {
@@ -202,7 +202,6 @@ export default {
     },
 
     answerToCall(call) {
-      console.log({call})
       call.answer(this.streamCurrentUser)
       call.on('stream', (userStream) => {
         const participant = this.getParticipantByPeerId(call.peer)
@@ -244,7 +243,13 @@ export default {
     },
 
     connectToNewUser(user, peerId, stream) {
-      const call = this.myPeer.call(peerId, stream)
+      const constraints = {
+        'mandatory': {
+          'OfferToReceiveAudio': true,
+          'OfferToReceiveVideo': true
+        },
+      }
+      const call = this.myPeer.call(peerId, stream, constraints)
       call.on('stream', (userStream) => {
         this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`,
           {
@@ -254,21 +259,37 @@ export default {
       })
     },
 
-    initWebcamStream() {
-      //todo: нужно брать по отдельности, иначе если нет вебки то вообще нельзя ниче делать + будет ошибка
-      const constraints = {
-        video: true,
-        audio: true,
+    async initWebcamStream() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: true})
+        this.initSpeechDetection(stream)
+        this.callInit(stream)
+      } catch {
+        try {
+          const videoStream = await navigator.mediaDevices.getUserMedia({video: true})
+          try {
+            const audioStream = await navigator.mediaDevices.getUserMedia({audio: true})
+            const concatenatedStream = concatVideoStreamAndAudioStream(videoStream, audioStream)
+            this.initSpeechDetection(concatenatedStream)
+            this.callInit(concatenatedStream)
+          } catch (error) {
+            this.$toast.error(ERROR_MICRO)
+            this.callInit(videoStream)
+          }
+        } catch (error) {
+          this.$toast.error(ERROR_VIDEO)
+          try {
+            const audioStream = await navigator.mediaDevices.getUserMedia({audio: true})
+            this.initSpeechDetection(audioStream)
+            this.callInit(audioStream)
+          } catch (e) {
+            this.$toast.error(ERROR_MICRO)
+            this.callInit(new MediaStream())
+          }
+        }
+
       }
-      navigator.mediaDevices.getUserMedia(constraints)
-        .then((stream) => {
-          this.initSpeechDetection(stream)
-          this.callInit(stream)
-        })
-        .catch((error) => {
-          console.error(error)
-          this.$toast.error(ERROR_MEDIA_DEVICES)
-        })
+
     },
 
     initDesktopStream() {
@@ -276,7 +297,7 @@ export default {
         .then( async (stream) => {
           try {
             const audioStream = await navigator.mediaDevices.getUserMedia({audio: true})
-            const concatenatedStream = concatDesktopStreamAndAudioStream(stream, audioStream)
+            const concatenatedStream = concatVideoStreamAndAudioStream(stream, audioStream)
             this.initSpeechDetection(concatenatedStream)
             this.callInit(concatenatedStream)
           } catch (error) {
