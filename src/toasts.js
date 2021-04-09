@@ -17,7 +17,6 @@ export const optionsToast = {
 }
 
 export const contentToastRaisedHand = (props, listeners) => {
-  console.log({ props, listeners })
   return {
     component: ToastRaisedHand,
     props,

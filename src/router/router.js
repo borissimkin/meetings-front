@@ -74,7 +74,6 @@ let router = new Router({
       component: Login,
       beforeEnter: async (to, from, next) => {
         if (store.getters['auth/isLoggedIn']) {
-          console.log('Тут')
           await store.dispatch('auth/logout')
           socket.close()
         }
