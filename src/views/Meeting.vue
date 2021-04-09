@@ -278,7 +278,6 @@ export default {
     },
 
     async handleConfirmSettingDevices(streamType) {
-      this.isPassedSettingMeeting = true
       this.streamType = streamType;
       const meetingId = this.meetingId
       const settingDevices = {
@@ -298,24 +297,28 @@ export default {
           return this.$router.push("/was-connected-to-meeting")
         }
       }
-      this.$socket.client.emit('join-meeting', meetingId, settingDevices)
-      Promise.all([
-        this.$store.dispatch('meeting/fetchMeetingInfo', {
-          meetingId
-        }),
-        this.$store.dispatch(`meeting/fetchParticipants`, {
-          meetingId,
-        }),
-        this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
-          meetingId,
-        }),
-        this.$store.dispatch(`meeting/fetchCheckpoints`, {
-          meetingId
-        })
-      ]).catch(error => {
+      this.$store.dispatch(`meeting/fetchCheckpoints`, {
+        meetingId
+      })
+      this.$store.dispatch('meeting/fetchMeetingInfo', {
+        meetingId
+      })
+      try {
+        await Promise.all([
+          this.$store.dispatch(`meeting/fetchParticipants`, {
+            meetingId,
+          }),
+          this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
+            meetingId,
+          }),
+        ])
+        this.$socket.client.emit('join-meeting', meetingId, settingDevices)
+        this.isPassedSettingMeeting = true
+
+      } catch (error) {
         this.$toast.error(ERROR_DATA_DOWNLOAD)
         console.log(error)
-      })
+      }
     },
 
     handleConfirmPresence() {

@@ -153,7 +153,6 @@ export default {
     }
 
     this.myPeer.on('open', (peerId) => {
-      console.log({peerId})
       this.$socket.client.emit('call-connect', peerId)
     })
   },
@@ -165,7 +164,6 @@ export default {
 
   sockets: {
     callConnected(user, peerId) {
-      console.log({user, peerId})
       this.connectToNewUser(user, peerId, this.streamCurrentUser)
     },
 
@@ -207,7 +205,6 @@ export default {
       console.log({call})
       call.answer(this.streamCurrentUser)
       call.on('stream', (userStream) => {
-        console.log({userStream})
         const participant = this.getParticipantByPeerId(call.peer)
         if (participant) {
           this.$store.commit(`meeting/${SET_STREAM_TO_PARTICIPANT}`, {

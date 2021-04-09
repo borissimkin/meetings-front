@@ -47,6 +47,14 @@ const productionPeerConfig = {
 }
 
 const developmentPeerConfig = {
+  config: {
+    iceServers: [
+      {
+        url: 'stun:stun.l.google.com:19302',
+      },
+      { url: 'stun:stun01.sipphone.com' },
+    ],
+  },
   host: '/',
   port: process.env.VUE_APP_PEER_SERVER_PORT,
 }
