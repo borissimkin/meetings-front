@@ -61,9 +61,9 @@ let router = new Router({
           next()
         } catch (error) {
           if (error.response.status === 404) {
-            next('404')
+            next('/404')
           } else if (error.response.status === 400) {
-            next('was-connected-to-meeting')
+            next('/was-connected-to-meeting')
           }
         }
       },
@@ -74,8 +74,9 @@ let router = new Router({
       component: Login,
       beforeEnter: async (to, from, next) => {
         if (store.getters['auth/isLoggedIn']) {
+          console.log('Тут')
           await store.dispatch('auth/logout')
-          socket.emit('authenticate', { token: '' })
+          socket.close()
         }
         next()
       },
