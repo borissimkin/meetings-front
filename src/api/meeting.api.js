@@ -28,4 +28,12 @@ export default {
   getCheckpoints(meetingId) {
     return server.get(`/meeting/${meetingId}/checkpoints`)
   },
+
+  getExamInfo(meetingId) {
+    return server.get(`/meeting/${meetingId}/exam`)
+  },
+
+  getStudentExamStates(meetingId) {
+    return server.get(`/meeting/${meetingId}/exam/student-states`)
+  },
 }

@@ -4,6 +4,10 @@
       Участников: {{countParticipants}}
     </h3>
     <v-divider />
+    <template v-if='isExamMeeting'>
+      <ExamSettings />
+      <v-divider />
+    </template>
     <v-spacer></v-spacer>
     <MeetingParticipantsListItem :user='currentUser'
                                  :participantState='meetingStateOfCurrentUser' />
@@ -17,10 +21,11 @@
 <script>
 import { mapGetters, mapState } from 'vuex'
 import MeetingParticipantsListItem from '@/components/MeetingParticipantsListItem'
+import ExamSettings from '@/components/ExamSettings'
 
 export default {
   name: 'MeetingParticipantsList',
-  components: { MeetingParticipantsListItem },
+  components: { ExamSettings, MeetingParticipantsListItem },
   computed: {
     ...mapState("auth", {
       currentUser: (state) => state.currentUser,
@@ -28,6 +33,7 @@ export default {
     ...mapState("meeting", {
       participantsMeetingState: (state) => state.participantsMeetingState,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
+      isExamMeeting: (state) => state.meetingInfo.isExam
     }),
     ...mapGetters("meeting", [
       'onlineParticipants'
@@ -49,7 +55,7 @@ export default {
   max-height: 700px;
   overflow: auto;
 
-
 }
+
 
 </style>
