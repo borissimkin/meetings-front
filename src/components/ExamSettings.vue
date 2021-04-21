@@ -2,9 +2,10 @@
   <div>
     <div class='exam-info'>
       <span class='caption pl-1'>Время подготовки:</span>
-      <div>
-        <span class='font-weight-medium caption'>{{countMinutesToPrepare}}</span>
-        <v-icon color='black' class='px-1' size='small'>mdi-pencil</v-icon>
+      <div class='mb-2'>
+        <span class='font-weight-medium caption pr-1'>{{countMinutesToPrepare}}</span>
+        <ModalChangePrepareTimeExam v-if='canChangeTimeToPrepare'
+                                    :initial-count-minutes='this.examInfo.minutesToPrepare' />
       </div>
     </div>
     <div class='exam-info mb-2'>
@@ -28,10 +29,18 @@
 <script>
 import { mapState } from 'vuex'
 import { getFullName } from '@/helpers/username.process'
+import ModalChangePrepareTimeExam from '@/components/modals/ModalChangePrepareTimeExam'
 
 export default {
   name: 'ExamSettings',
+  components: { ModalChangePrepareTimeExam },
   computed: {
+    ...mapState("auth", {
+      currentUserId: state => state.currentUser.id
+    }),
+    ...mapState("meeting", {
+      meetingInfo: state => state.meetingInfo
+    }),
     ...mapState("exam", {
       examInfo: state => state.examInfo
     }),
@@ -47,6 +56,9 @@ export default {
         }
       }
       return ""
+    },
+    canChangeTimeToPrepare() {
+      return this.meetingInfo.creator.id === this.currentUserId
     }
   }
 }

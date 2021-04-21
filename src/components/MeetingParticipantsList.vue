@@ -11,11 +11,11 @@
     <v-spacer></v-spacer>
     <MeetingParticipantsListItem :user='currentUser'
                                  :participantState='meetingStateOfCurrentUser'
-                                 :exam-state='studentExamStates[currentUser.id]' />
+                                 :exam-state='getExamState(currentUser.id)' />
     <MeetingParticipantsListItem v-for='participant in onlineParticipants'
                                  :key='participant.user.id'
                                  :participantState='participantsMeetingState[participant.user.id]'
-                                 :exam-state='studentExamStates[participant.user.id]'
+                                 :exam-state='getExamState(participant.user.id)'
                                  :user='participant.user' />
   </v-container>
 </template>
@@ -48,6 +48,14 @@ export default {
       return this.onlineParticipants.length + 1
     },
 
+  },
+  methods: {
+    getExamState(userId) {
+      const examState = this.studentExamStates[userId]
+      return examState ? examState : {}
+
+
+    }
   }
 }
 </script>

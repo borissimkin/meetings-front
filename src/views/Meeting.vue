@@ -88,7 +88,7 @@ import {
   SET_ENABLED_AUDIO_PARTICIPANT,
   SET_ENABLED_VIDEO_PARTICIPANT,
   STOP_USER_STREAM,
-  SET_ONLINE_PARTICIPANT, ADD_CHECKPOINT, ADD_USER_ID_TO_CHECKPOINT,
+  SET_ONLINE_PARTICIPANT, ADD_CHECKPOINT, ADD_USER_ID_TO_CHECKPOINT, SET_MINUTES_TO_PREPARE,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -236,6 +236,10 @@ export default {
         userId,
         enabledAudio,
       })
+    },
+
+    changeMinutesToPrepareExam(minutesToPrepare) {
+      this.$store.commit(`exam/${SET_MINUTES_TO_PREPARE}`, minutesToPrepare)
     },
 
     toggleVideo(userId, enabledVideo) {
