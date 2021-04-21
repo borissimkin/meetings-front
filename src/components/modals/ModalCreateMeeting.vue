@@ -197,7 +197,6 @@
 <script>
 //todo: валидировать время чтобы в прошлое нельзя было ставить и чтобы время начала не было больше времени окончания
 import dayjs from "dayjs";
-import { ADD_MEETING } from '@/store/mutations.type'
 import { fromTimeToDayjs } from '@/helpers/datetime.process'
 import { ERROR_MESSAGE, MEETING_WAS_CREATED } from '@/helpers/toast.messages'
 export default {
@@ -262,7 +261,7 @@ export default {
     async createMeeting() {
       this.loading = true
       try {
-        await this.$store.dispatch(`room/${ADD_MEETING}`, {
+        await this.$store.dispatch(`room/addMeeting`, {
           roomId: this.roomId,
           ...this.form,
         })

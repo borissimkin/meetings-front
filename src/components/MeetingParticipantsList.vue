@@ -10,10 +10,12 @@
     </template>
     <v-spacer></v-spacer>
     <MeetingParticipantsListItem :user='currentUser'
-                                 :participantState='meetingStateOfCurrentUser' />
+                                 :participantState='meetingStateOfCurrentUser'
+                                 :exam-state='studentExamStates[currentUser.id]' />
     <MeetingParticipantsListItem v-for='participant in onlineParticipants'
                                  :key='participant.user.id'
                                  :participantState='participantsMeetingState[participant.user.id]'
+                                 :exam-state='studentExamStates[participant.user.id]'
                                  :user='participant.user' />
   </v-container>
 </template>
@@ -34,6 +36,9 @@ export default {
       participantsMeetingState: (state) => state.participantsMeetingState,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
       isExamMeeting: (state) => state.meetingInfo.isExam
+    }),
+    ...mapState("exam", {
+      studentExamStates: (state) => state.studentExamStates,
     }),
     ...mapGetters("meeting", [
       'onlineParticipants'

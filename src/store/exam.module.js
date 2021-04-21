@@ -1,7 +1,11 @@
-const { SET_STUDENT_EXAM_STATES } = require('@/store/mutations.type')
-const { SET_RESPONDED_USER_ID } = require('@/store/mutations.type')
-const { SET_MINUTES_TO_PREPARE } = require('@/store/mutations.type')
-const { SET_EXAM_INFO } = require('@/store/mutations.type')
+import {
+  SET_STUDENT_EXAM_STATES,
+  SET_RESPONDED_USER_ID,
+  SET_MINUTES_TO_PREPARE,
+  SET_EXAM_INFO,
+} from '@/store/mutations.type'
+import meetingApi from '@/api/meeting.api'
+
 const getDefaultState = () => {
   return {
     examInfo: {
@@ -34,10 +38,17 @@ const exam = {
     },
   },
 
-  // actions: {
-  //   fetchExamInfo({ commit }, payload) {},
-  //
-  //   fetchStudentExamStates({ commit }, payload) {},
-  // },
+  actions: {
+    async fetchExamInfo({ commit }, meetingId) {
+      console.log({ meetingId })
+      const response = await meetingApi.getExamInfo(meetingId)
+      commit(SET_EXAM_INFO, response.data)
+    },
+
+    async fetchStudentExamStates({ commit }, meetingId) {
+      const response = await meetingApi.getStudentExamStates(meetingId)
+      commit(SET_STUDENT_EXAM_STATES, response.data)
+    },
+  },
 }
 export default exam

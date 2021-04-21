@@ -312,6 +312,9 @@ export default {
             meetingId,
           }),
         ])
+        if (this.meetingInfo.isExam) {
+          this.fetchExam(meetingId)
+        }
         this.$socket.client.emit('join-meeting', meetingId, settingDevices)
         this.isPassedSettingMeeting = true
 
@@ -319,6 +322,12 @@ export default {
         this.$toast.error(ERROR_DATA_DOWNLOAD)
         console.log(error)
       }
+    },
+
+    fetchExam(meetingId) {
+      this.$store.dispatch("exam/fetchExamInfo", meetingId)
+      this.$store.dispatch("exam/fetchStudentExamStates", meetingId)
+
     },
 
     handleConfirmPresence() {

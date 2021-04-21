@@ -16,15 +16,18 @@
         <v-icon v-show='isRaisedHand' color='orange'>mdi-hand-right</v-icon>
       </div>
     </div>
-    <!--    <div class='px-1 text-caption font-weight-light'>-->
-    <!--      {{new Date().toISOString()}}-->
-    <!--    </div>-->
+    <template v-if='!examStateIsEmpty'>
+      <div class='px-1 text-caption font-weight-light'>
+        {{new Date().toISOString()}}
+      </div>
+    </template>
   </v-card>
 </template>
 
 <script>
 import { getFullName } from '@/helpers/username.process'
 import { mapState } from 'vuex'
+import _ from "lodash"
 
 export default {
   name: 'MeetingParticipantsListItem',
@@ -41,6 +44,12 @@ export default {
       default: () => {
       },
     },
+    examState: {
+      type: Object,
+      required: true,
+      default: () => {
+      }
+    }
   },
   computed: {
     ...mapState("meeting", {
@@ -48,6 +57,10 @@ export default {
     }),
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
+    },
+
+    examStateIsEmpty() {
+      return _.isEmpty(this.examState)
     },
 
     isRaisedHand() {
