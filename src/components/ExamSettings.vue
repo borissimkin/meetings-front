@@ -10,7 +10,7 @@
     </div>
     <div class='exam-info mb-2'>
       <v-btn x-small>сбросить</v-btn>
-      <v-btn x-small >запустить</v-btn>
+      <v-btn @click='startAllPreparations' :loading='isLoading' x-small >запустить</v-btn>
     </div>
     <template>
       <v-divider />
@@ -30,10 +30,17 @@
 import { mapState } from 'vuex'
 import { getFullName } from '@/helpers/username.process'
 import ModalChangePrepareTimeExam from '@/components/modals/ModalChangePrepareTimeExam'
+import meetingApi from "@/api/meeting.api"
+import { START_ALL_PREPARATIONS_TO_EXAM } from '@/helpers/toast.messages'
 
 export default {
   name: 'ExamSettings',
   components: { ModalChangePrepareTimeExam },
+  data() {
+    return {
+      isLoading: false
+    }
+  },
   computed: {
     ...mapState("auth", {
       currentUserId: state => state.currentUser.id
@@ -59,6 +66,19 @@ export default {
     },
     canChangeTimeToPrepare() {
       return this.meetingInfo.creator.id === this.currentUserId
+    }
+  },
+  methods: {
+    async startAllPreparations() {
+      try {
+        this.isLoading = true
+        await meetingApi.startAllPreparations(this.meetingInfo.hashId)
+        this.$toast.success(START_ALL_PREPARATIONS_TO_EXAM)
+      } catch (e) {
+        console.error({e})
+      } finally {
+        this.isLoading = false
+      }
     }
   }
 }

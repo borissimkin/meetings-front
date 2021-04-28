@@ -36,4 +36,8 @@ export default {
   getStudentExamStates(meetingId) {
     return server.get(`/meeting/${meetingId}/exam/student-states`)
   },
+
+  startAllPreparations(meetingId) {
+    return server.put(`/meeting/${meetingId}/exam/start-all-preparation`)
+  },
 }

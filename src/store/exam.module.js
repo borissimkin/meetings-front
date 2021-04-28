@@ -3,6 +3,7 @@ import {
   SET_RESPONDED_USER_ID,
   SET_MINUTES_TO_PREPARE,
   SET_EXAM_INFO,
+  UPDATE_STUDENT_EXAM_STATES,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
@@ -35,6 +36,21 @@ const exam = {
     },
     [SET_STUDENT_EXAM_STATES](state, payload) {
       Object.assign(state.studentExamStates, payload)
+    },
+    [UPDATE_STUDENT_EXAM_STATES](state, payload) {
+      Object.entries(payload).forEach(([key]) => {
+        console.log(state.studentExamStates[key])
+        console.log(payload[key])
+        const examState1 = state.studentExamStates[key]
+        console.log({ examState1 })
+        this._vm.$set(
+          state.studentExamStates[key],
+          'prepareStart',
+          payload[key].prepareStart
+        )
+        // Object.assign(state.studentExamStates[key], payload[key])
+        // this._vm.$set(state.studentExamStates[key], key, payload[key])
+      })
     },
   },
 

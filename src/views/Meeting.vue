@@ -88,7 +88,11 @@ import {
   SET_ENABLED_AUDIO_PARTICIPANT,
   SET_ENABLED_VIDEO_PARTICIPANT,
   STOP_USER_STREAM,
-  SET_ONLINE_PARTICIPANT, ADD_CHECKPOINT, ADD_USER_ID_TO_CHECKPOINT, SET_MINUTES_TO_PREPARE,
+  SET_ONLINE_PARTICIPANT,
+  ADD_CHECKPOINT,
+  ADD_USER_ID_TO_CHECKPOINT,
+  SET_MINUTES_TO_PREPARE,
+  UPDATE_STUDENT_EXAM_STATES, SET_STUDENT_EXAM_STATES,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -96,7 +100,11 @@ import AttendanceStatistics from '@/components/AttendanceStatisitcs'
 import { canStartCheckListeners } from '@/helpers/permissions'
 import meetingApi from '@/api/meeting.api'
 import streamTypes from '@/helpers/stream.type'
-import { CHECK_LISTENERS_STARTED, ERROR_DATA_DOWNLOAD } from '@/helpers/toast.messages'
+import {
+  CHECK_LISTENERS_STARTED,
+  CURRENT_USER_START_PREPARATION_TO_EXAM,
+  ERROR_DATA_DOWNLOAD,
+} from '@/helpers/toast.messages'
 import { contentToastRaisedHand } from '@/toasts'
 import { getFullName } from '@/helpers/username.process'
 
@@ -211,6 +219,18 @@ export default {
       )
       if (document.fullscreenElement) {
         document.exitFullscreen()
+      }
+    },
+
+    startAllPreparation(studentExamStates) {
+      console.log({studentExamStates})
+      console.log(typeof this.$store.state.exam.studentExamStates[2].prepareStart)
+      console.log(UPDATE_STUDENT_EXAM_STATES)
+      this.$store.commit(`exam/${SET_STUDENT_EXAM_STATES}`, studentExamStates)
+      console.log(this.$store.state.exam.studentExamStates)
+
+      if (studentExamStates[this.currentUser.id]) {
+        this.$toast.info(CURRENT_USER_START_PREPARATION_TO_EXAM)
       }
     },
 

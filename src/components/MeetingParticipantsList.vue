@@ -11,11 +11,10 @@
     <v-spacer></v-spacer>
     <MeetingParticipantsListItem :user='currentUser'
                                  :participantState='meetingStateOfCurrentUser'
-                                 :exam-state='getExamState(currentUser.id)' />
+                                  />
     <MeetingParticipantsListItem v-for='participant in onlineParticipants'
                                  :key='participant.user.id'
                                  :participantState='participantsMeetingState[participant.user.id]'
-                                 :exam-state='getExamState(participant.user.id)'
                                  :user='participant.user' />
   </v-container>
 </template>

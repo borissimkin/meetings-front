@@ -18,7 +18,7 @@
     </div>
     <template v-if='!examStateIsEmpty'>
       <div class='px-1 text-caption font-weight-light'>
-        {{new Date().toISOString()}}
+        {{examState.prepareStart}}
       </div>
     </template>
   </v-card>
@@ -44,16 +44,18 @@ export default {
       default: () => {
       },
     },
-    examState: {
-      type: Object,
-      required: true,
-      default: () => {
-      }
+  },
+  watch: {
+    examState(val) {
+      console.log({ val })
     }
   },
   computed: {
     ...mapState("meeting", {
       meetingHostId: state => state.meetingInfo.creator.id
+    }),
+    ...mapState("exam", {
+      examStates: state => state.studentExamStates
     }),
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
@@ -61,6 +63,10 @@ export default {
 
     examStateIsEmpty() {
       return _.isEmpty(this.examState)
+    },
+
+    examState() {
+      return this.examStates[this.user.id]
     },
 
     isRaisedHand() {
