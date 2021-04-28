@@ -48,14 +48,6 @@ export default {
     },
 
   },
-  methods: {
-    getExamState(userId) {
-      const examState = this.studentExamStates[userId]
-      return examState ? examState : {}
-
-
-    }
-  }
 }
 </script>
 

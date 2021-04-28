@@ -92,7 +92,7 @@ import {
   ADD_CHECKPOINT,
   ADD_USER_ID_TO_CHECKPOINT,
   SET_MINUTES_TO_PREPARE,
-  UPDATE_STUDENT_EXAM_STATES, SET_STUDENT_EXAM_STATES,
+  SET_STUDENT_EXAM_STATES,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -223,13 +223,8 @@ export default {
     },
 
     startAllPreparation(studentExamStates) {
-      console.log({studentExamStates})
-      console.log(typeof this.$store.state.exam.studentExamStates[2].prepareStart)
-      console.log(UPDATE_STUDENT_EXAM_STATES)
       this.$store.commit(`exam/${SET_STUDENT_EXAM_STATES}`, studentExamStates)
-      console.log(this.$store.state.exam.studentExamStates)
-
-      if (studentExamStates[this.currentUser.id]) {
+      if (studentExamStates.find(examState => examState.userId === this.currentUser.id)) {
         this.$toast.info(CURRENT_USER_START_PREPARATION_TO_EXAM)
       }
     },

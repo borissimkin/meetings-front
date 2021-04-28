@@ -45,28 +45,24 @@ export default {
       },
     },
   },
-  watch: {
-    examState(val) {
-      console.log({ val })
-    }
-  },
   computed: {
     ...mapState("meeting", {
       meetingHostId: state => state.meetingInfo.creator.id
     }),
     ...mapState("exam", {
-      examStates: state => state.studentExamStates
+      studentExamStates: state => state.studentExamStates
     }),
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
     },
 
-    examStateIsEmpty() {
-      return _.isEmpty(this.examState)
+    examState() {
+      const state = this.studentExamStates.find(examState => examState.userId === this.user.id)
+      return state ? state : {}
     },
 
-    examState() {
-      return this.examStates[this.user.id]
+    examStateIsEmpty() {
+      return _.isEmpty(this.examState)
     },
 
     isRaisedHand() {

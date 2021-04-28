@@ -14,9 +14,9 @@ const getDefaultState = () => {
       respondedUserId: 0,
     },
     /**
-     * {userId: {prepareStart: Date} , }
+     * [{userId, prepareStart}, ]
      * **/
-    studentExamStates: {},
+    studentExamStates: [],
   }
 }
 //todo: свой стейт отдельно нужно хранить
@@ -35,28 +35,22 @@ const exam = {
       state.examInfo.respondedUserId = userId
     },
     [SET_STUDENT_EXAM_STATES](state, payload) {
-      Object.assign(state.studentExamStates, payload)
+      state.studentExamStates = payload
     },
     [UPDATE_STUDENT_EXAM_STATES](state, payload) {
-      Object.entries(payload).forEach(([key]) => {
-        console.log(state.studentExamStates[key])
-        console.log(payload[key])
-        const examState1 = state.studentExamStates[key]
-        console.log({ examState1 })
-        this._vm.$set(
-          state.studentExamStates[key],
-          'prepareStart',
-          payload[key].prepareStart
+      payload.forEach((payloadExamState) => {
+        const examState = state.studentExamStates.find(
+          (examState) => examState.userId === payloadExamState.userId
         )
-        // Object.assign(state.studentExamStates[key], payload[key])
-        // this._vm.$set(state.studentExamStates[key], key, payload[key])
+        Object.entries(examState).forEach(([key]) => {
+          examState[key] = payloadExamState[key]
+        })
       })
     },
   },
 
   actions: {
     async fetchExamInfo({ commit }, meetingId) {
-      console.log({ meetingId })
       const response = await meetingApi.getExamInfo(meetingId)
       commit(SET_EXAM_INFO, response.data)
     },
