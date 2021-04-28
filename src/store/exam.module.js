@@ -4,6 +4,7 @@ import {
   SET_MINUTES_TO_PREPARE,
   SET_EXAM_INFO,
   UPDATE_STUDENT_EXAM_STATES,
+  ADD_STUDENT_EXAM_STATE,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
@@ -19,7 +20,6 @@ const getDefaultState = () => {
     studentExamStates: [],
   }
 }
-//todo: свой стейт отдельно нужно хранить
 const exam = {
   namespaced: true,
   state: getDefaultState(),
@@ -46,6 +46,9 @@ const exam = {
           examState[key] = payloadExamState[key]
         })
       })
+    },
+    [ADD_STUDENT_EXAM_STATE](state, payload) {
+      state.studentExamStates.push(payload)
     },
   },
 

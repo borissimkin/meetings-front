@@ -92,7 +92,7 @@ import {
   ADD_CHECKPOINT,
   ADD_USER_ID_TO_CHECKPOINT,
   SET_MINUTES_TO_PREPARE,
-  SET_STUDENT_EXAM_STATES,
+  SET_STUDENT_EXAM_STATES, ADD_STUDENT_EXAM_STATE,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -160,6 +160,9 @@ export default {
     ...mapGetters('meeting', [
       'getParticipantByUserId'
     ]),
+    ...mapState("exam", {
+      studentExamStates: state => state.studentExamStates
+    }),
 
     isBossOfThisMeeting() {
       return this.currentUser.id === this.meetingInfo.creator.id
@@ -191,6 +194,13 @@ export default {
           enabledAudio,
         }
       })
+    },
+
+    studentConnected(examState) {
+      const currentExamState = this.studentExamStates.find(x => x.userId === examState.userId)
+      if (!currentExamState) {
+        this.$store.commit(`exam/${ADD_STUDENT_EXAM_STATE}`, examState)
+      }
     },
 
     userDisconnected(user) {
