@@ -2,13 +2,13 @@
   <div>
     <div class='exam-info'>
       <span class='caption pl-1'>Время подготовки:</span>
-      <div class='mb-2'>
+      <div class='my-auto py-2'>
         <span class='font-weight-medium caption pr-1'>{{countMinutesToPrepare}}</span>
-        <ModalChangePrepareTimeExam v-if='canChangeTimeToPrepare'
+        <ModalChangePrepareTimeExam v-if='canManageSettings'
                                     :initial-count-minutes='this.examInfo.minutesToPrepare' />
       </div>
     </div>
-    <div class='exam-info mb-2'>
+    <div v-if='canManageSettings' class='exam-info mb-2'>
       <v-btn x-small>сбросить</v-btn>
       <v-btn @click='startAllPreparations' :loading='isLoading' x-small >запустить</v-btn>
     </div>
@@ -18,7 +18,7 @@
         <span class='caption'>Отвечает: </span>
         <div v-if='respondedStudentName'>
           <span class='font-weight-medium caption'>{{ respondedStudentName }}</span>
-          <v-icon color='red' class='px-1' size='small'>mdi-close-box-outline</v-icon>
+          <v-icon v-if='canManageSettings' color='red' class='px-1' size='small'>mdi-close-box-outline</v-icon>
         </div>
 
       </div>
@@ -64,7 +64,7 @@ export default {
       }
       return ""
     },
-    canChangeTimeToPrepare() {
+    canManageSettings() {
       return this.meetingInfo.creator.id === this.currentUserId
     }
   },
