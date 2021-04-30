@@ -59,17 +59,12 @@ export default {
     }
   },
   watch: {
-    prepareStart(newPrepareStart) {
+    prepareStart() {
       if (this.timer) {
         clearInterval(this.timer)
       }
       this.createTimer()
-      console.log({newPrepareStart})
     },
-
-    countMinutesToPrepare(newCountMinutes) {
-      console.log({newCountMinutes})
-    }
   },
   computed: {
     ...mapState("meeting", {
@@ -96,7 +91,7 @@ export default {
     },
 
     countMinutesToPrepare() {
-      return this.examInfo.minutesToPrepare
+      return this.examState.minutesToPrepare
     },
 
 
@@ -135,12 +130,16 @@ export default {
     }
 
   },
+  mounted() {
+    if (this.examState && this.prepareStart) {
+      this.createTimer()
+    }
+  },
   methods: {
-    //todo: както сохранить нереактивно минуты на подготовку. Можно прям в функции сразу вычислять оставшееся время
     createTimer() {
       this.timer = setInterval(() => {
         const leftSeconds = dayjs().diff(dayjs(this.examState.prepareStart), "seconds")
-        let totalSeconds = this.examInfo.minutesToPrepare * 60 - leftSeconds;
+        let totalSeconds = this.countMinutesToPrepare * 60 - leftSeconds;
         if (totalSeconds < 0) {
           totalSeconds = 0
           clearInterval(this.timer)

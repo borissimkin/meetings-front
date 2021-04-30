@@ -15,7 +15,7 @@ const getDefaultState = () => {
       respondedUserId: 0,
     },
     /**
-     * [{userId, prepareStart}, ]
+     * [{ userId, prepareStart, minutesToPrepare }, ]
      * **/
     studentExamStates: [],
   }
