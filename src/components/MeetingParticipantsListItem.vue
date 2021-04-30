@@ -17,8 +17,8 @@
       </div>
     </div>
     <template v-if='!examStateIsEmpty'>
-      <div class='px-1 text-caption font-weight-light'>
-        {{examState.prepareStart}}
+      <div v-if='prepareStart' class='px-1 text-caption font-weight-light' :class="{'red--text': timeIsGone}">
+        {{ formatShowTimer }}
       </div>
     </template>
   </v-card>
@@ -28,6 +28,8 @@
 import { getFullName } from '@/helpers/username.process'
 import { mapState } from 'vuex'
 import _ from "lodash"
+import dayjs from 'dayjs'
+import { fromSecondsToTime, fromTimeToSeconds } from '@/helpers/datetime.process'
 
 export default {
   name: 'MeetingParticipantsListItem',
@@ -45,6 +47,30 @@ export default {
       },
     },
   },
+  data() {
+    return {
+      timer: null,
+      leftTimeToPrepare: {
+        hours: 0,
+        minutes: 0,
+        seconds: 0
+
+      }
+    }
+  },
+  watch: {
+    prepareStart(newPrepareStart) {
+      if (this.timer) {
+        clearInterval(this.timer)
+      }
+      this.createTimer()
+      console.log({newPrepareStart})
+    },
+
+    countMinutesToPrepare(newCountMinutes) {
+      console.log({newCountMinutes})
+    }
+  },
   computed: {
     ...mapState("meeting", {
       meetingHostId: state => state.meetingInfo.creator.id
@@ -52,6 +78,10 @@ export default {
     ...mapState("exam", {
       studentExamStates: state => state.studentExamStates
     }),
+    ...mapState("exam", {
+      examInfo: state => state.examInfo
+    }),
+
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
     },
@@ -60,6 +90,15 @@ export default {
       const state = this.studentExamStates.find(examState => examState.userId === this.user.id)
       return state ? state : {}
     },
+
+    prepareStart() {
+      return this.examState.prepareStart
+    },
+
+    countMinutesToPrepare() {
+      return this.examInfo.minutesToPrepare
+    },
+
 
     examStateIsEmpty() {
       return _.isEmpty(this.examState)
@@ -83,8 +122,44 @@ export default {
 
     isHostOfMeeting() {
       return this.user.id === this.meetingHostId
+    },
+
+    timeIsGone() {
+      return !fromTimeToSeconds(this.leftTimeToPrepare.hours, this.leftTimeToPrepare.minutes, this.leftTimeToPrepare.seconds)
+    },
+
+    formatShowTimer() {
+      return `${this.partTimeToShow(this.leftTimeToPrepare.hours)}:${this.partTimeToShow(this.leftTimeToPrepare.minutes)}:${this.partTimeToShow(
+        this.leftTimeToPrepare.seconds
+      )}`;
     }
+
   },
+  methods: {
+    //todo: както сохранить нереактивно минуты на подготовку. Можно прям в функции сразу вычислять оставшееся время
+    createTimer() {
+      this.timer = setInterval(() => {
+        const leftSeconds = dayjs().diff(dayjs(this.examState.prepareStart), "seconds")
+        let totalSeconds = this.examInfo.minutesToPrepare * 60 - leftSeconds;
+        if (totalSeconds < 0) {
+          totalSeconds = 0
+          clearInterval(this.timer)
+        }
+        const time = fromSecondsToTime(totalSeconds)
+        Object.assign(this.leftTimeToPrepare, time)
+
+      }, 1000)
+    },
+
+    partTimeToShow(number) {
+      const stringNumber = number.toString();
+      if (stringNumber.length < 2) {
+        return `0${stringNumber}`;
+      }
+      return stringNumber;
+    }
+
+  }
 }
 </script>
 
