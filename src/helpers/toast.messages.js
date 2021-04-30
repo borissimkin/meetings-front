@@ -10,4 +10,7 @@ export const ERROR_DATA_DOWNLOAD =
   'Произошла ошибка загрузки данных, перезагрузите страницу'
 export const REGISTRATION_SUCCESS = 'Вы успешно зарегистрировались'
 export const START_ALL_PREPARATIONS_TO_EXAM = 'Все начали подготовку!'
+export const RESET_ALL_PREPARATIONS_TO_EXAM = 'Подготовка сброшена'
 export const CURRENT_USER_START_PREPARATION_TO_EXAM = 'Ваше время пошло'
+export const CURRENT_USER_RESET_PREPARATION_TO_EXAM =
+  'Ваше время подготовки сброшено'

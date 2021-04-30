@@ -101,7 +101,7 @@ import { canStartCheckListeners } from '@/helpers/permissions'
 import meetingApi from '@/api/meeting.api'
 import streamTypes from '@/helpers/stream.type'
 import {
-  CHECK_LISTENERS_STARTED,
+  CHECK_LISTENERS_STARTED, CURRENT_USER_RESET_PREPARATION_TO_EXAM,
   CURRENT_USER_START_PREPARATION_TO_EXAM,
   ERROR_DATA_DOWNLOAD,
 } from '@/helpers/toast.messages'
@@ -236,6 +236,13 @@ export default {
       this.$store.commit(`exam/${SET_STUDENT_EXAM_STATES}`, studentExamStates)
       if (studentExamStates.find(examState => examState.userId === this.currentUser.id)) {
         this.$toast.info(CURRENT_USER_START_PREPARATION_TO_EXAM)
+      }
+    },
+
+    resetAllPreparation(studentExamStates) {
+      this.$store.commit(`exam/${SET_STUDENT_EXAM_STATES}`, studentExamStates)
+      if (studentExamStates.find(examState => examState.userId === this.currentUser.id)) {
+        this.$toast.info(CURRENT_USER_RESET_PREPARATION_TO_EXAM)
       }
     },
 

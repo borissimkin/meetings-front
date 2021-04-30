@@ -9,7 +9,7 @@
       </div>
     </div>
     <div v-if='canManageSettings' class='exam-info mb-2'>
-      <v-btn x-small>сбросить</v-btn>
+      <v-btn @click='resetAllPreparations' x-small>сбросить</v-btn>
       <v-btn @click='startAllPreparations' :loading='isLoading' x-small >запустить</v-btn>
     </div>
     <template>
@@ -31,7 +31,7 @@ import { mapState } from 'vuex'
 import { getFullName } from '@/helpers/username.process'
 import ModalChangePrepareTimeExam from '@/components/modals/ModalChangePrepareTimeExam'
 import meetingApi from "@/api/meeting.api"
-import { START_ALL_PREPARATIONS_TO_EXAM } from '@/helpers/toast.messages'
+import { RESET_ALL_PREPARATIONS_TO_EXAM, START_ALL_PREPARATIONS_TO_EXAM } from '@/helpers/toast.messages'
 
 export default {
   name: 'ExamSettings',
@@ -79,6 +79,11 @@ export default {
       } finally {
         this.isLoading = false
       }
+    },
+
+    async resetAllPreparations() {
+      await meetingApi.resetAllPreparations(this.meetingInfo.hashId)
+      this.$toast.success(RESET_ALL_PREPARATIONS_TO_EXAM)
     }
   }
 }

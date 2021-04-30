@@ -40,4 +40,8 @@ export default {
   startAllPreparations(meetingId) {
     return server.put(`/meeting/${meetingId}/exam/start-all-preparation`)
   },
+
+  resetAllPreparations(meetingId) {
+    return server.put(`/meeting/${meetingId}/exam/reset-all-preparation`)
+  },
 }

@@ -59,11 +59,13 @@ export default {
     }
   },
   watch: {
-    prepareStart() {
+    prepareStart(value) {
       if (this.timer) {
         clearInterval(this.timer)
       }
-      this.createTimer()
+      if (value) {
+        this.createTimer()
+      }
     },
   },
   computed: {
