@@ -47,6 +47,7 @@
 <script>
 import redirectService from '@/services/redirect.service'
 import { socket } from '@/socket'
+import { SUCCESS_AUTH } from '@/helpers/toast.messages'
 export default {
   name: 'Login',
   data() {
@@ -66,7 +67,7 @@ export default {
       try {
         await this.$store.dispatch('auth/signIn', this.form)
         await this.$router.push(redirectService.getRedirectPath() || '/')
-        this.$toast.success('Вы авторизованы!')
+        this.$toast.success(SUCCESS_AUTH)
         if (!socket.connected) {
           socket.connect()
         } else {

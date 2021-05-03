@@ -232,14 +232,14 @@ export default {
       }
     },
 
-    startAllPreparation(studentExamStates) {
+    startPreparation(studentExamStates) {
       this.$store.commit(`exam/${SET_STUDENT_EXAM_STATES}`, studentExamStates)
       if (studentExamStates.find(examState => examState.userId === this.currentUser.id)) {
         this.$toast.info(CURRENT_USER_START_PREPARATION_TO_EXAM)
       }
     },
 
-    resetAllPreparation(studentExamStates) {
+    resetPreparation(studentExamStates) {
       this.$store.commit(`exam/${SET_STUDENT_EXAM_STATES}`, studentExamStates)
       if (studentExamStates.find(examState => examState.userId === this.currentUser.id)) {
         this.$toast.info(CURRENT_USER_RESET_PREPARATION_TO_EXAM)

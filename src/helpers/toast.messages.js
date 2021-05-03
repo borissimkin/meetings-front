@@ -1,5 +1,6 @@
 import { getFullName } from '@/helpers/username.process'
 
+export const SUCCESS_AUTH = 'Вы авторизованы!'
 export const ERROR_MESSAGE = 'Произошла ошибка, попробуйте еще раз!'
 export const ERROR_MEDIA_DEVICES =
   'Дайте доступ к медиаустройствам и перезагрузите страницу'
