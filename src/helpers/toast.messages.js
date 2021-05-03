@@ -1,3 +1,5 @@
+import { getFullName } from '@/helpers/username.process'
+
 export const ERROR_MESSAGE = 'Произошла ошибка, попробуйте еще раз!'
 export const ERROR_MEDIA_DEVICES =
   'Дайте доступ к медиаустройствам и перезагрузите страницу'
@@ -14,3 +16,7 @@ export const RESET_ALL_PREPARATIONS_TO_EXAM = 'Подготовка сброше
 export const CURRENT_USER_START_PREPARATION_TO_EXAM = 'Ваше время пошло'
 export const CURRENT_USER_RESET_PREPARATION_TO_EXAM =
   'Ваше время подготовки сброшено'
+export const START_PREPARATIONS_TO_EXAM = (firstName, lastName) =>
+  `${getFullName(firstName, lastName)} начал подготовку`
+export const RESET_PREPARATIONS_TO_EXAM = (firstName, lastName) =>
+  `Подготовка у ${getFullName(firstName, lastName)} сброшена`

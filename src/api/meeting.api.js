@@ -44,4 +44,12 @@ export default {
   resetAllPreparations(meetingId) {
     return server.put(`/meeting/${meetingId}/exam/reset-all-preparation`)
   },
+
+  resetPreparationToUser(meetingId, userId) {
+    return server.put(`/meeting/${meetingId}/exam/reset-preparation/${userId}`)
+  },
+
+  startPreparationToUser(meetingId, userId) {
+    return server.put(`/meeting/${meetingId}/exam/start-preparation/${userId}`)
+  },
 }

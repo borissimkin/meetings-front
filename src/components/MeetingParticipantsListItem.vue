@@ -3,7 +3,7 @@
     <div class='menu'>
       <span v-if='isHostOfMeeting' class='text-caption px-1'>создатель собрания</span>
       <v-spacer v-else/>
-      <v-icon>mdi-dots-horizontal</v-icon>
+      <ParticipantSettingsMenu :user='user' class='ma-1' v-if='showMenuSettings' />
     </div>
     <div class='content px-1'>
       <div class='font-weight-medium'>
@@ -30,9 +30,11 @@ import { mapState } from 'vuex'
 import _ from "lodash"
 import dayjs from 'dayjs'
 import { fromSecondsToTime, fromTimeToSeconds } from '@/helpers/datetime.process'
+import ParticipantSettingsMenu from '@/components/ParticipantSettingsMenu'
 
 export default {
   name: 'MeetingParticipantsListItem',
+  components: { ParticipantSettingsMenu },
   props: {
     user: {
       type: Object,
@@ -46,6 +48,11 @@ export default {
       default: () => {
       },
     },
+    showMenuSettings: {
+      type: Boolean,
+      required: true,
+      default: false
+    }
   },
   data() {
     return {
