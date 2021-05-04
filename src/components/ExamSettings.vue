@@ -18,7 +18,7 @@
         <span class='caption'>Отвечает: </span>
         <div v-if='respondedStudentName'>
           <span class='font-weight-medium caption'>{{ respondedStudentName }}</span>
-          <v-icon v-if='canManageSettings' color='red' class='px-1' size='small'>mdi-close-box-outline</v-icon>
+          <v-icon v-if='canManageSettings' @click='resetRespondedUser' color='red' class='px-1' size='small'>mdi-close-box-outline</v-icon>
         </div>
 
       </div>
@@ -43,7 +43,7 @@ export default {
   },
   computed: {
     ...mapState("auth", {
-      currentUserId: state => state.currentUser.id
+      currentUser: state => state.currentUser
     }),
     ...mapState("meeting", {
       meetingInfo: state => state.meetingInfo
@@ -57,6 +57,9 @@ export default {
     respondedStudentName() {
       const userId = this.examInfo.respondedUserId
       if (userId) {
+        if (this.currentUser.id === userId) {
+          return getFullName(this.currentUser.firstName, this.currentUser.lastName)
+        }
         const participant = this.$store.getters["meeting/getParticipantByUserId"](userId)
         if (participant) {
           const user = participant.user
@@ -66,7 +69,7 @@ export default {
       return ""
     },
     canManageSettings() {
-      return this.meetingInfo.creator.id === this.currentUserId
+      return this.meetingInfo.creator.id === this.currentUser.id
     }
   },
   methods: {
@@ -85,6 +88,14 @@ export default {
     async resetAllPreparations() {
       await meetingApi.resetAllPreparations(this.meetingInfo.hashId)
       this.$toast.success(RESET_ALL_PREPARATIONS_TO_EXAM)
+    },
+
+    async resetRespondedUser() {
+      try {
+        await meetingApi.setRespondedUserId(this.meetingInfo.hashId, 0)
+      } catch (e) {
+        console.log({e})
+      }
     }
   }
 }
