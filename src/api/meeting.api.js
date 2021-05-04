@@ -52,4 +52,8 @@ export default {
   startPreparationToUser(meetingId, userId) {
     return server.put(`/meeting/${meetingId}/exam/start-preparation/${userId}`)
   },
+
+  setRespondedUserId(meetingId, userId) {
+    return server.put(`/meeting/${meetingId}/exam/set-responded-user/${userId}`)
+  },
 }

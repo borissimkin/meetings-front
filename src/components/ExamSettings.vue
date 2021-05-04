@@ -57,8 +57,9 @@ export default {
     respondedStudentName() {
       const userId = this.examInfo.respondedUserId
       if (userId) {
-        const user = this.$store.getters["meeting/getParticipantByUserId"](userId)
-        if (user) {
+        const participant = this.$store.getters["meeting/getParticipantByUserId"](userId)
+        if (participant) {
+          const user = participant.user
           return getFullName(user.firstName, user.lastName)
         }
       }

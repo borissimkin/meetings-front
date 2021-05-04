@@ -21,3 +21,6 @@ export const START_PREPARATIONS_TO_EXAM = (firstName, lastName) =>
   `${getFullName(firstName, lastName)} начал подготовку`
 export const RESET_PREPARATIONS_TO_EXAM = (firstName, lastName) =>
   `Подготовка у ${getFullName(firstName, lastName)} сброшена`
+export const SET_RESPONDED_CURRENT_USER = 'Вы отвечаете!'
+export const SET_RESPONDED_USER = (firstName, lastName) =>
+  `${getFullName(firstName, lastName)} отвечает`

@@ -92,7 +92,7 @@ import {
   ADD_CHECKPOINT,
   ADD_USER_ID_TO_CHECKPOINT,
   SET_MINUTES_TO_PREPARE,
-  SET_STUDENT_EXAM_STATES, ADD_STUDENT_EXAM_STATE,
+  SET_STUDENT_EXAM_STATES, ADD_STUDENT_EXAM_STATE, SET_RESPONDED_USER_ID,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -103,7 +103,7 @@ import streamTypes from '@/helpers/stream.type'
 import {
   CHECK_LISTENERS_STARTED, CURRENT_USER_RESET_PREPARATION_TO_EXAM,
   CURRENT_USER_START_PREPARATION_TO_EXAM,
-  ERROR_DATA_DOWNLOAD,
+  ERROR_DATA_DOWNLOAD, SET_RESPONDED_CURRENT_USER,
 } from '@/helpers/toast.messages'
 import { contentToastRaisedHand } from '@/toasts'
 import { getFullName } from '@/helpers/username.process'
@@ -194,6 +194,14 @@ export default {
           enabledAudio,
         }
       })
+    },
+
+    setRespondedUserId(userId) {
+      const processedUserId = Number(userId)
+      this.$store.commit(`exam/${SET_RESPONDED_USER_ID}`, processedUserId)
+      if (processedUserId && this.currentUser.id === processedUserId) {
+        this.$toast.warning(SET_RESPONDED_CURRENT_USER)
+      }
     },
 
     studentConnected(examState) {

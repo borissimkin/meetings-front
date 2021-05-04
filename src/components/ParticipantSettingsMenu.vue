@@ -15,6 +15,11 @@
             Сбросить
           </v-list-item-content>
         </v-list-item>
+        <v-list-item @click='setResponder'>
+          <v-list-item-content>
+            Отвечать!
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-card>
   </v-menu>
@@ -23,7 +28,7 @@
 <script>
 import meetingApi from "@/api/meeting.api"
 import { mapState } from 'vuex'
-import { RESET_PREPARATIONS_TO_EXAM, START_PREPARATIONS_TO_EXAM } from '@/helpers/toast.messages'
+import { RESET_PREPARATIONS_TO_EXAM, SET_RESPONDED_USER, START_PREPARATIONS_TO_EXAM } from '@/helpers/toast.messages'
 export default {
   name: 'ParticipantSettingsMenu',
   props: {
@@ -53,6 +58,15 @@ export default {
       try {
         await meetingApi.resetPreparationToUser(this.meetingInfo.hashId, this.user.id )
         this.$toast.success(RESET_PREPARATIONS_TO_EXAM(this.user.firstName, this.user.lastName))
+      } catch (e) {
+        console.log({e})
+      }
+    },
+
+    async setResponder() {
+      try {
+        await meetingApi.setRespondedUserId(this.meetingInfo.hashId, this.user.id)
+        this.$toast.info(SET_RESPONDED_USER(this.user.firstName, this.user.lastName))
       } catch (e) {
         console.log({e})
       }
