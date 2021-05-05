@@ -1,11 +1,6 @@
 <template>
   <div>
     <div id='video-grid'>
-      <div :class="{'speaking': meetingStateOfCurrentUser.isSpeaking}" class='post-1'>
-        <VideoPlayer v-show='isShowStreamCurrentUser' :stream='streamCurrentUser' muted></VideoPlayer>
-        <VideoStreamPlaceholder v-show='!isShowStreamCurrentUser' :user='currentUser'></VideoStreamPlaceholder>
-        <span class='stream-name'>{{ getName(currentUser) }}</span>
-      </div>
       <template v-for='(place, index) in Object.keys(streamPlaces)'>
         <div v-if='streamPlaces[place]'
              :key='`place-${index}`'
@@ -15,6 +10,7 @@
           <div :class="{'speaking': participantIsSpeaking(streamPlaces[place].user.id)}"
                style='width: 100%; height: 100%'>
             <VideoPlayer v-show='isShowStreamParticipant(streamPlaces[place].stream, streamPlaces[place].user.id)'
+                         :muted='streamPlaces[place].user.id === currentUser.id'
                          :stream='streamPlaces[place].stream'>
 
             </VideoPlayer>
@@ -63,7 +59,7 @@ import VideoPlayer from '@/components/VideoPlayer'
 import streamTypes from '@/helpers/stream.type'
 import { concatVideoStreamAndAudioStream } from '@/helpers/stream.process'
 import { ERROR_MEDIA_DEVICES, ERROR_MICRO, ERROR_VIDEO } from '@/helpers/toast.messages'
-//todo: все таки вынести видео в отдельные компоненты
+
 /**
  * peer {
  *   user: {
@@ -101,6 +97,7 @@ export default {
       streamCurrentUser: (state) => state.userStream,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
       participantsMeetingState: (state) => state.participantsMeetingState,
+      meetingInfo: state => state.meetingInfo
     }),
     ...mapState('auth', {
       currentUser: state => state.currentUser,
@@ -110,30 +107,45 @@ export default {
       ['getParticipantByPeerId', 'onlineParticipants'],
     ),
 
-    isShowStreamCurrentUser() {
-      return this.streamCurrentUser && this.meetingStateOfCurrentUser.enabledVideo
-    },
-
     streamPlaces() {
       const places = {}
-      //todo: пока что в главном окне всегда текущий пользователь, потом переделается
-      //todo: пока что тупой вариант без приоритетов
-      for (let i = 1; i < this.maxCountVideos; i++) {
-        places[`post-${i + 1}`] = this.onlineParticipants[i - 1]
+      for (let i = 0; i < this.maxCountVideos; i++) {
+        const elementQueue = this.participantsPriorityQueue[i]
+        places[`post-${i+1}`] = elementQueue ? elementQueue.participant : elementQueue
       }
       return places
+    },
+
+    participantsPriorityQueue() {
+      const participants = [...this.onlineParticipants, {
+        user: this.currentUser,
+        online: true,
+        stream: this.streamCurrentUser
+      }]
+      const participantWithPriority = participants.map(participant => {
+        const priority = this.calculatePriority(participant)
+        return {
+          participant,
+          priority
+        }
+      })
+      participantWithPriority.sort((a, b) => {
+        return b.priority - a.priority
+      })
+      return participantWithPriority
     },
 
     stashedParticipantsStream() {
       return this.onlineParticipants.filter(participant => {
         for (let place of Object.keys(this.streamPlaces)) {
           const streamPlace = this.streamPlaces[place]
+          console.log({streamPlace})
           if (!streamPlace) {
             continue
           }
           const user = streamPlace.user
           if (user) {
-            if (user.id === participant.id) {
+            if (user.id === participant.user.id) {
               return false
             }
           }
@@ -190,6 +202,28 @@ export default {
       setIsSpeakingParticipant: SET_IS_SPEAKING_PARTICIPANT,
     }),
 
+    calculatePriority(participant) {
+      const priorities = {
+        enabledVideo: 2,
+        isSpeaking: 1,
+        isCreatorOfMeeting: 3
+      }
+      const meetingState = participant.user.id === this.currentUser.id ? this.meetingStateOfCurrentUser : this.participantsMeetingState[participant.user.id]
+      if (!meetingState) {
+        return 0
+      }
+      let sumPriority = 0
+      for (const priority in priorities) {
+        if (meetingState[priority]) {
+          sumPriority += priorities[priority]
+        }
+      }
+      if (participant.user.id === this.meetingInfo.creator.id) {
+        sumPriority += priorities.isCreatorOfMeeting
+      }
+      return sumPriority
+    },
+
     callInit(stream) {
       this.$store.dispatch('meeting/setUserStream', stream)
       this.myPeer.on('call', this.answerToCall)
@@ -221,10 +255,16 @@ export default {
     },
 
     isShowStreamParticipant(stream, userId) {
+      if (userId === this.currentUser.id) {
+        return stream && this.meetingStateOfCurrentUser.enabledVideo
+      }
       return stream && this.participantsMeetingState[userId]?.enabledVideo
 
     },
     participantIsSpeaking(userId) {
+      if (userId === this.currentUser.id) {
+        return this.meetingStateOfCurrentUser.isSpeaking
+      }
       return this.participantsMeetingState[userId]?.isSpeaking
 
     },
