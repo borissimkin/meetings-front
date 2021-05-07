@@ -90,6 +90,12 @@ export default {
       myPeer: new Peer(undefined, getPeerConfig()),
       maxCountVideos: 6,
       placeholderImage: require('@/assets/stream-placeholder.png'),
+
+      cyclicChangeVideoStreams: {
+        userIdCurrentCyclicInterval: 0,
+        timer: null,
+        secondsInterval: 5
+      }
     }
   },
   computed: {
@@ -103,25 +109,75 @@ export default {
       currentUser: state => state.currentUser,
     }),
 
+    ...mapState('exam', {
+      respondedUserId: state => state.examInfo.respondedUserId
+    }),
+
     ...mapGetters('meeting',
       ['getParticipantByPeerId', 'onlineParticipants'],
     ),
-
+    participantCurrentUser() {
+      return {
+        user: this.currentUser,
+        online: true,
+        stream: this.streamCurrentUser
+      }
+    },
+    //todo: сделать кнопку по которой включается циклическая смена
+    //todo: разделить на два компутеда, а в третьем компутеде вычислять какой отдавать в шаблон
     streamPlaces() {
+      //todo: убрал условие пока условие на включенное видео
       const places = {}
-      for (let i = 0; i < this.maxCountVideos; i++) {
-        const elementQueue = this.participantsPriorityQueue[i]
-        places[`post-${i+1}`] = elementQueue ? elementQueue.participant : elementQueue
+      if (this.meetingInfo.isExam) {
+        let participants = this.onlineParticipants.filter(participant =>
+          this.respondedUserId !== participant.user.id
+        )
+        if (this.toAddCurrentUser) {
+          participants.push(this.participantCurrentUser)
+        }
+        participants.sort((a, b) => a.user.id - b.user.id)
+        if (participants.length > this.maxCountVideos) {
+          const indexParticipant = participants.findIndex(x => x.user.id === this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval)
+          if (indexParticipant !== -1) {
+            const slicedParticipants = participants.slice(indexParticipant)
+            if (indexParticipant !== 0) {
+              const leftParticipants = participants.slice(0, indexParticipant)
+              participants = [...leftParticipants, ...slicedParticipants]
+            } else {
+              participants = slicedParticipants
+            }
+          }
+        }
+        if (this.respondedUserId) {
+          let participant
+          if (this.respondedUserId === this.currentUser.id) {
+            participant = this.participantCurrentUser
+          } else {
+            participant = this.onlineParticipants.find(x => x.user.id === this.respondedUserId)
+          }
+          if (participant) {
+            participants.unshift(participant)
+          }
+        }
+        for (let i = 0; i < this.maxCountVideos; i++) {
+          places[`post-${i+1}`] = participants[i]
+        }
+
+      } else {
+        for (let i = 0; i < this.maxCountVideos; i++) {
+          const elementQueue = this.participantsPriorityQueue[i]
+          places[`post-${i+1}`] = elementQueue ? elementQueue.participant : elementQueue
+        }
       }
       return places
     },
 
+    toAddCurrentUser() {
+      return this.currentUser.id !== this.meetingInfo.creator.id && this.respondedUserId !== this.currentUser.id
+    },
+
     participantsPriorityQueue() {
-      const participants = [...this.onlineParticipants, {
-        user: this.currentUser,
-        online: true,
-        stream: this.streamCurrentUser
-      }]
+      const participants = [...this.onlineParticipants, this.participantCurrentUser]
       const participantWithPriority = participants.map(participant => {
         const priority = this.calculatePriority(participant)
         return {
@@ -135,11 +191,12 @@ export default {
       return participantWithPriority
     },
 
+
+
     stashedParticipantsStream() {
       return this.onlineParticipants.filter(participant => {
         for (let place of Object.keys(this.streamPlaces)) {
           const streamPlace = this.streamPlaces[place]
-          console.log({streamPlace})
           if (!streamPlace) {
             continue
           }
@@ -162,6 +219,10 @@ export default {
     } else {
       console.error(`Stream type=${this.streamType} not found`)
       return
+    }
+    if (this.meetingInfo.isExam) {
+      this.timer = setInterval(this.cyclicChangeVideos,
+        this.cyclicChangeVideoStreams.secondsInterval * 1000)
     }
 
     this.myPeer.on('open', (peerId) => {
@@ -201,6 +262,15 @@ export default {
       setIsSpeakingCurrentUser: SET_IS_SPEAKING_CURRENT_USER,
       setIsSpeakingParticipant: SET_IS_SPEAKING_PARTICIPANT,
     }),
+
+    cyclicChangeVideos() {
+      const participantUserIds = [...this.onlineParticipants, this.participantCurrentUser]
+        .filter(participant => participant.user.id !== this.meetingInfo.creator.id)
+        .filter(participant => participant.user.id !== this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval)
+        .map(participant => participant.user.id)
+      const min = Math.min(...participantUserIds)
+      this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval = min
+    },
 
     calculatePriority(participant) {
       const priorities = {
