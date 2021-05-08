@@ -11,3 +11,22 @@ export const toFormatTimeOrDatetime = (date) => {
 export const fromTimeToDayjs = (time) => {
   return dayjs(`${dayjs().format('YYYY-MM-dd')} ${time}`)
 }
+
+export const fromSecondsToTime = (seconds) => {
+  const hours = Math.floor(seconds / 3600)
+  const secondsWithoutHours = seconds % 3600
+  const minutes = Math.floor(secondsWithoutHours / 60)
+  const remainingSeconds = secondsWithoutHours % 60
+  return {
+    hours,
+    minutes,
+    seconds: remainingSeconds,
+  }
+}
+
+export const fromTimeToSeconds = (hours, minutes, seconds) => {
+  let totalSeconds = 0
+  const totalMinutes = hours * 60 + minutes
+  totalSeconds += totalMinutes * 60 + seconds
+  return totalSeconds
+}

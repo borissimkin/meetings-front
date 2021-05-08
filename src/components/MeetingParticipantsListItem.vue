@@ -3,7 +3,7 @@
     <div class='menu'>
       <span v-if='isHostOfMeeting' class='text-caption px-1'>создатель собрания</span>
       <v-spacer v-else/>
-      <v-icon>mdi-dots-horizontal</v-icon>
+      <ParticipantSettingsMenu :user='user' class='ma-1' v-if='showMenuSettings' />
     </div>
     <div class='content px-1'>
       <div class='font-weight-medium'>
@@ -16,18 +16,25 @@
         <v-icon v-show='isRaisedHand' color='orange'>mdi-hand-right</v-icon>
       </div>
     </div>
-    <!--    <div class='px-1 text-caption font-weight-light'>-->
-    <!--      {{new Date().toISOString()}}-->
-    <!--    </div>-->
+    <template v-if='!examStateIsEmpty'>
+      <div v-if='prepareStart' class='px-1 text-caption font-weight-light' :class="{'red--text': timeIsGone}">
+        {{ formatShowTimer }}
+      </div>
+    </template>
   </v-card>
 </template>
 
 <script>
 import { getFullName } from '@/helpers/username.process'
 import { mapState } from 'vuex'
+import _ from "lodash"
+import dayjs from 'dayjs'
+import { fromSecondsToTime, fromTimeToSeconds } from '@/helpers/datetime.process'
+import ParticipantSettingsMenu from '@/components/ParticipantSettingsMenu'
 
 export default {
   name: 'MeetingParticipantsListItem',
+  components: { ParticipantSettingsMenu },
   props: {
     user: {
       type: Object,
@@ -41,13 +48,64 @@ export default {
       default: () => {
       },
     },
+    showMenuSettings: {
+      type: Boolean,
+      required: true,
+      default: false
+    }
+  },
+  data() {
+    return {
+      timer: null,
+      leftTimeToPrepare: {
+        hours: 0,
+        minutes: 0,
+        seconds: 0
+
+      }
+    }
+  },
+  watch: {
+    prepareStart(value) {
+      if (this.timer) {
+        clearInterval(this.timer)
+      }
+      if (value) {
+        this.createTimer()
+      }
+    },
   },
   computed: {
     ...mapState("meeting", {
       meetingHostId: state => state.meetingInfo.creator.id
     }),
+    ...mapState("exam", {
+      studentExamStates: state => state.studentExamStates
+    }),
+    ...mapState("exam", {
+      examInfo: state => state.examInfo
+    }),
+
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
+    },
+
+    examState() {
+      const state = this.studentExamStates.find(examState => examState.userId === this.user.id)
+      return state ? state : {}
+    },
+
+    prepareStart() {
+      return this.examState.prepareStart
+    },
+
+    countMinutesToPrepare() {
+      return this.examState.minutesToPrepare
+    },
+
+
+    examStateIsEmpty() {
+      return _.isEmpty(this.examState)
     },
 
     isRaisedHand() {
@@ -68,8 +126,48 @@ export default {
 
     isHostOfMeeting() {
       return this.user.id === this.meetingHostId
+    },
+
+    timeIsGone() {
+      return !fromTimeToSeconds(this.leftTimeToPrepare.hours, this.leftTimeToPrepare.minutes, this.leftTimeToPrepare.seconds)
+    },
+
+    formatShowTimer() {
+      return `${this.partTimeToShow(this.leftTimeToPrepare.hours)}:${this.partTimeToShow(this.leftTimeToPrepare.minutes)}:${this.partTimeToShow(
+        this.leftTimeToPrepare.seconds
+      )}`;
+    }
+
+  },
+  mounted() {
+    if (this.examState && this.prepareStart) {
+      this.createTimer()
     }
   },
+  methods: {
+    createTimer() {
+      this.timer = setInterval(() => {
+        const leftSeconds = dayjs().diff(dayjs(this.examState.prepareStart), "seconds")
+        let totalSeconds = this.countMinutesToPrepare * 60 - leftSeconds;
+        if (totalSeconds < 0) {
+          totalSeconds = 0
+          clearInterval(this.timer)
+        }
+        const time = fromSecondsToTime(totalSeconds)
+        Object.assign(this.leftTimeToPrepare, time)
+
+      }, 1000)
+    },
+
+    partTimeToShow(number) {
+      const stringNumber = number.toString();
+      if (stringNumber.length < 2) {
+        return `0${stringNumber}`;
+      }
+      return stringNumber;
+    }
+
+  }
 }
 </script>
 

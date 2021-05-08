@@ -28,4 +28,32 @@ export default {
   getCheckpoints(meetingId) {
     return server.get(`/meeting/${meetingId}/checkpoints`)
   },
+
+  getExamInfo(meetingId) {
+    return server.get(`/meeting/${meetingId}/exam`)
+  },
+
+  getStudentExamStates(meetingId) {
+    return server.get(`/meeting/${meetingId}/exam/student-states`)
+  },
+
+  startAllPreparations(meetingId) {
+    return server.put(`/meeting/${meetingId}/exam/start-all-preparation`)
+  },
+
+  resetAllPreparations(meetingId) {
+    return server.put(`/meeting/${meetingId}/exam/reset-all-preparation`)
+  },
+
+  resetPreparationToUser(meetingId, userId) {
+    return server.put(`/meeting/${meetingId}/exam/reset-preparation/${userId}`)
+  },
+
+  startPreparationToUser(meetingId, userId) {
+    return server.put(`/meeting/${meetingId}/exam/start-preparation/${userId}`)
+  },
+
+  setRespondedUserId(meetingId, userId) {
+    return server.put(`/meeting/${meetingId}/exam/set-responded-user/${userId}`)
+  },
 }

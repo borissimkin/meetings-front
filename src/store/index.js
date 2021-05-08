@@ -4,6 +4,7 @@ import meeting from './meeting.module'
 import auth from './auth.module'
 import home from './home.module'
 import room from '@/store/room.module'
+import exam from '@/store/exam.module'
 
 Vue.use(Vuex)
 
@@ -13,6 +14,7 @@ let store = new Vuex.Store({
     auth,
     home,
     room,
+    exam,
   },
 })
 

@@ -88,7 +88,11 @@ import {
   SET_ENABLED_AUDIO_PARTICIPANT,
   SET_ENABLED_VIDEO_PARTICIPANT,
   STOP_USER_STREAM,
-  SET_ONLINE_PARTICIPANT, ADD_CHECKPOINT, ADD_USER_ID_TO_CHECKPOINT,
+  SET_ONLINE_PARTICIPANT,
+  ADD_CHECKPOINT,
+  ADD_USER_ID_TO_CHECKPOINT,
+  SET_MINUTES_TO_PREPARE,
+  SET_STUDENT_EXAM_STATES, ADD_STUDENT_EXAM_STATE, SET_RESPONDED_USER_ID,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -96,7 +100,11 @@ import AttendanceStatistics from '@/components/AttendanceStatisitcs'
 import { canStartCheckListeners } from '@/helpers/permissions'
 import meetingApi from '@/api/meeting.api'
 import streamTypes from '@/helpers/stream.type'
-import { CHECK_LISTENERS_STARTED, ERROR_DATA_DOWNLOAD } from '@/helpers/toast.messages'
+import {
+  CHECK_LISTENERS_STARTED, CURRENT_USER_RESET_PREPARATION_TO_EXAM,
+  CURRENT_USER_START_PREPARATION_TO_EXAM,
+  ERROR_DATA_DOWNLOAD, SET_RESPONDED_CURRENT_USER,
+} from '@/helpers/toast.messages'
 import { contentToastRaisedHand } from '@/toasts'
 import { getFullName } from '@/helpers/username.process'
 
@@ -152,6 +160,9 @@ export default {
     ...mapGetters('meeting', [
       'getParticipantByUserId'
     ]),
+    ...mapState("exam", {
+      studentExamStates: state => state.studentExamStates
+    }),
 
     isBossOfThisMeeting() {
       return this.currentUser.id === this.meetingInfo.creator.id
@@ -185,6 +196,21 @@ export default {
       })
     },
 
+    setRespondedUserId(userId) {
+      const processedUserId = Number(userId)
+      this.$store.commit(`exam/${SET_RESPONDED_USER_ID}`, processedUserId)
+      if (processedUserId && this.currentUser.id === processedUserId) {
+        this.$toast.warning(SET_RESPONDED_CURRENT_USER)
+      }
+    },
+
+    studentConnected(examState) {
+      const currentExamState = this.studentExamStates.find(x => x.userId === examState.userId)
+      if (!currentExamState) {
+        this.$store.commit(`exam/${ADD_STUDENT_EXAM_STATE}`, examState)
+      }
+    },
+
     userDisconnected(user) {
       this.$store.commit(`meeting/${SET_ONLINE_PARTICIPANT}`, {
         userId: user.id,
@@ -214,6 +240,20 @@ export default {
       }
     },
 
+    startPreparation(studentExamStates) {
+      this.$store.commit(`exam/${SET_STUDENT_EXAM_STATES}`, studentExamStates)
+      if (studentExamStates.find(examState => examState.userId === this.currentUser.id)) {
+        this.$toast.info(CURRENT_USER_START_PREPARATION_TO_EXAM)
+      }
+    },
+
+    resetPreparation(studentExamStates) {
+      this.$store.commit(`exam/${SET_STUDENT_EXAM_STATES}`, studentExamStates)
+      if (studentExamStates.find(examState => examState.userId === this.currentUser.id)) {
+        this.$toast.info(CURRENT_USER_RESET_PREPARATION_TO_EXAM)
+      }
+    },
+
     passCheckListeners(checkpointId, userId) {
       this.addUserIdToCheckpoint({
         checkpointId,
@@ -236,6 +276,10 @@ export default {
         userId,
         enabledAudio,
       })
+    },
+
+    changeMinutesToPrepareExam(minutesToPrepare) {
+      this.$store.commit(`exam/${SET_MINUTES_TO_PREPARE}`, minutesToPrepare)
     },
 
     toggleVideo(userId, enabledVideo) {
@@ -312,6 +356,9 @@ export default {
             meetingId,
           }),
         ])
+        if (this.meetingInfo.isExam) {
+          this.fetchExam(meetingId)
+        }
         this.$socket.client.emit('join-meeting', meetingId, settingDevices)
         this.isPassedSettingMeeting = true
 
@@ -319,6 +366,12 @@ export default {
         this.$toast.error(ERROR_DATA_DOWNLOAD)
         console.log(error)
       }
+    },
+
+    fetchExam(meetingId) {
+      this.$store.dispatch("exam/fetchExamInfo", meetingId)
+      this.$store.dispatch("exam/fetchStudentExamStates", meetingId)
+
     },
 
     handleConfirmPresence() {

@@ -23,6 +23,7 @@ import {
   SET_CHECKPOINTS,
   ADD_CHECKPOINT,
   ADD_USER_ID_TO_CHECKPOINT,
+  SET_NORMAL_MODE_SHOW_VIDEOS,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
@@ -38,6 +39,7 @@ const getDefaultState = () => {
     participantsMeetingState: {}, // {userId: {isSpeaking, isRaisedHand, enabledAudio, enabledVideo}}
     participants: [],
     checkpoints: [],
+    normalModeShowVideos: true,
     meetingInfo: {
       id: 0,
       creator: {
@@ -198,6 +200,10 @@ const meetings = {
 
     [REMOVE_PARTICIPANTS_MEETING_STATE](state, userId) {
       this._vm.$delete(state.participantsMeetingState, userId)
+    },
+
+    [SET_NORMAL_MODE_SHOW_VIDEOS](state, value) {
+      state.normalModeShowVideos = value
     },
   },
   actions: {

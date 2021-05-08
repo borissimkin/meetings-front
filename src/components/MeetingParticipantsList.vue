@@ -4,11 +4,18 @@
       Участников: {{countParticipants}}
     </h3>
     <v-divider />
+    <template v-if='meetingInfo.isExam'>
+      <ExamSettings />
+      <v-divider />
+    </template>
     <v-spacer></v-spacer>
     <MeetingParticipantsListItem :user='currentUser'
-                                 :participantState='meetingStateOfCurrentUser' />
+                                 :participantState='meetingStateOfCurrentUser'
+                                 :show-menu-settings='false'
+                                  />
     <MeetingParticipantsListItem v-for='participant in onlineParticipants'
                                  :key='participant.user.id'
+                                 :show-menu-settings='isShowMenuSettingOnParticipants'
                                  :participantState='participantsMeetingState[participant.user.id]'
                                  :user='participant.user' />
   </v-container>
@@ -17,10 +24,11 @@
 <script>
 import { mapGetters, mapState } from 'vuex'
 import MeetingParticipantsListItem from '@/components/MeetingParticipantsListItem'
+import ExamSettings from '@/components/ExamSettings'
 
 export default {
   name: 'MeetingParticipantsList',
-  components: { MeetingParticipantsListItem },
+  components: { ExamSettings, MeetingParticipantsListItem },
   computed: {
     ...mapState("auth", {
       currentUser: (state) => state.currentUser,
@@ -28,6 +36,11 @@ export default {
     ...mapState("meeting", {
       participantsMeetingState: (state) => state.participantsMeetingState,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
+      meetingInfo: (state) => state.meetingInfo,
+
+    }),
+    ...mapState("exam", {
+      studentExamStates: (state) => state.studentExamStates,
     }),
     ...mapGetters("meeting", [
       'onlineParticipants'
@@ -37,7 +50,11 @@ export default {
       return this.onlineParticipants.length + 1
     },
 
-  }
+    isShowMenuSettingOnParticipants() {
+      return this.currentUser.id === this.meetingInfo.creator.id
+    }
+
+  },
 }
 </script>
 
@@ -49,7 +66,7 @@ export default {
   max-height: 700px;
   overflow: auto;
 
-
 }
+
 
 </style>
