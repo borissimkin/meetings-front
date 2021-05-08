@@ -88,7 +88,7 @@ export default {
   data() {
     return {
       myPeer: new Peer(undefined, getPeerConfig()),
-      maxCountVideos: 2,
+      maxCountVideos: 6,
       placeholderImage: require('@/assets/stream-placeholder.png'),
 
       cyclicChangeVideoStreams: {
