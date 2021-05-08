@@ -98,12 +98,22 @@ export default {
       }
     }
   },
+  watch: {
+    normalModeShowVideos(value) {
+      if (value) {
+        this.destroyTimerCyclicVideos()
+      } else {
+        this.createTimerCyclicVideos()
+      }
+    }
+  },
   computed: {
     ...mapState('meeting', {
       streamCurrentUser: (state) => state.userStream,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
       participantsMeetingState: (state) => state.participantsMeetingState,
-      meetingInfo: state => state.meetingInfo
+      meetingInfo: state => state.meetingInfo,
+      normalModeShowVideos: state => state.normalModeShowVideos
     }),
     ...mapState('auth', {
       currentUser: state => state.currentUser,
@@ -127,7 +137,6 @@ export default {
         stream: this.streamCurrentUser
       }
     },
-    //todo: сделать кнопку по которой включается циклическая смена
     streamPlacesNormalMode() {
       const places = {}
       for (let i = 0; i < this.maxCountVideos; i++) {
@@ -175,8 +184,7 @@ export default {
     },
 
     streamPlaces() {
-      //todo: убрал условие пока условие на включенное видео
-      return this.meetingInfo.isExam ? this.streamPlacesCyclicChangeVideos : this.streamPlacesNormalMode
+      return this.normalModeShowVideos ? this.streamPlacesNormalMode : this.streamPlacesCyclicChangeVideos
     },
 
     toAddCurrentUser() {
@@ -226,9 +234,8 @@ export default {
       console.error(`Stream type=${this.streamType} not found`)
       return
     }
-    if (this.meetingInfo.isExam) {
-      this.cyclicChangeVideoStreams.timer = setInterval(this.cyclicChangeVideos,
-        this.cyclicChangeVideoStreams.secondsInterval * 1000)
+    if (!this.normalModeShowVideos) {
+      this.createTimerCyclicVideos()
     }
 
     this.myPeer.on('open', (peerId) => {
@@ -239,9 +246,7 @@ export default {
   beforeDestroy() {
     this.myPeer.destroy()
     this.$store.commit(`meeting/${STOP_USER_STREAM}`)
-    if (this.cyclicChangeVideoStreams.timer) {
-      clearInterval(this.cyclicChangeVideoStreams.timer)
-    }
+    this.destroyTimerCyclicVideos()
   },
 
   sockets: {
@@ -271,6 +276,18 @@ export default {
       setIsSpeakingCurrentUser: SET_IS_SPEAKING_CURRENT_USER,
       setIsSpeakingParticipant: SET_IS_SPEAKING_PARTICIPANT,
     }),
+
+    createTimerCyclicVideos() {
+      this.cyclicChangeVideoStreams.timer = setInterval(this.cyclicChangeVideos,
+        this.cyclicChangeVideoStreams.secondsInterval * 1000)
+    },
+
+    destroyTimerCyclicVideos() {
+      if (this.cyclicChangeVideoStreams.timer) {
+        clearInterval(this.cyclicChangeVideoStreams.timer)
+        this.cyclicChangeVideoStreams.timer = null
+      }
+    },
 
     cyclicChangeVideos() {
       const participantUserIds = [...this.onlineParticipants, this.participantCurrentUser]
