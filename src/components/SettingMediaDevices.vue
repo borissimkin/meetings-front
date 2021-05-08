@@ -3,7 +3,7 @@
     <div class='toolbar'>
       <SettingAudio class='toolbar__button' />
       <SettingVideo class='toolbar__button' />
-      <ButtonRaiseHand class='toolbar__button' />
+      <ButtonRaiseHand v-if='canRaiseHand' class='toolbar__button' />
       <ButtonToggleModeShowVideos v-if='showToggleVideoMode' class='toolbar__button' />
     </div>
   </div>
@@ -27,8 +27,17 @@ export default {
     ...mapState("auth", {
       currentUser: state => state.currentUser
     }),
+
+    currentUserIsHost() {
+      return this.currentUser.id === this.meetingInfo.creator.id
+    },
+
     showToggleVideoMode() {
-      return this.currentUser.id === this.meetingInfo.creator.id && this.meetingInfo.isExam
+      return this.currentUserIsHost && this.meetingInfo.isExam
+    },
+
+    canRaiseHand() {
+      return !this.currentUserIsHost
     }
   }
 }
