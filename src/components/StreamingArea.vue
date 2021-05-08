@@ -88,7 +88,7 @@ export default {
   data() {
     return {
       myPeer: new Peer(undefined, getPeerConfig()),
-      maxCountVideos: 6,
+      maxCountVideos: 2,
       placeholderImage: require('@/assets/stream-placeholder.png'),
 
       cyclicChangeVideoStreams: {
@@ -116,6 +116,10 @@ export default {
     ...mapGetters('meeting',
       ['getParticipantByPeerId', 'onlineParticipants'],
     ),
+    userIdCurrentCyclicInterval() {
+      return this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval
+    },
+
     participantCurrentUser() {
       return {
         user: this.currentUser,
@@ -136,13 +140,15 @@ export default {
           participants.push(this.participantCurrentUser)
         }
         participants.sort((a, b) => a.user.id - b.user.id)
+        console.log({participants})
         if (participants.length > this.maxCountVideos) {
           const indexParticipant = participants.findIndex(x => x.user.id === this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval)
           if (indexParticipant !== -1) {
             const slicedParticipants = participants.slice(indexParticipant)
+            console.log({slicedParticipants})
             if (indexParticipant !== 0) {
               const leftParticipants = participants.slice(0, indexParticipant)
-              participants = [...leftParticipants, ...slicedParticipants]
+              participants = [...slicedParticipants, ...leftParticipants]
             } else {
               participants = slicedParticipants
             }
@@ -192,9 +198,8 @@ export default {
     },
 
 
-
     stashedParticipantsStream() {
-      return this.onlineParticipants.filter(participant => {
+      return [...this.onlineParticipants, this.participantCurrentUser].filter(participant => {
         for (let place of Object.keys(this.streamPlaces)) {
           const streamPlace = this.streamPlaces[place]
           if (!streamPlace) {
@@ -221,7 +226,7 @@ export default {
       return
     }
     if (this.meetingInfo.isExam) {
-      this.timer = setInterval(this.cyclicChangeVideos,
+      this.cyclicChangeVideoStreams.timer = setInterval(this.cyclicChangeVideos,
         this.cyclicChangeVideoStreams.secondsInterval * 1000)
     }
 
@@ -233,6 +238,9 @@ export default {
   beforeDestroy() {
     this.myPeer.destroy()
     this.$store.commit(`meeting/${STOP_USER_STREAM}`)
+    if (this.cyclicChangeVideoStreams.timer) {
+      clearInterval(this.cyclicChangeVideoStreams.timer)
+    }
   },
 
   sockets: {
@@ -266,9 +274,19 @@ export default {
     cyclicChangeVideos() {
       const participantUserIds = [...this.onlineParticipants, this.participantCurrentUser]
         .filter(participant => participant.user.id !== this.meetingInfo.creator.id)
-        .filter(participant => participant.user.id !== this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval)
         .map(participant => participant.user.id)
-      const min = Math.min(...participantUserIds)
+      if (!participantUserIds.length) {
+        return
+      }
+      const maxUserId = Math.max(...participantUserIds)
+      if (maxUserId === this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval) {
+        console.log(maxUserId)
+        this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval = Math.min(...participantUserIds)
+        return
+      }
+      const remainingParticipantUserIds = participantUserIds.filter(userId => userId > this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval)
+      const min = Math.min(...remainingParticipantUserIds)
+      console.log({ min })
       this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval = min
     },
 
