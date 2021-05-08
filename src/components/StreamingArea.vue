@@ -128,54 +128,55 @@ export default {
       }
     },
     //todo: сделать кнопку по которой включается циклическая смена
-    //todo: разделить на два компутеда, а в третьем компутеде вычислять какой отдавать в шаблон
-    streamPlaces() {
-      //todo: убрал условие пока условие на включенное видео
+    streamPlacesNormalMode() {
       const places = {}
-      if (this.meetingInfo.isExam) {
-        let participants = this.onlineParticipants.filter(participant =>
-          this.respondedUserId !== participant.user.id
-        )
-        if (this.toAddCurrentUser) {
-          participants.push(this.participantCurrentUser)
-        }
-        participants.sort((a, b) => a.user.id - b.user.id)
-        console.log({participants})
-        if (participants.length > this.maxCountVideos) {
-          const indexParticipant = participants.findIndex(x => x.user.id === this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval)
-          if (indexParticipant !== -1) {
-            const slicedParticipants = participants.slice(indexParticipant)
-            console.log({slicedParticipants})
-            if (indexParticipant !== 0) {
-              const leftParticipants = participants.slice(0, indexParticipant)
-              participants = [...slicedParticipants, ...leftParticipants]
-            } else {
-              participants = slicedParticipants
-            }
-          }
-        }
-        if (this.respondedUserId) {
-          let participant
-          if (this.respondedUserId === this.currentUser.id) {
-            participant = this.participantCurrentUser
-          } else {
-            participant = this.onlineParticipants.find(x => x.user.id === this.respondedUserId)
-          }
-          if (participant) {
-            participants.unshift(participant)
-          }
-        }
-        for (let i = 0; i < this.maxCountVideos; i++) {
-          places[`post-${i+1}`] = participants[i]
-        }
-
-      } else {
-        for (let i = 0; i < this.maxCountVideos; i++) {
-          const elementQueue = this.participantsPriorityQueue[i]
-          places[`post-${i+1}`] = elementQueue ? elementQueue.participant : elementQueue
-        }
+      for (let i = 0; i < this.maxCountVideos; i++) {
+        const elementQueue = this.participantsPriorityQueue[i]
+        places[`post-${i+1}`] = elementQueue ? elementQueue.participant : elementQueue
       }
       return places
+    },
+    streamPlacesCyclicChangeVideos() {
+      const places = {}
+      let participants = this.onlineParticipants.filter(participant =>
+        this.respondedUserId !== participant.user.id
+      )
+      if (this.toAddCurrentUser) {
+        participants.push(this.participantCurrentUser)
+      }
+      participants.sort((a, b) => a.user.id - b.user.id)
+      if (participants.length > this.maxCountVideos) {
+        const indexParticipant = participants.findIndex(x => x.user.id === this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval)
+        if (indexParticipant !== -1) {
+          const slicedParticipants = participants.slice(indexParticipant)
+          if (indexParticipant !== 0) {
+            const leftParticipants = participants.slice(0, indexParticipant)
+            participants = [...slicedParticipants, ...leftParticipants]
+          } else {
+            participants = slicedParticipants
+          }
+        }
+      }
+      if (this.respondedUserId) {
+        let participant
+        if (this.respondedUserId === this.currentUser.id) {
+          participant = this.participantCurrentUser
+        } else {
+          participant = this.onlineParticipants.find(x => x.user.id === this.respondedUserId)
+        }
+        if (participant) {
+          participants.unshift(participant)
+        }
+      }
+      for (let i = 0; i < this.maxCountVideos; i++) {
+        places[`post-${i+1}`] = participants[i]
+      }
+      return places
+    },
+
+    streamPlaces() {
+      //todo: убрал условие пока условие на включенное видео
+      return this.meetingInfo.isExam ? this.streamPlacesCyclicChangeVideos : this.streamPlacesNormalMode
     },
 
     toAddCurrentUser() {
@@ -280,14 +281,11 @@ export default {
       }
       const maxUserId = Math.max(...participantUserIds)
       if (maxUserId === this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval) {
-        console.log(maxUserId)
         this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval = Math.min(...participantUserIds)
         return
       }
       const remainingParticipantUserIds = participantUserIds.filter(userId => userId > this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval)
-      const min = Math.min(...remainingParticipantUserIds)
-      console.log({ min })
-      this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval = min
+      this.cyclicChangeVideoStreams.userIdCurrentCyclicInterval = Math.min(...remainingParticipantUserIds)
     },
 
     calculatePriority(participant) {
