@@ -29,6 +29,8 @@
           </v-btn>
         </v-card-actions>
       </v-menu>
+      <v-icon color='black' :disabled='!canUndo' @click='$emit("undo-action")'>mdi-undo</v-icon>
+      <v-icon color='black' :disabled='!canRedo' @click='$emit("redo-action")'>mdi-redo</v-icon>
     </v-toolbar-items>
   </v-toolbar>
 </template>
@@ -36,6 +38,18 @@
 <script>
 export default {
   name: 'WhiteboardSettingsToolbar',
+  props: {
+    canUndo: {
+      type: Boolean,
+      required: true,
+      default: false
+    },
+    canRedo: {
+      type: Boolean,
+      required: true,
+      default: false
+    }
+  },
   data() {
     return {
       colorPickerDialog: false

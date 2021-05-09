@@ -15,7 +15,6 @@
             <v-tab-item>
               <StreamingArea :meeting-id="meetingId"
                              :stream-type='streamType' />
-              <SettingsMediaDevices />
             </v-tab-item>
             <v-tab-item eager>
               <Whiteboard
@@ -23,7 +22,6 @@
                 :width="900"
                 style="min-width: 900px; min-height: 600px"
               ></Whiteboard>
-              <SettingsMediaDevices />
 
             </v-tab-item>
             <v-tab-item >
@@ -31,6 +29,8 @@
                 style='min-height: 600px; min-width: 900px'/>
             </v-tab-item>
           </v-tabs-items>
+          <SettingsMediaDevices />
+
         </div>
         <v-card
           max-height="600px"

@@ -10,7 +10,10 @@
             @mouseup='endDraw'>
 
     </canvas>
-    <WhiteboardSettingsToolbar @clear-whiteboard='clearWhiteboard' />
+    <WhiteboardSettingsToolbar :can-redo='canRedo' :can-undo='canUndo'
+      @clear-whiteboard='clearWhiteboard'
+      @redo-action='redoAction'
+      @undo-action='undoAction'/>
     <v-overlay absolute  :value="loading">
       <v-progress-circular indeterminate size="64" />
     </v-overlay>
@@ -77,6 +80,7 @@ export default {
        * **/
       currentLine: [], // пока мышьку не отпустили сюда будут добавляться элементы данной линии
       actionIdsInCurrentSessions: [],
+      rollbackActions: [],
       isDrawing: false,
       context: null,
       canvas: null,
@@ -88,7 +92,15 @@ export default {
     }),
     ...mapState("meeting", {
       meetingHashId: state => state.meetingInfo.hashId
-    })
+    }),
+
+    canRedo() {
+      return !!this.rollbackActions.length
+    },
+
+    canUndo() {
+      return !!this.actionIdsInCurrentSessions.length
+    }
   },
   async mounted() {
     this.loading = true
@@ -99,7 +111,7 @@ export default {
       const whiteboardData = response.data
       this.whiteboardData = whiteboardData
       const drawings = whiteboardData.map(x => x.drawings)
-      this.initialDrawings(drawings)
+      this.redrawBoard(drawings)
     } catch (error) {
       console.log({error})
       this.$toast.error(ERROR_SYNC_WHITEBOARD)
@@ -121,6 +133,10 @@ export default {
       }
     },
 
+    whiteboardRemoveElement(actionId) {
+      this.removeElement(actionId)
+    },
+
     whiteboardClear() {
       this.resetWhiteboard()
     }
@@ -133,9 +149,38 @@ export default {
       this.resetWhiteboard()
     },
 
+    removeElement(actionId) {
+      const index = this.whiteboardData.findIndex(x => x.id === actionId)
+      if (index !== -1) {
+        this.whiteboardData.splice(index, 1)
+        const drawings = this.whiteboardData.map(x => x.drawings)
+        if (this.currentLine.length) {
+          drawings.push(JSON.stringify(this.currentLine))
+        }
+        this.redrawBoard(drawings)
+      }
+    },
+
+    redoAction() {
+      console.log("redo")
+    },
+
+    undoAction() {
+      const actionId = this.actionIdsInCurrentSessions.pop()
+      if (!actionId) {
+        return
+      }
+      this.$socket.client.emit('whiteboard-remove-element', actionId)
+      const action = this.whiteboardData.find(x => x.id === actionId)
+      this.rollbackActions.push(action.drawings)
+      this.removeElement(actionId)
+    },
+
     resetWhiteboard() {
       this.currentLine = []
       this.whiteboardData = []
+      this.actionIdsInCurrentSessions = []
+      this.rollbackActions = []
       this.context.clearRect(0, 0, this.width, this.height)
     },
 
@@ -147,7 +192,8 @@ export default {
       }
     },
 
-    initialDrawings(drawings) {
+    redrawBoard(drawings) {
+      this.context.clearRect(0, 0, this.width, this.height)
       drawings.forEach(drawing => {
         const drawingObj = JSON.parse(drawing)
         this.context.beginPath()
@@ -176,9 +222,8 @@ export default {
       this.drawLine(this.currentCursorPosition.x,
         this.currentCursorPosition.y,
         position.x, position.y, this.currentColor, true)
-      //todo: next tick???
       this.$socket.client.emit('whiteboard-end-drawing', this.currentLine)
-
+      this.currentLine = []
 
     },
 
