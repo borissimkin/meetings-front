@@ -10,7 +10,11 @@
             @mouseup='endDraw'>
 
     </canvas>
-    <WhiteboardSettingsToolbar :can-redo='canRedo' :can-undo='canUndo'
+    <WhiteboardSettingsToolbar
+      :can-redo='canRedo'
+      :can-undo='canUndo'
+      :current-color='currentColor'
+      @change-color='changeColor'
       @clear-whiteboard='clearWhiteboard'
       @redo-action='redoAction'
       @undo-action='undoAction'/>
@@ -43,19 +47,10 @@ export default {
     },
   },
   //todo: добавить толщину линии
-  /**
-   * todo: мысли об откате действий:
-   * 1) Подгружать все каракули;
-   * 2) после окончания рисования линии пользователем, сохраняется в бд, приходит id,
-   * который записывается в массив действий пользователя в данной сессии, при откате брать последний айди из этого массива
-   * и отправлять на сервер что такое надо удалить, всем остальным также сигнал отсылается.
-   * 3) при приеме сигнала, удалить запись с этим айди, и при перерисовке нужно помнить о текущей линии (вдруг сейчас кто то рисовал)
-   * **/
   data() {
-
     return {
       loading: false,
-      currentColor: 'black',
+      currentColor: '#000000',
       fractionDigits: 4,
       currentCursorPosition: {
         x: 0,
@@ -152,6 +147,10 @@ export default {
   },
 
   methods: {
+    changeColor(color) {
+      this.currentColor = color
+    },
+
     clearWhiteboard() {
       this.$socket.client.emit('whiteboard-clear')
       this.resetWhiteboard()
