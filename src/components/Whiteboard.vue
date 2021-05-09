@@ -133,6 +133,14 @@ export default {
       }
     },
 
+    whiteboardCreateElement(whiteboardData) {
+      this.whiteboardData.push(whiteboardData)
+      if (whiteboardData.userId === this.currentUser.id) {
+        this.actionIdsInCurrentSessions.push(whiteboardData.id)
+      }
+      this.drawElement(JSON.parse(whiteboardData.drawings))
+    },
+
     whiteboardRemoveElement(actionId) {
       this.removeElement(actionId)
     },
@@ -162,7 +170,12 @@ export default {
     },
 
     redoAction() {
-      console.log("redo")
+      const actionString = this.rollbackActions.pop()
+      if (!actionString) {
+        return
+      }
+      const action = JSON.parse(actionString)
+      this.$socket.client.emit('whiteboard-create-element', action)
     },
 
     undoAction() {
@@ -196,16 +209,20 @@ export default {
       this.context.clearRect(0, 0, this.width, this.height)
       drawings.forEach(drawing => {
         const drawingObj = JSON.parse(drawing)
-        this.context.beginPath()
-        drawingObj.forEach(elem => {
-          this.context.moveTo(elem.x0 * this.width, elem.y0 * this.height)
-          this.context.lineTo(elem.x1 * this.width, elem.y1 * this.height)
-          this.context.strokeStyle = elem.color
-          this.context.lineWidth = 2
-        })
-        this.context.stroke()
-        this.context.closePath()
+        this.drawElement(drawingObj)
       })
+    },
+
+    drawElement(element) {
+      this.context.beginPath()
+      element.forEach(elem => {
+        this.context.moveTo(elem.x0 * this.width, elem.y0 * this.height)
+        this.context.lineTo(elem.x1 * this.width, elem.y1 * this.height)
+        this.context.strokeStyle = elem.color
+        this.context.lineWidth = 2
+      })
+      this.context.stroke()
+      this.context.closePath()
     },
 
     startDraw(event) {
