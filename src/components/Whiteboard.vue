@@ -10,6 +10,7 @@
             @mouseup='endDraw'>
 
     </canvas>
+    <WhiteboardSettingsToolbar @clear-whiteboard='clearWhiteboard' />
     <v-overlay absolute  :value="loading">
       <v-progress-circular indeterminate size="64" />
     </v-overlay>
@@ -21,9 +22,11 @@ import _ from 'lodash'
 import { mapState } from 'vuex'
 import meetingApi from "@/api/meeting.api"
 import { ERROR_SYNC_WHITEBOARD } from '@/helpers/toast.messages'
+import WhiteboardSettingsToolbar from '@/components/WhiteboardSettingsToolbar'
 
 export default {
   name: 'Whiteboard',
+  components: { WhiteboardSettingsToolbar },
   props: {
     width: {
       type: Number,
@@ -116,11 +119,26 @@ export default {
       if (whiteboardData.userId === this.currentUser.id) {
         this.actionIdsInCurrentSessions.push(whiteboardData.id)
       }
+    },
+
+    whiteboardClear() {
+      this.resetWhiteboard()
     }
 
   },
 
   methods: {
+    clearWhiteboard() {
+      this.$socket.client.emit('whiteboard-clear')
+      this.resetWhiteboard()
+    },
+
+    resetWhiteboard() {
+      this.currentLine = []
+      this.whiteboardData = []
+      this.context.clearRect(0, 0, this.width, this.height)
+    },
+
     getMousePositionOnCanvas(event) {
       const rect = this.canvas.getBoundingClientRect()
       return {
