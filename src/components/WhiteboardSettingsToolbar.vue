@@ -15,6 +15,19 @@
         swatches-max-height="100"
       ></v-color-picker>
     </v-menu>
+    <v-container class='ml-2'>
+      <v-row class='mt-2'>
+        <v-col cols='4'>
+          <v-select
+            v-model='thickness'
+            :items="thicknessElements"
+            filled
+            label="Толщина линии"
+          ></v-select>
+        </v-col>
+      </v-row>
+    </v-container>
+
     <v-spacer />
     <v-btn :disabled='!canUndo' @click='$emit("undo-action")' icon>
       <v-icon color='black'>mdi-undo</v-icon>
@@ -45,15 +58,21 @@ export default {
       type: String,
       required: true,
       default: "#000000"
-    }
+    },
   },
   data() {
     return {
       colorPickerDialog: false,
-      color: ""
+      color: "",
+      thickness: 2,
+      thicknessElements: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
     }
   },
   watch: {
+    thickness(value) {
+      this.$emit('change-thickness', value)
+    },
+
     colorPickerDialog(value) {
       if (!value) {
         this.$emit('change-color', this.color)

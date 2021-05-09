@@ -13,8 +13,9 @@
     <WhiteboardSettingsToolbar
       :can-redo='canRedo'
       :can-undo='canUndo'
-      :current-color='currentColor'
+      :current-color='settings.color'
       @change-color='changeColor'
+      @change-thickness='changeThickness'
       @clear-whiteboard='clearWhiteboard'
       @redo-action='redoAction'
       @undo-action='undoAction'/>
@@ -46,11 +47,13 @@ export default {
       default: 600,
     },
   },
-  //todo: добавить толщину линии
   data() {
     return {
       loading: false,
-      currentColor: '#000000',
+      settings: {
+        color: '#000000',
+        thickness: 2,
+      },
       fractionDigits: 4,
       currentCursorPosition: {
         x: 0,
@@ -71,6 +74,7 @@ export default {
        *   x1,
        *   y1,
        *   color
+       *   thickness
        * }
        * **/
       currentLine: [], // пока мышьку не отпустили сюда будут добавляться элементы данной линии
@@ -118,7 +122,7 @@ export default {
     whiteboardDrawing(data) {
       const w = this.width
       const h = this.height
-      this.drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color)
+      this.drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color, data.thickness)
     },
 
     whiteboardEndDrawing(whiteboardData) {
@@ -148,7 +152,11 @@ export default {
 
   methods: {
     changeColor(color) {
-      this.currentColor = color
+      this.settings.color = color
+    },
+
+    changeThickness(thickness) {
+      this.settings.thickness = thickness
     },
 
     clearWhiteboard() {
@@ -215,10 +223,11 @@ export default {
     drawElement(element) {
       this.context.beginPath()
       element.forEach(elem => {
+        console.log({elem})
+        this.context.strokeStyle = elem.color
+        this.context.lineWidth = elem.thickness
         this.context.moveTo(elem.x0 * this.width, elem.y0 * this.height)
         this.context.lineTo(elem.x1 * this.width, elem.y1 * this.height)
-        this.context.strokeStyle = elem.color
-        this.context.lineWidth = 2
       })
       this.context.stroke()
       this.context.closePath()
@@ -237,7 +246,7 @@ export default {
       const position = this.getMousePositionOnCanvas(event)
       this.drawLine(this.currentCursorPosition.x,
         this.currentCursorPosition.y,
-        position.x, position.y, this.currentColor, true)
+        position.x, position.y, this.settings.color, this.settings.thickness, true)
       this.$socket.client.emit('whiteboard-end-drawing', this.currentLine)
       this.currentLine = []
 
@@ -249,17 +258,17 @@ export default {
       }
       const position = this.getMousePositionOnCanvas(event)
       const { x, y } = { ...position }
-      this.drawLine(this.currentCursorPosition.x, this.currentCursorPosition.y, x, y, this.currentColor, true)
+      this.drawLine(this.currentCursorPosition.x, this.currentCursorPosition.y, x, y, this.settings.color, this.settings.thickness, true)
       this.currentCursorPosition.x = x
       this.currentCursorPosition.y = y
     }, 10),
 
-    drawLine(x0, y0, x1, y1, color, emit) {
+    drawLine(x0, y0, x1, y1, color, thickness, emit) {
       this.context.beginPath()
       this.context.moveTo(x0, y0)
       this.context.lineTo(x1, y1)
       this.context.strokeStyle = color
-      this.context.lineWidth = 2
+      this.context.lineWidth = thickness
       this.context.stroke()
       this.context.closePath()
       if (!emit) {
@@ -273,6 +282,7 @@ export default {
         x1: (x1 / w).toFixed(this.fractionDigits),
         y1: (y1 / h).toFixed(this.fractionDigits),
         color,
+        thickness
       }
       this.currentLine.push(drawingElement)
       this.$socket.client.emit('whiteboard-drawing', drawingElement)
