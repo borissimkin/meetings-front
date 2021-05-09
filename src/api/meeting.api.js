@@ -56,4 +56,8 @@ export default {
   setRespondedUserId(meetingId, userId) {
     return server.put(`/meeting/${meetingId}/exam/set-responded-user/${userId}`)
   },
+
+  getWhiteboardData(meetingId) {
+    return server.get(`/meeting/${meetingId}/whiteboard`)
+  },
 }

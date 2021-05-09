@@ -23,6 +23,8 @@
                 :width="900"
                 style="min-width: 900px; min-height: 600px"
               ></Whiteboard>
+              <SettingsMediaDevices />
+
             </v-tab-item>
             <v-tab-item >
               <AttendanceStatistics

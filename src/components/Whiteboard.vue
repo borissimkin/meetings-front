@@ -8,12 +8,19 @@
             @mousemove='drawing'
             @mouseout='endDraw'
             @mouseup='endDraw'>
+
     </canvas>
+    <v-overlay absolute  :value="loading">
+      <v-progress-circular indeterminate size="64" />
+    </v-overlay>
   </div>
 </template>
 
 <script>
 import _ from 'lodash'
+import { mapState } from 'vuex'
+import meetingApi from "@/api/meeting.api"
+import { ERROR_SYNC_WHITEBOARD } from '@/helpers/toast.messages'
 
 export default {
   name: 'Whiteboard',
@@ -29,21 +36,73 @@ export default {
       default: 600,
     },
   },
+  //todo: добавить толщину линии
+  /**
+   * todo: мысли об откате действий:
+   * 1) Подгружать все каракули;
+   * 2) после окончания рисования линии пользователем, сохраняется в бд, приходит id,
+   * который записывается в массив действий пользователя в данной сессии, при откате брать последний айди из этого массива
+   * и отправлять на сервер что такое надо удалить, всем остальным также сигнал отсылается.
+   * 3) при приеме сигнала, удалить запись с этим айди, и при перерисовке нужно помнить о текущей линии (вдруг сейчас кто то рисовал)
+   * **/
   data() {
+
     return {
+      loading: false,
       currentColor: 'black',
+      fractionDigits: 4,
       currentCursorPosition: {
         x: 0,
         y: 0,
       },
+      /**
+       * {
+       *   id
+       *   userId,
+       *   drawings: "[]"
+       * }
+       * **/
+      whiteboardData: [],
+      /**
+       * {
+       *   x0,
+       *   y0,
+       *   x1,
+       *   y1,
+       *   color
+       * }
+       * **/
+      currentLine: [], // пока мышьку не отпустили сюда будут добавляться элементы данной линии
+      actionIdsInCurrentSessions: [],
       isDrawing: false,
       context: null,
       canvas: null,
     }
   },
-  mounted() {
+  computed: {
+    ...mapState("auth", {
+      currentUser: state => state.currentUser
+    }),
+    ...mapState("meeting", {
+      meetingHashId: state => state.meetingInfo.hashId
+    })
+  },
+  async mounted() {
+    this.loading = true
     this.canvas = document.getElementById('js-board')
     this.context = this.canvas.getContext('2d')
+    try {
+      const response = await meetingApi.getWhiteboardData(this.meetingHashId)
+      const whiteboardData = response.data
+      this.whiteboardData = whiteboardData
+      const drawings = whiteboardData.map(x => x.drawings)
+      this.initialDrawings(drawings)
+    } catch (error) {
+      console.log({error})
+      this.$toast.error(ERROR_SYNC_WHITEBOARD)
+    } finally {
+      this.loading = false
+    }
   },
   sockets: {
     whiteboardDrawing(data) {
@@ -51,6 +110,13 @@ export default {
       const h = this.height
       this.drawLine(data.x0 * w, data.y0 * h, data.x1 * w, data.y1 * h, data.color)
     },
+
+    whiteboardEndDrawing(whiteboardData) {
+      this.whiteboardData.push(whiteboardData)
+      if (whiteboardData.userId === this.currentUser.id) {
+        this.actionIdsInCurrentSessions.push(whiteboardData.id)
+      }
+    }
 
   },
 
@@ -61,7 +127,21 @@ export default {
         x: event.clientX - rect.left,
         y: event.clientY - rect.top,
       }
+    },
 
+    initialDrawings(drawings) {
+      drawings.forEach(drawing => {
+        const drawingObj = JSON.parse(drawing)
+        this.context.beginPath()
+        drawingObj.forEach(elem => {
+          this.context.moveTo(elem.x0 * this.width, elem.y0 * this.height)
+          this.context.lineTo(elem.x1 * this.width, elem.y1 * this.height)
+          this.context.strokeStyle = elem.color
+          this.context.lineWidth = 2
+        })
+        this.context.stroke()
+        this.context.closePath()
+      })
     },
 
     startDraw(event) {
@@ -78,6 +158,9 @@ export default {
       this.drawLine(this.currentCursorPosition.x,
         this.currentCursorPosition.y,
         position.x, position.y, this.currentColor, true)
+      //todo: next tick???
+      this.$socket.client.emit('whiteboard-end-drawing', this.currentLine)
+
 
     },
 
@@ -105,13 +188,15 @@ export default {
       }
       const w = this.width
       const h = this.height
-      this.$socket.client.emit('whiteboard-drawing', {
-        x0: x0 / w,
-        y0: y0 / h,
-        x1: x1 / w,
-        y1: y1 / h,
+      const drawingElement = {
+        x0: (x0 / w).toFixed(this.fractionDigits),
+        y0: (y0 / h).toFixed(this.fractionDigits),
+        x1: (x1 / w).toFixed(this.fractionDigits),
+        y1: (y1 / h).toFixed(this.fractionDigits),
         color,
-      })
+      }
+      this.currentLine.push(drawingElement)
+      this.$socket.client.emit('whiteboard-drawing', drawingElement)
 
     },
   },
