@@ -24,3 +24,5 @@ export const RESET_PREPARATIONS_TO_EXAM = (firstName, lastName) =>
 export const SET_RESPONDED_CURRENT_USER = 'Вы отвечаете!'
 export const SET_RESPONDED_USER = (firstName, lastName) =>
   `${getFullName(firstName, lastName)} отвечает`
+export const ERROR_SYNC_WHITEBOARD =
+  'Произошла ошибка синхронизации доски, ' + 'перезагрузите страницу'
