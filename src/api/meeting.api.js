@@ -60,4 +60,8 @@ export default {
   getWhiteboardData(meetingId) {
     return server.get(`/meeting/${meetingId}/whiteboard`)
   },
+
+  getMeetingPermissions(meetingId) {
+    return server.get(`/meeting/${meetingId}/permissions`)
+  },
 }

@@ -1,6 +1,7 @@
 <template>
   <div class='canvas-wrapper'>
     <canvas id='js-board'
+            :class='{"whiteboard_not-allowed-drawing": !canDrawing}'
             :height='height'
             :width='width'
             class='whiteboard'
@@ -27,7 +28,7 @@
 
 <script>
 import _ from 'lodash'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import meetingApi from "@/api/meeting.api"
 import { ERROR_SYNC_WHITEBOARD } from '@/helpers/toast.messages'
 import WhiteboardSettingsToolbar from '@/components/WhiteboardSettingsToolbar'
@@ -92,14 +93,21 @@ export default {
     ...mapState("meeting", {
       meetingHashId: state => state.meetingInfo.hashId
     }),
+    ...mapGetters("meeting", [
+      "currentUserPermissions"
+    ]),
+
+    canDrawing() {
+      return !!this.currentUserPermissions.canDrawing
+    },
 
     canRedo() {
-      return !!this.rollbackActions.length
+      return !!this.rollbackActions.length && this.canDrawing
     },
 
     canUndo() {
-      return !!this.actionIdsInCurrentSessions.length
-    }
+      return !!this.actionIdsInCurrentSessions.length && this.canDrawing
+    },
   },
   async mounted() {
     this.loading = true
@@ -234,6 +242,9 @@ export default {
     },
 
     startDraw(event) {
+      if (!this.canDrawing) {
+        return
+      }
       this.isDrawing = true
       const position = this.getMousePositionOnCanvas(event)
       this.currentCursorPosition = { ...position }
@@ -303,6 +314,10 @@ export default {
   width: 900px;
   position: absolute;
   border: 1px solid black;
+}
+
+.whiteboard_not-allowed-drawing {
+  cursor: not-allowed;
 }
 
 </style>
