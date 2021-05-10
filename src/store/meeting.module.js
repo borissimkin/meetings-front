@@ -216,6 +216,7 @@ const meetings = {
 
     [EDIT_MEETING_PERMISSIONS](state, payload) {
       const { userId, ...permissions } = { ...payload }
+      console.log({ userId, permissions })
       const userPermission = state.permissions.find((x) => x.userId === userId)
       if (userPermission) {
         Object.entries(userPermission).forEach(([key]) => {
@@ -232,7 +233,6 @@ const meetings = {
 
     async fetchPermissions({ commit }, payload) {
       const response = await meetingApi.getMeetingPermissions(payload.meetingId)
-      console.log({ response })
       commit(SET_MEETING_PERMISSIONS, response.data)
     },
 
@@ -273,6 +273,10 @@ const meetings = {
 
     currentUserPermissions: (state, _, rootState) => {
       return state.permissions.find((x) => x.userId === rootState.auth.currentUser.id)
+    },
+
+    currentUserIsHost: (state, _, rootState) => {
+      return state.meetingInfo.creator.id === rootState.auth.currentUser.id
     },
   },
 }

@@ -74,7 +74,10 @@ export default {
     ...mapGetters("meeting", ["currentUserPermissions"]),
 
     canClearBoard() {
-      return !!this.currentUserPermissions.canDrawing
+      if (this.currentUserPermissions) {
+        return this.currentUserPermissions.canDrawing
+      }
+      return false
     }
   },
   watch: {

@@ -1,9 +1,13 @@
 <template>
   <v-card class='pa-1 mt-2 mb-2 ' flat>
-    <div class='menu'>
-      <span v-if='isHostOfMeeting' class='text-caption px-1'>создатель собрания</span>
+    <div class='menu mx-1'>
+      <v-btn x-small v-if='canSetDrawingPermission && !isHostOfMeeting' icon @click='changeDrawingPermission'>
+        <v-icon small :color='colorDrawingIcon'>{{ drawingIcon }}</v-icon>
+      </v-btn>
+      <v-icon v-else-if='!isHostOfMeeting' small :color='colorDrawingIcon'>{{ drawingIcon }}</v-icon>
+      <span v-if='isHostOfMeeting' class='text-caption'>создатель собрания</span>
       <v-spacer v-else/>
-      <ParticipantSettingsMenu :user='user' class='ma-1' v-if='showMenuSettings' />
+      <ParticipantSettingsMenu :user='user' v-if='showMenuSettings' />
     </div>
     <div class='content px-1'>
       <div class='font-weight-medium'>
@@ -26,11 +30,12 @@
 
 <script>
 import { getFullName } from '@/helpers/username.process'
-import { mapState } from 'vuex'
+import { mapGetters, mapState } from 'vuex'
 import _ from "lodash"
 import dayjs from 'dayjs'
 import { fromSecondsToTime, fromTimeToSeconds } from '@/helpers/datetime.process'
 import ParticipantSettingsMenu from '@/components/ParticipantSettingsMenu'
+import { EDIT_MEETING_PERMISSIONS } from '@/store/mutations.type'
 
 export default {
   name: 'MeetingParticipantsListItem',
@@ -85,6 +90,10 @@ export default {
     ...mapState("exam", {
       examInfo: state => state.examInfo
     }),
+    ...mapState("meeting", {
+      permissions: state => state.permissions
+    }),
+    ...mapGetters("meeting", ["currentUserIsHost"]),
 
     name() {
       return getFullName(this.user.firstName, this.user.lastName)
@@ -103,6 +112,25 @@ export default {
       return this.examState.minutesToPrepare
     },
 
+    canSetDrawingPermission() {
+      return this.currentUserIsHost
+    },
+
+    meetingPermissions() {
+      return this.permissions.find(x => x.userId === this.user.id)
+    },
+
+    canDrawing() {
+      return !!this.meetingPermissions?.canDrawing
+    },
+
+    drawingIcon() {
+      return this.canDrawing ? "mdi-pencil" : "mdi-pencil-off"
+    },
+
+    colorDrawingIcon() {
+      return this.canDrawing ? "red" : "black"
+    },
 
     examStateIsEmpty() {
       return _.isEmpty(this.examState)
@@ -157,6 +185,12 @@ export default {
         Object.assign(this.leftTimeToPrepare, time)
 
       }, 1000)
+    },
+
+    changeDrawingPermission() {
+      const payload = { userId: this.user.id, canDrawing: !this.canDrawing}
+      this.$socket.client.emit('change-can-drawing', payload)
+      this.$store.commit(`meeting/${EDIT_MEETING_PERMISSIONS}`, payload)
     },
 
     partTimeToShow(number) {

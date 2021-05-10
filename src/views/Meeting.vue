@@ -162,7 +162,8 @@ export default {
   computed: {
     ...mapState('meeting', {
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
-      meetingInfo: state => state.meetingInfo
+      meetingInfo: state => state.meetingInfo,
+      permissions: state => state.permissions
     }),
     ...mapState('auth', {
       currentUser: state => state.currentUser
@@ -194,6 +195,9 @@ export default {
           peerId: ""
         }
         this.$store.commit(`meeting/${ADD_PARTICIPANT}`, newParticipant)
+      }
+
+      if (!this.permissions.find(x => x.userId === user.id)) {
         this.$store.commit(`meeting/${ADD_MEETING_PERMISSIONS}`, permissions)
       }
       const {enabledVideo, enabledAudio} = {...settingDevices}

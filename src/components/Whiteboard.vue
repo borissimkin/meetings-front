@@ -98,7 +98,7 @@ export default {
     ]),
 
     canDrawing() {
-      return !!this.currentUserPermissions.canDrawing
+      return !!this.currentUserPermissions?.canDrawing
     },
 
     canRedo() {
@@ -231,7 +231,6 @@ export default {
     drawElement(element) {
       this.context.beginPath()
       element.forEach(elem => {
-        console.log({elem})
         this.context.strokeStyle = elem.color
         this.context.lineWidth = elem.thickness
         this.context.moveTo(elem.x0 * this.width, elem.y0 * this.height)
