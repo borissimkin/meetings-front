@@ -35,12 +35,14 @@
     <v-btn :disabled='!canRedo' @click='$emit("redo-action")' icon>
       <v-icon color='black'>mdi-redo</v-icon>
     </v-btn>
-    <v-btn class='ml-3' @click='$emit("clear-whiteboard")'>Очистить доску</v-btn>
+    <v-btn :disabled='!canClearBoard' class='ml-3' @click='$emit("clear-whiteboard")'>Очистить доску</v-btn>
 
   </v-toolbar>
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 export default {
   name: 'WhiteboardSettingsToolbar',
   props: {
@@ -66,6 +68,15 @@ export default {
       color: "",
       thickness: 2,
       thicknessElements: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+    }
+  },
+  computed: {
+    ...mapState("meeting", {
+      currentUserPermissions: state => state.currentUserPermissions
+    }),
+
+    canClearBoard() {
+      return this.currentUserPermissions.canDrawing
     }
   },
   watch: {

@@ -24,6 +24,10 @@ import {
   ADD_CHECKPOINT,
   ADD_USER_ID_TO_CHECKPOINT,
   SET_NORMAL_MODE_SHOW_VIDEOS,
+  SET_MEETING_PERMISSIONS,
+  ADD_MEETING_PERMISSIONS,
+  EDIT_MEETING_PERMISSIONS,
+  SET_MEETING_PERMISSIONS_CURRENT_USER,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
@@ -39,6 +43,11 @@ const getDefaultState = () => {
     participantsMeetingState: {}, // {userId: {isSpeaking, isRaisedHand, enabledAudio, enabledVideo}}
     participants: [],
     checkpoints: [],
+    permissions: [],
+    currentUserPermissions: {
+      userId: 0,
+      canDrawing: false,
+    },
     normalModeShowVideos: true,
     meetingInfo: {
       id: 0,
@@ -170,9 +179,7 @@ const meetings = {
     },
 
     [SET_PARTICIPANTS_MEETING_STATE](state, payload) {
-      Object.entries(payload).forEach(
-        ([key]) => (payload[key].isSpeaking = false)
-      )
+      Object.entries(payload).forEach(([key]) => (payload[key].isSpeaking = false))
       state.participantsMeetingState = payload
     },
 
@@ -186,9 +193,7 @@ const meetings = {
 
     [ADD_USER_ID_TO_CHECKPOINT](state, payload) {
       const { userId, checkpointId } = { ...payload }
-      const checkpoint = state.checkpoints.find(
-        (checkpoint) => checkpoint.id === checkpointId
-      )
+      const checkpoint = state.checkpoints.find((checkpoint) => checkpoint.id === checkpointId)
       checkpoint.userIds.push(userId)
     },
 
@@ -205,11 +210,45 @@ const meetings = {
     [SET_NORMAL_MODE_SHOW_VIDEOS](state, value) {
       state.normalModeShowVideos = value
     },
+
+    [SET_MEETING_PERMISSIONS](state, permissions) {
+      state.permissions = permissions
+    },
+
+    [ADD_MEETING_PERMISSIONS](state, userPermissions) {
+      state.permissions.push(userPermissions)
+    },
+
+    [SET_MEETING_PERMISSIONS_CURRENT_USER](state, permissions) {
+      Object.entries(state.currentUserPermissions).forEach(([key]) => {
+        state.currentUserPermissions[key] = permissions[key]
+      })
+    },
+
+    [EDIT_MEETING_PERMISSIONS](state, payload) {
+      const { userId, ...permissions } = { ...payload }
+      const userPermission = state.permissions.find((x) => x.userId === userId)
+      if (userPermission) {
+        Object.entries(permissions).forEach(([key]) => {
+          userPermission[key] = permissions[key]
+        })
+      }
+    },
   },
   actions: {
     async fetchParticipants({ commit }, payload) {
       const response = await meetingApi.getAllParticipants(payload.meetingId)
       commit(SET_PARTICIPANTS, response.data)
+    },
+
+    async fetchPermissions({ commit }, payload) {
+      const response = await meetingApi.getMeetingPermissions(payload.meetingId)
+      commit(SET_MEETING_PERMISSIONS, response.data)
+    },
+
+    async fetchPermissionsCurrentUser({ commit }, payload) {
+      const response = await meetingApi.getMeetingPermissionsCurrentUser(payload.meetingId)
+      commit(SET_MEETING_PERMISSIONS_CURRENT_USER, response.data)
     },
 
     async fetchCheckpoints({ commit }, payload) {
@@ -223,23 +262,15 @@ const meetings = {
     },
 
     async fetchParticipantsMeetingState({ commit }, payload) {
-      const response = await meetingApi.getParticipantsMeetingState(
-        payload.meetingId
-      )
+      const response = await meetingApi.getParticipantsMeetingState(payload.meetingId)
       const participantsMeetingState = response.data
       commit(SET_PARTICIPANTS_MEETING_STATE, participantsMeetingState)
     },
 
     setUserStream({ commit, state }, stream) {
       commit(SET_USER_STREAM, stream)
-      commit(
-        SET_ENABLED_AUDIO_OF_CURRENT_USER,
-        state.meetingStateOfCurrentUser.enabledAudio
-      )
-      commit(
-        SET_ENABLED_VIDEO_OF_CURRENT_USER,
-        state.meetingStateOfCurrentUser.enabledVideo
-      )
+      commit(SET_ENABLED_AUDIO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledAudio)
+      commit(SET_ENABLED_VIDEO_OF_CURRENT_USER, state.meetingStateOfCurrentUser.enabledVideo)
     },
   },
   getters: {
@@ -253,6 +284,10 @@ const meetings = {
 
     onlineParticipants: (state) => {
       return state.participants.filter((participant) => participant.online)
+    },
+
+    currentUserIsHost: (state, _, rootState) => {
+      return state.meetingInfo.creator.id === rootState.auth.currentUser.id
     },
   },
 }

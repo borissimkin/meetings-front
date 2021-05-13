@@ -1,6 +1,7 @@
 <template>
   <div class='canvas-wrapper'>
     <canvas id='js-board'
+            :class='{"whiteboard_not-allowed-drawing": !canDrawing}'
             :height='height'
             :width='width'
             class='whiteboard'
@@ -92,14 +93,21 @@ export default {
     ...mapState("meeting", {
       meetingHashId: state => state.meetingInfo.hashId
     }),
+    ...mapState("meeting", {
+      currentUserPermissions: state => state.currentUserPermissions
+    }),
+
+    canDrawing() {
+      return this.currentUserPermissions.canDrawing
+    },
 
     canRedo() {
-      return !!this.rollbackActions.length
+      return !!this.rollbackActions.length && this.canDrawing
     },
 
     canUndo() {
-      return !!this.actionIdsInCurrentSessions.length
-    }
+      return !!this.actionIdsInCurrentSessions.length && this.canDrawing
+    },
   },
   async mounted() {
     this.loading = true
@@ -223,7 +231,6 @@ export default {
     drawElement(element) {
       this.context.beginPath()
       element.forEach(elem => {
-        console.log({elem})
         this.context.strokeStyle = elem.color
         this.context.lineWidth = elem.thickness
         this.context.moveTo(elem.x0 * this.width, elem.y0 * this.height)
@@ -234,6 +241,9 @@ export default {
     },
 
     startDraw(event) {
+      if (!this.canDrawing) {
+        return
+      }
       this.isDrawing = true
       const position = this.getMousePositionOnCanvas(event)
       this.currentCursorPosition = { ...position }
@@ -303,6 +313,10 @@ export default {
   width: 900px;
   position: absolute;
   border: 1px solid black;
+}
+
+.whiteboard_not-allowed-drawing {
+  cursor: not-allowed;
 }
 
 </style>

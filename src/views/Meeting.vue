@@ -94,7 +94,11 @@ import {
   ADD_CHECKPOINT,
   ADD_USER_ID_TO_CHECKPOINT,
   SET_MINUTES_TO_PREPARE,
-  SET_STUDENT_EXAM_STATES, ADD_STUDENT_EXAM_STATE, SET_RESPONDED_USER_ID,
+  SET_STUDENT_EXAM_STATES,
+  ADD_STUDENT_EXAM_STATE,
+  SET_RESPONDED_USER_ID,
+  ADD_MEETING_PERMISSIONS,
+  EDIT_MEETING_PERMISSIONS, SET_MEETING_PERMISSIONS_CURRENT_USER,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -103,9 +107,13 @@ import { canStartCheckListeners } from '@/helpers/permissions'
 import meetingApi from '@/api/meeting.api'
 import streamTypes from '@/helpers/stream.type'
 import {
-  CHECK_LISTENERS_STARTED, CURRENT_USER_RESET_PREPARATION_TO_EXAM,
+  CHECK_LISTENERS_STARTED,
+  CURRENT_USER_CAN_DRAWING,
+  CURRENT_USER_CAN_NOT_DRAWING,
+  CURRENT_USER_RESET_PREPARATION_TO_EXAM,
   CURRENT_USER_START_PREPARATION_TO_EXAM,
-  ERROR_DATA_DOWNLOAD, SET_RESPONDED_CURRENT_USER,
+  ERROR_DATA_DOWNLOAD,
+  SET_RESPONDED_CURRENT_USER,
 } from '@/helpers/toast.messages'
 import { contentToastRaisedHand } from '@/toasts'
 import { getFullName } from '@/helpers/username.process'
@@ -154,7 +162,8 @@ export default {
   computed: {
     ...mapState('meeting', {
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
-      meetingInfo: state => state.meetingInfo
+      meetingInfo: state => state.meetingInfo,
+      permissions: state => state.permissions
     }),
     ...mapState('auth', {
       currentUser: state => state.currentUser
@@ -172,7 +181,7 @@ export default {
   },
 
   sockets: {
-    userConnected(user, userSettingDevices) {
+    userConnected({ user, settingDevices, permissions }) {
       const participant = this.getParticipantByUserId(user.id)
       if (participant) {
         this.$store.commit(`meeting/${SET_ONLINE_PARTICIPANT}`, {
@@ -187,7 +196,11 @@ export default {
         }
         this.$store.commit(`meeting/${ADD_PARTICIPANT}`, newParticipant)
       }
-      const {enabledVideo, enabledAudio} = {...userSettingDevices}
+
+      if (!this.permissions.find(x => x.userId === user.id)) {
+        this.$store.commit(`meeting/${ADD_MEETING_PERMISSIONS}`, permissions)
+      }
+      const {enabledVideo, enabledAudio} = {...settingDevices}
       this.$store.commit(`meeting/${ADD_PARTICIPANTS_MEETING_STATE}`, {
         userId: user.id,
         meetingState: {
@@ -203,6 +216,16 @@ export default {
       this.$store.commit(`exam/${SET_RESPONDED_USER_ID}`, processedUserId)
       if (processedUserId && this.currentUser.id === processedUserId) {
         this.$toast.warning(SET_RESPONDED_CURRENT_USER)
+      }
+    },
+
+    changeCanDrawing({ userId, canDrawing }) {
+      const isCurrentUserChanged = userId === this.currentUser.id
+      const typeMutation = isCurrentUserChanged ? SET_MEETING_PERMISSIONS_CURRENT_USER : EDIT_MEETING_PERMISSIONS
+      this.$store.commit(`meeting/${typeMutation}`, { userId, canDrawing})
+      if (isCurrentUserChanged) {
+        const toastMessage = canDrawing ? CURRENT_USER_CAN_DRAWING : CURRENT_USER_CAN_NOT_DRAWING
+        this.$toast.info(toastMessage)
       }
     },
 
@@ -317,7 +340,9 @@ export default {
           participant.user.lastName)
       }, {
         click: () => {
-          //todo: давать права на рисование
+          const payload = { userId, canDrawing: true}
+          this.$socket.client.emit('change-can-drawing', payload)
+          this.$store.commit(`meeting/${EDIT_MEETING_PERMISSIONS}`, payload)
           this.$toast.dismiss(toastId)
         }
       }))
@@ -349,6 +374,9 @@ export default {
       this.$store.dispatch('meeting/fetchMeetingInfo', {
         meetingId
       })
+      this.$store.dispatch(`meeting/fetchPermissions`, {
+        meetingId
+      })
       try {
         await Promise.all([
           this.$store.dispatch(`meeting/fetchParticipants`, {
@@ -357,6 +385,9 @@ export default {
           this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
             meetingId,
           }),
+          this.$store.dispatch(`meeting/fetchPermissionsCurrentUser`, {
+            meetingId
+          })
         ])
         if (this.meetingInfo.isExam) {
           this.fetchExam(meetingId)
