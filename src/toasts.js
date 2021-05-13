@@ -14,12 +14,6 @@ export const optionsToast = {
   closeButton: 'button',
   icon: true,
   rtl: false,
-  filterBeforeCreate: (toast, toasts) => {
-    if (toasts.filter((t) => t.type === toast.type).length !== 0) {
-      return false
-    }
-    return toast
-  },
 }
 
 export const contentToastRaisedHand = (props, listeners) => {
