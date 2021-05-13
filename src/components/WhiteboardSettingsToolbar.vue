@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapState } from 'vuex'
 
 export default {
   name: 'WhiteboardSettingsToolbar',
@@ -71,13 +71,12 @@ export default {
     }
   },
   computed: {
-    ...mapGetters("meeting", ["currentUserPermissions"]),
+    ...mapState("meeting", {
+      currentUserPermissions: state => state.currentUserPermissions
+    }),
 
     canClearBoard() {
-      if (this.currentUserPermissions) {
-        return this.currentUserPermissions.canDrawing
-      }
-      return false
+      return this.currentUserPermissions.canDrawing
     }
   },
   watch: {

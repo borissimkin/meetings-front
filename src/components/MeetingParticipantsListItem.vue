@@ -53,6 +53,11 @@ export default {
       default: () => {
       },
     },
+    permissions: {
+      type: Object,
+      required: true,
+      default: () => {}
+    },
     showMenuSettings: {
       type: Boolean,
       required: true,
@@ -90,9 +95,6 @@ export default {
     ...mapState("exam", {
       examInfo: state => state.examInfo
     }),
-    ...mapState("meeting", {
-      permissions: state => state.permissions
-    }),
     ...mapGetters("meeting", ["currentUserIsHost"]),
 
     name() {
@@ -116,12 +118,8 @@ export default {
       return this.currentUserIsHost
     },
 
-    meetingPermissions() {
-      return this.permissions.find(x => x.userId === this.user.id)
-    },
-
     canDrawing() {
-      return !!this.meetingPermissions?.canDrawing
+      return !!this.permissions?.canDrawing
     },
 
     drawingIcon() {

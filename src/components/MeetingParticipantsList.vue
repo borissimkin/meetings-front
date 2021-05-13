@@ -12,10 +12,12 @@
     <MeetingParticipantsListItem :user='currentUser'
                                  :participantState='meetingStateOfCurrentUser'
                                  :show-menu-settings='false'
+                                 :permissions='currentUserPermissions'
                                   />
     <MeetingParticipantsListItem v-for='participant in onlineParticipants'
                                  :key='participant.user.id'
                                  :show-menu-settings='isShowMenuSettingOnParticipants'
+                                 :permissions='getPermissionByUserId(participant.user.id)'
                                  :participantState='participantsMeetingState[participant.user.id]'
                                  :user='participant.user' />
   </v-container>
@@ -37,7 +39,8 @@ export default {
       participantsMeetingState: (state) => state.participantsMeetingState,
       meetingStateOfCurrentUser: (state) => state.meetingStateOfCurrentUser,
       meetingInfo: (state) => state.meetingInfo,
-
+      currentUserPermissions: state => state.currentUserPermissions,
+      permissions: state => state.permissions
     }),
     ...mapState("exam", {
       studentExamStates: (state) => state.studentExamStates,
@@ -55,6 +58,15 @@ export default {
     }
 
   },
+  methods: {
+    getPermissionByUserId(userId) {
+      const permissions = this.permissions.find(x => x.userId === userId)
+      if (permissions) {
+        return permissions
+      }
+      return {}
+    }
+  }
 }
 </script>
 

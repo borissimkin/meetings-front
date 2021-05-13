@@ -28,7 +28,7 @@
 
 <script>
 import _ from 'lodash'
-import { mapGetters, mapState } from 'vuex'
+import { mapState } from 'vuex'
 import meetingApi from "@/api/meeting.api"
 import { ERROR_SYNC_WHITEBOARD } from '@/helpers/toast.messages'
 import WhiteboardSettingsToolbar from '@/components/WhiteboardSettingsToolbar'
@@ -93,12 +93,12 @@ export default {
     ...mapState("meeting", {
       meetingHashId: state => state.meetingInfo.hashId
     }),
-    ...mapGetters("meeting", [
-      "currentUserPermissions"
-    ]),
+    ...mapState("meeting", {
+      currentUserPermissions: state => state.currentUserPermissions
+    }),
 
     canDrawing() {
-      return !!this.currentUserPermissions?.canDrawing
+      return this.currentUserPermissions.canDrawing
     },
 
     canRedo() {

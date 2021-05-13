@@ -27,6 +27,7 @@ import {
   SET_MEETING_PERMISSIONS,
   ADD_MEETING_PERMISSIONS,
   EDIT_MEETING_PERMISSIONS,
+  SET_MEETING_PERMISSIONS_CURRENT_USER,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
 
@@ -43,6 +44,10 @@ const getDefaultState = () => {
     participants: [],
     checkpoints: [],
     permissions: [],
+    currentUserPermissions: {
+      userId: 0,
+      canDrawing: false,
+    },
     normalModeShowVideos: true,
     meetingInfo: {
       id: 0,
@@ -214,12 +219,17 @@ const meetings = {
       state.permissions.push(userPermissions)
     },
 
+    [SET_MEETING_PERMISSIONS_CURRENT_USER](state, permissions) {
+      Object.entries(state.currentUserPermissions).forEach(([key]) => {
+        state.currentUserPermissions[key] = permissions[key]
+      })
+    },
+
     [EDIT_MEETING_PERMISSIONS](state, payload) {
       const { userId, ...permissions } = { ...payload }
-      console.log({ userId, permissions })
       const userPermission = state.permissions.find((x) => x.userId === userId)
       if (userPermission) {
-        Object.entries(userPermission).forEach(([key]) => {
+        Object.entries(permissions).forEach(([key]) => {
           userPermission[key] = permissions[key]
         })
       }
@@ -234,6 +244,11 @@ const meetings = {
     async fetchPermissions({ commit }, payload) {
       const response = await meetingApi.getMeetingPermissions(payload.meetingId)
       commit(SET_MEETING_PERMISSIONS, response.data)
+    },
+
+    async fetchPermissionsCurrentUser({ commit }, payload) {
+      const response = await meetingApi.getMeetingPermissionsCurrentUser(payload.meetingId)
+      commit(SET_MEETING_PERMISSIONS_CURRENT_USER, response.data)
     },
 
     async fetchCheckpoints({ commit }, payload) {
@@ -269,10 +284,6 @@ const meetings = {
 
     onlineParticipants: (state) => {
       return state.participants.filter((participant) => participant.online)
-    },
-
-    currentUserPermissions: (state, _, rootState) => {
-      return state.permissions.find((x) => x.userId === rootState.auth.currentUser.id)
     },
 
     currentUserIsHost: (state, _, rootState) => {

@@ -98,7 +98,7 @@ import {
   ADD_STUDENT_EXAM_STATE,
   SET_RESPONDED_USER_ID,
   ADD_MEETING_PERMISSIONS,
-  EDIT_MEETING_PERMISSIONS,
+  EDIT_MEETING_PERMISSIONS, SET_MEETING_PERMISSIONS_CURRENT_USER,
 } from '@/store/mutations.type'
 import ModalCheckListener from '@/components/modals/ModalCheckListener'
 import { mapGetters, mapMutations, mapState } from 'vuex'
@@ -220,8 +220,10 @@ export default {
     },
 
     changeCanDrawing({ userId, canDrawing }) {
-      this.$store.commit(`meeting/${EDIT_MEETING_PERMISSIONS}`, { userId, canDrawing})
-      if (userId === this.currentUser.id) {
+      const isCurrentUserChanged = userId === this.currentUser.id
+      const typeMutation = isCurrentUserChanged ? SET_MEETING_PERMISSIONS_CURRENT_USER : EDIT_MEETING_PERMISSIONS
+      this.$store.commit(`meeting/${typeMutation}`, { userId, canDrawing})
+      if (isCurrentUserChanged) {
         const toastMessage = canDrawing ? CURRENT_USER_CAN_DRAWING : CURRENT_USER_CAN_NOT_DRAWING
         this.$toast.info(toastMessage)
       }
@@ -383,6 +385,9 @@ export default {
           this.$store.dispatch(`meeting/fetchParticipantsMeetingState`, {
             meetingId,
           }),
+          this.$store.dispatch(`meeting/fetchPermissionsCurrentUser`, {
+            meetingId
+          })
         ])
         if (this.meetingInfo.isExam) {
           this.fetchExam(meetingId)
