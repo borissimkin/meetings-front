@@ -24,8 +24,7 @@
 </template>
 
 <script>
-import dayjs from 'dayjs'
-import { fromTimeToDayjs } from '@/helpers/datetime.process'
+import { getMeetingTime } from '@/helpers/datetime.process'
 import { getFullName } from '@/helpers/username.process'
 
 export default {
@@ -44,11 +43,8 @@ export default {
   },
   computed: {
     timeSpending() {
-      const date = dayjs(this.meeting.startDate)
-      const dateSpending = date.format("dddd, D MMMM YYYY г.")
-      const timeSpending = `${fromTimeToDayjs(this.meeting.startTime).format("H:mm")} -
-      ${fromTimeToDayjs(this.meeting.endTime).format('H:mm')}`
-      return `${dateSpending} в ${timeSpending}`
+      const {startDate, startTime, endTime} = {...this.meeting}
+      return getMeetingTime({startTime, startDate, endTime})
     },
     creatorName() {
       return getFullName(this.meeting.creator.firstName, this.meeting.creator.lastName)

@@ -30,6 +30,7 @@ import {
   SET_MEETING_PERMISSIONS_CURRENT_USER,
 } from '@/store/mutations.type'
 import meetingApi from '@/api/meeting.api'
+import { meetingEntity } from '@/helpers/entities/meeting'
 
 const getDefaultState = () => {
   return {
@@ -50,21 +51,7 @@ const getDefaultState = () => {
     },
     normalModeShowVideos: true,
     meetingInfo: {
-      id: 0,
-      creator: {
-        id: 0,
-        firstName: '',
-        lastName: '',
-      },
-      createdAt: '',
-      endTime: '',
-      hashId: '',
-      isCheckListeners: false,
-      isExam: false,
-      name: '',
-      roomId: 0,
-      startDate: '',
-      startTime: '',
+      ...meetingEntity,
     },
   }
 }

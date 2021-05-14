@@ -30,3 +30,11 @@ export const fromTimeToSeconds = (hours, minutes, seconds) => {
   totalSeconds += totalMinutes * 60 + seconds
   return totalSeconds
 }
+
+export const getMeetingTime = ({ startDate, startTime, endTime }) => {
+  const date = dayjs(startDate)
+  const dateSpending = date.format('dddd, D MMMM YYYY г.')
+  const timeSpending = `${fromTimeToDayjs(startTime).format('H:mm')} -
+      ${fromTimeToDayjs(endTime).format('H:mm')}`
+  return `${dateSpending} в ${timeSpending}`
+}

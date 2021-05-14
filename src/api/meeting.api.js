@@ -68,4 +68,8 @@ export default {
   getMeetingPermissionsCurrentUser(meetingId) {
     return server.get(`/meeting/${meetingId}/permissions-my`)
   },
+
+  getMeetingVisitors(meetingId) {
+    return server.get(`/meeting/${meetingId}/visitors`)
+  },
 }
