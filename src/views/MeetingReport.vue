@@ -9,10 +9,10 @@
         <h3>Создатель собрания: {{getFullName(meetingInfo.creator.firstName, meetingInfo.creator.lastName)}}</h3>
         <h3>{{ timeSpending }}</h3>
         <h4>
-          Всего участников: {{visitors.length}}
+          Всего участников: {{ countParticipants }}
         </h4>
         <h5>
-          Количество проверок слушателей: {{ meetingInfo.countCheckpoints }}
+          Количество проверок слушателей: {{ countCheckpoints }}
         </h5>
       </div>
       <v-simple-table>
@@ -25,6 +25,9 @@
             <th>
               Количество пройденных проверок
             </th>
+            <th>
+              Присоединился к собранию
+            </th>
           </tr>
           </thead>
           <tbody>
@@ -34,6 +37,7 @@
           >
             <td>{{ getFullName(item.user.firstName, item.user.lastName) }}</td>
             <td>{{ item.countPassedCheckpoints }}</td>
+            <td>{{ processCreatedAtVisitor(item.createdAt) }}</td>
           </tr>
           </tbody>
         </template>
@@ -50,7 +54,7 @@ import MeetingChatReport from '@/components/MeetingChatReport'
 import { meetingEntity } from '@/helpers/entities/meeting'
 import meetingApi from "@/api/meeting.api"
 import { getFullName } from '@/helpers/username.process'
-import { getMeetingTime } from '@/helpers/datetime.process'
+import { getMeetingTime, toFormatTimeOrDatetime } from '@/helpers/datetime.process'
 export default {
   name: 'MeetingReport',
   components: { MeetingChatReport },
@@ -73,6 +77,7 @@ export default {
        * {
        *   id:,
        *   countPassedCheckpoints
+       *   createdAt
        *   user: {
        *     id,
        *     firstName,
@@ -82,6 +87,7 @@ export default {
        *
        * **/
       visitors: [],
+      checkpoints: [],
       meetingInfo: { ...meetingEntity }
     }
   },
@@ -92,12 +98,19 @@ export default {
     },
     visitorsWithoutCreator() {
       return this.visitors.filter(x => x.user.id !== this.meetingInfo.creator.id)
+    },
+    countCheckpoints() {
+      return this.checkpoints.length
+    },
+    countParticipants() {
+      return this.visitors.length
     }
   },
   mounted() {
     this.fetchMeetingInfo()
     this.fetchMessages()
     this.fetchVisitors()
+    this.fetchCheckpoints()
   },
   methods: {
     async fetchMeetingInfo() {
@@ -113,6 +126,15 @@ export default {
       const visitors = response.data
       visitors.sort((x1, x2) => x2.countPassedCheckpoints - x1.countPassedCheckpoints)
       this.visitors = visitors
+    },
+
+    processCreatedAtVisitor(datetime) {
+      return toFormatTimeOrDatetime(datetime)
+    },
+
+    async fetchCheckpoints() {
+      const response = await meetingApi.getCheckpoints(this.meetingId)
+      this.checkpoints = response.data
     },
 
     getFullName(firstName, lastName) {

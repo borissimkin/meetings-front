@@ -14,5 +14,4 @@ export const meetingEntity = {
   roomId: 0,
   startDate: '',
   startTime: '',
-  countCheckpoints: 0,
 }

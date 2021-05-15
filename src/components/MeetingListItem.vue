@@ -1,5 +1,5 @@
 <template>
-  <v-list-item :to='`/room/${roomHashId}/meeting/${meeting.hashId}`'>
+  <v-list-item :to='baseRoutToMeeting'>
     <v-list-item-content>
       <v-list-item-title v-text='meeting.name' class='text--primary'></v-list-item-title>
       <v-list-item-subtitle
@@ -19,6 +19,9 @@
               title='С проверкой слушателей'>
         mdi-account-multiple-check
       </v-icon>
+      <v-btn :to='`${baseRoutToMeeting}/report`' icon>
+        <v-icon title='Отчет по собранию'>mdi-information</v-icon>
+      </v-btn>
     </v-list-item-action>
   </v-list-item>
 </template>
@@ -48,6 +51,9 @@ export default {
     },
     creatorName() {
       return getFullName(this.meeting.creator.firstName, this.meeting.creator.lastName)
+    },
+    baseRoutToMeeting() {
+      return `/room/${this.roomHashId}/meeting/${this.meeting.hashId}`
     }
   }
 }
