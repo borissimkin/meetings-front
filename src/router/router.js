@@ -13,6 +13,7 @@ import Room from '@/views/Room'
 import Meeting from '@/views/Meeting'
 import { socket } from '@/socket'
 import WasConnectedToMeeting from '@/views/WasConnectedToMeeting'
+import MeetingReport from '@/views/MeetingReport'
 
 Vue.use(Router)
 
@@ -54,10 +55,7 @@ let router = new Router({
       props: true,
       async beforeEnter(to, from, next) {
         try {
-          await meetingApi.canConnectToMeeting(
-            to.params.roomId,
-            to.params.meetingId
-          )
+          await meetingApi.canConnectToMeeting(to.params.roomId, to.params.meetingId)
           next()
         } catch (error) {
           if (error.response.status === 404) {
@@ -67,6 +65,30 @@ let router = new Router({
           }
         }
       },
+    },
+    {
+      path: `/room/:roomId/meeting/:meetingId/report`,
+      name: 'MeetingReport',
+      component: MeetingReport,
+      meta: {
+        requiresAuth: true,
+      },
+      props: true,
+      // async beforeEnter(to, from, next) {
+      //   try {
+      //     await meetingApi.canConnectToMeeting(
+      //       to.params.roomId,
+      //       to.params.meetingId
+      //     )
+      //     next()
+      //   } catch (error) {
+      //     if (error.response.status === 404) {
+      //       next('/404')
+      //     } else if (error.response.status === 400) {
+      //       next('/was-connected-to-meeting')
+      //     }
+      //   }
+      // },
     },
     {
       path: '/login',

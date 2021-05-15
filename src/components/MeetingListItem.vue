@@ -1,5 +1,5 @@
 <template>
-  <v-list-item :to='`/room/${roomHashId}/meeting/${meeting.hashId}`'>
+  <v-list-item :to='baseRoutToMeeting'>
     <v-list-item-content>
       <v-list-item-title v-text='meeting.name' class='text--primary'></v-list-item-title>
       <v-list-item-subtitle
@@ -19,13 +19,15 @@
               title='С проверкой слушателей'>
         mdi-account-multiple-check
       </v-icon>
+      <v-btn :to='`${baseRoutToMeeting}/report`' icon>
+        <v-icon title='Отчет по собранию'>mdi-information</v-icon>
+      </v-btn>
     </v-list-item-action>
   </v-list-item>
 </template>
 
 <script>
-import dayjs from 'dayjs'
-import { fromTimeToDayjs } from '@/helpers/datetime.process'
+import { getMeetingTime } from '@/helpers/datetime.process'
 import { getFullName } from '@/helpers/username.process'
 
 export default {
@@ -44,14 +46,14 @@ export default {
   },
   computed: {
     timeSpending() {
-      const date = dayjs(this.meeting.startDate)
-      const dateSpending = date.format("dddd, D MMMM YYYY г.")
-      const timeSpending = `${fromTimeToDayjs(this.meeting.startTime).format("H:mm")} -
-      ${fromTimeToDayjs(this.meeting.endTime).format('H:mm')}`
-      return `${dateSpending} в ${timeSpending}`
+      const {startDate, startTime, endTime} = {...this.meeting}
+      return getMeetingTime({startTime, startDate, endTime})
     },
     creatorName() {
       return getFullName(this.meeting.creator.firstName, this.meeting.creator.lastName)
+    },
+    baseRoutToMeeting() {
+      return `/room/${this.roomHashId}/meeting/${this.meeting.hashId}`
     }
   }
 }
